@@ -26,6 +26,19 @@
   "simple_mode": "🌱 מצב פשוט",
   "advanced_mode": "🧠 מצב מתקדם",
   "cabinet": "👤 אזור אישי",
+  
+  
+  "set_password_title": "🔐 שינוי סיסמה",
+  "set_password_label": "סיסמה חדשה",
+  "set_password_save": "שמור",
+  "set_password_cancel": "ביטול",
+  "cabinet_password_notice": "🔒 כדי לקבל גישה מלאה יש להגדיר סיסמה.",
+  "cabinet_set_password_link": "הגדר סיסמה",
+  "cabinet_access_full": "גישה מלאה",
+  "cabinet_access_limited": "גישה מוגבלת",
+  "cabinet_change_password": "🔐 שנה סיסמה",
+								   
+
 
   "home_intro": "MindMesh הוא כלי לעבודה עם רעיונות.",
   "home_description": "זהו מאגר חי שבו רעיונות מושווים, מנותחים ומתפתחים בעזרת בינה מלאכותית.",
@@ -107,6 +120,13 @@
   "simple2_error_save": "שגיאת שמירה",
   "simple2_btn_save_db": "שמור במסד הנתונים",
   "simple2_btn_save_changes": "שמור שינויים",
+  "simple2_need_email_title": "כדי לשמור את הרעיון, הזן אימייל",
+  "simple2_need_email_body": "זה לוקח 5 שניות. אין צורך בסיסמה.",
+  "simple2_email_placeholder": "האימייל שלך",
+  "simple2_email_btn": "שמור",
+  "simple2_email_invalid": "נא להזין אימייל תקין.",
+  "simple2_next_version": "יהיה זמין בגרסה הבאה.",
+  "simple2_dup_found": "נראה שכבר יש רעיון במאגר:",													   
 
   "advanced_title": "🧠 מצב מתקדם — דיאלוג עם העוזר",
   "advanced_subtitle": "עמדת עבודה אסטרטגית להכנת רעיון",
@@ -127,11 +147,11 @@
   "assistant_edit_done": "✅ מצוין, עדכנתי את הכרטיס. זה יותר טוב עכשיו?",
   "assistant_error_generic": "הממ… משהו השתבש. בוא ננסה שוב 🙂",
 
-  "assistant_preview_title": "📄 תצוגה מקדימה:",
-  "assistant_label_title": "כותרת:",
-  "assistant_label_short": "קצר:",
-  "assistant_label_full": "מלא:",
-  "assistant_label_keywords": "מילות מפתח:",
+  "assistant_preview_title": "📄 תצוגה מקדימה",
+  "assistant_label_title": "כותרת",
+  "assistant_label_short": "קצר",
+  "assistant_label_full": "מלא",
+  "assistant_label_keywords": "מילות מפתח",
   "assistant_label_author": "מחבר",
 
   "assistant_hint_title": "רגע מעניין!",

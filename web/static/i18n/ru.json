@@ -61,7 +61,7 @@
 
   "cabinet_feedback": "Обратная связь",
   "cabinet_help": "Справка",
-
+ 
   "simple_title": "🌱 Простой режим",
   "simple_success_title": "✅ Идея успешно сохранена",
   "simple_result_id_label": "ID:",
@@ -108,6 +108,13 @@
   "simple2_error_save": "Ошибка сохранения",
   "simple2_btn_save_db": "Сохранить в базе",
   "simple2_btn_save_changes": "Сохранить изменения",
+  "simple2_need_email_title": "Чтобы сохранить идею, укажите email",
+  "simple2_need_email_body": "Это займёт 5 секунд. Пароль не обязателен.",
+  "simple2_email_placeholder": "Ваш email",
+  "simple2_email_btn": "Сохранить",
+  "simple2_email_invalid": "Пожалуйста, введите корректный email.",
+  "simple2_next_version": "Будет доступно в следующей версии.",
+  "simple2_dup_found": "Похоже, в базе уже есть идея:",											
 
   "advanced_title": "🧠 Продвинутый режим — Диалог с ассистентом",
   "advanced_subtitle": "Стратегическая рабочая станция подготовки идеи",
@@ -175,6 +182,40 @@
 
   "validation_bad_text": "🤖 Похоже, это случайный набор символов. Попробуй написать осмысленно 🙂",
   
+  "sa_title": "🧠 Центр управления SEARCHWAVE",
+  "sa_subtitle": "MindMesh — структура вместо хаоса идей",
+
+  "sa_system_state": "Состояние системы",
+  "sa_test_mode": "Тестовый режим",
+  "sa_maintenance": "Обслуживание",
+
+  "sa_system_controls": "Управление системой",
+  "sa_toggle_test": "Переключить тестовый режим",
+  "sa_soft": "Мягкий режим обслуживания",
+  "sa_full": "Полный режим обслуживания",
+  "sa_disable": "Отключить обслуживание",
+
+  "sa_user_control": "Управление пользователями",
+  "sa_user_control_desc": "Назначение ролей, статус аккаунта, верификация (v2).",
+
+  "sa_idea_control": "Управление идеями",
+  "sa_idea_control_desc": "Работа с дубликатами, изменение статусов, архивирование (v2).",
+
+  "sa_ai_control": "Управление ИИ",
+  "sa_ai_control_desc": "Порог совпадения, режим проверки ИИ, переиндексация (v2).",
+  "login_password": "Пароль",
+  "login_hint": "Если пароль установлен — введите его для полного доступа.",
+
+  "set_password_title": "🔐 Смена пароля",
+  "set_password_label": "Новый пароль",
+  "set_password_save": "Сохранить",
+  "set_password_cancel": "назад",
+
+  "cabinet_password_notice": "🔒 Для полного доступа установите пароль.",
+  "cabinet_set_password_link": "Установить пароль",
+  "cabinet_access_full": "Полный доступ",
+  "cabinet_access_limited": "Ограниченный доступ",
+  "cabinet_change_password": "🔐 Сменить пароль",																
    "sa_title": "🧠 Центр управления MindMesh",
   "sa_subtitle": "Control Center",
 

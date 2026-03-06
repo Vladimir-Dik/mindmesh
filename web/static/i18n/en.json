@@ -107,6 +107,13 @@
   "simple2_error_save": "Saving error",
   "simple2_btn_save_db": "Save to database",
   "simple2_btn_save_changes": "Save changes",
+  "simple2_need_email_title": "To save the idea, enter your email",
+  "simple2_need_email_body": "This takes 5 seconds. Password is not required.",
+  "simple2_email_placeholder": "Your email",
+  "simple2_email_btn": "Save",
+  "simple2_email_invalid": "Please enter a valid email.",
+  "simple2_next_version": "Will be available in the next version.",
+  "simple2_dup_found": "It looks like the database already has an idea:",											
 
   "advanced_title": "🧠 Advanced mode — Assistant dialog",
   "advanced_subtitle": "Strategic idea preparation workspace",
@@ -127,7 +134,7 @@
   "assistant_edit_done": "✅ Great, I updated the card. Is this better now?",
   "assistant_error_generic": "Hmm… something went wrong. Let’s try again 🙂",
 
-  "assistant_preview_title": "📄 Preview:",
+  "assistant_preview_title": "📄 Preview",
   "assistant_label_title": "Title",
   "assistant_label_short": "Short",
   "assistant_label_full": "Full",
@@ -174,13 +181,20 @@
 
   "validation_bad_text": "🤖 This looks like random text. Please try to write something meaningful 🙂",
   
-  
   "sa_title": "🧠 SuperAdmin Control Center",
-  "sa_subtitle": "MindMesh — Control Center",
+  "sa_subtitle": "MindMesh — structure instead of idea chaos",
 
   "sa_system_status": "📊 System Status",
   "sa_system_state": "Status",
+  "sa_test_mode": "Test Mode",
+  "sa_maintenance": "Maintenance",
   "sa_state_working": "Working",
+
+  "sa_system_controls": "System Controls",
+  "sa_toggle_test": "Toggle Test Mode",
+  "sa_soft": "Soft Maintenance",
+  "sa_full": "Full Maintenance",
+  "sa_disable": "Disable Maintenance",
   "sa_state_test": "Testing",
   "sa_state_maintenance": "Maintenance",
   "sa_test_mode": "Test Mode",
@@ -188,7 +202,27 @@
   "sa_enable": "Enable",
   "sa_disable": "Disable",
   "sa_apply": "Apply",
+  
+  "sa_user_control": "User Control",
+  "sa_user_control_desc": "Role assignment, account status, verification (v2).",
 
+  "sa_idea_control": "Idea Control",
+  "sa_idea_control_desc": "Duplicate management, status override, archiving (v2).",
+
+  "sa_ai_control": "AI Control",
+  "sa_ai_control_desc": "Similarity threshold, AI review mode, reindexing (v2).",
+    
+  "set_password_title": "🔐 Change Password",
+  "set_password_label": "New Password",
+  "set_password_save": "Save",
+  "set_password_cancel": "Cancel",
+  
+  "cabinet_password_notice": "🔒 Set a password to unlock full access.",
+  "cabinet_set_password_link": "Set password",
+  "cabinet_access_full": "Full access",
+  "cabinet_access_limited": "Limited access",
+  "cabinet_change_password": "🔐 Change password",
+ 
   "sa_users": "👥 Users",
   "sa_users_total": "Total",
   "sa_users_new": "New",
