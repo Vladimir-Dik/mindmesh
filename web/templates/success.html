@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>✅ Идея успешно сохранена</h2>
+
+    <p><b>ID:</b> {{ result.record_id }}</p>
+    <p><b>Автор:</b> {{ result.author_display }}</p>
+    <p><b>Похожесть:</b> {{ "%.2f"|format(result.similarity) }}</p>
+
+    {% if result.duplicate_of %}
+        <p class="warn">⚠ Найден похожий проект: {{ result.duplicate_of }}</p>
+    {% endif %}
+
+    <div class="buttons">
+        <a class="btn" href="/simple">➕ Добавить ещё одну идею</a>
+        <a class="btn secondary" href="/">🏠 На главную</a>
+    </div>
+</div>
+{% endblock %}

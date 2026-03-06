@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "active_stopwords": [
+    "stopwords_ru.json",
+    "stopwords_en.json",
+    "stopwords_he.json"
+  ],
+  "active_improvement_markers": "improvement_markers.json",
+  "auto_reload": true,
+  "last_updated": "2026-02-15"
+}

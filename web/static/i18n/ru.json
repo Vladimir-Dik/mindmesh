@@ -1,0 +1,205 @@
+{
+  "_meta": {
+    "project": "MindMesh",
+    "file": "ru.json",
+    "version": "2.2",
+    "date": "24.02.2026",
+    "description": "Russian language pack — UI + Assistant translations"
+  },
+
+  "nav_home": "Главная",
+  "nav_simple": "Простой режим",
+  "nav_advanced": "Продвинутый режим",
+  "footer_text": "MindMesh — структура вместо хаоса идей",
+
+  "user": "Вы",
+  "assistant": "Ассистент",
+  "system": "Система",
+
+  "login": "Войти",
+  "logout": "Выйти",
+  "hello_user": "Привет",
+
+  "welcome_title": "Добро пожаловать в MindMesh",
+  "welcome_subtitle": "Система для сохранения, анализа и объединения идей.",
+
+  "simple_mode": "🌱 Простой режим",
+  "advanced_mode": "🧠 Продвинутый режим",
+  "cabinet": "👤 Кабинет",
+
+  "home_intro": "MindMesh — инструмент для работы с идеями.",
+  "home_description": "Это живая база, где идеи не просто хранятся, а сопоставляются, анализируются и развиваются с помощью ИИ.",
+  "home_point_1": "Зафиксировать идею — от черновика до проработанной концепции",
+  "home_point_2": "Увидеть похожие и аналогичные идеи",
+  "home_point_3": "Понять различия, контекст и потенциал",
+  "home_point_4": "Развивать идеи постепенно, не теряя историю и авторство",
+  "home_conclusion": "MindMesh создан, чтобы довести идею от первого замысла — к реальному проекту.",
+
+  "login_title": "🔐 Вход в MindMesh",
+  "login_email": "Email",
+  "login_password": "Пароль (необязательно)",
+  "login_hint": "Если пароль не задан — вход будет выполнен без него. Вы сможете задать пароль позже.",
+  "login_button": "Войти",
+
+  "cabinet_title": "Личный кабинет",
+  "cabinet_subtitle": "Управление идеями и профилем",
+
+  "cabinet_profile_title": "Профиль",
+  "cabinet_profile_email": "Email:",
+  "cabinet_profile_name": "Имя:",
+  "cabinet_profile_status": "Статус аккаунта:",
+  "cabinet_status_basic": "Стандартный",
+
+  "cabinet_btn_profile": "Профиль",
+  "cabinet_btn_settings": "Настройки",
+
+  "cabinet_ideas_title": "Идеи",
+  "cabinet_my_ideas": "Мои идеи",
+  "cabinet_drafts": "Черновики",
+  "cabinet_archive": "Архив",
+  "cabinet_ideas_hint": "Здесь будет история ваших идей, статусы, развитие и связи.",
+
+  "cabinet_feedback": "Обратная связь",
+  "cabinet_help": "Справка",
+
+  "simple_title": "🌱 Простой режим",
+  "simple_success_title": "✅ Идея успешно сохранена",
+  "simple_result_id_label": "ID:",
+  "simple_result_author_label": "Автор:",
+  "simple_result_similarity_label": "Текстовое совпадение по базе:",
+  "simple_result_duplicate_warn": "⚠ Найден похожий проект",
+  "simple_add_more_btn": "➕ Добавить ещё одну идею",
+  "simple_back_home_btn": "🏠 На главную",
+  
+  "simple_fallback_title": "Сохранение не удалось",
+  "simple_fallback_message": "Идея не была сохранена.\nПричина: {reason}",
+  "simple_fallback_retry": "Повторить попытку",
+  "simple_fallback_copy": "Скопировать текст",
+  "simple_fallback_download": "Скачать .txt",
+  "simple_fallback_copied": "Текст скопирован в буфер обмена.",
+  "simple_fallback_copy_error": "Не удалось скопировать текст.",
+  "simple_fallback_status_not_saved": "НЕ СОХРАНЕНО В БАЗЕ",
+  "simple_fallback_file_header": "MindMesh — Локальная копия идеи",
+  "simple_fallback_file_date": "Дата",
+  "simple_fallback_file_author": "Автор",
+  "simple_fallback_file_email": "Email",
+  "simple_fallback_file_similarity": "Similarity",
+  "simple_fallback_file_duplicate": "Duplicate ID",
+  "simple_fallback_file_raw": "Исходный текст",
+
+
+  "simple_label_title": "Название идеи",
+  "simple_label_short": "Краткое описание",
+  "simple_label_full": "Полное описание",
+  "simple_label_keywords": "Ключевые слова (через запятую)",
+  "simple_label_name": "Имя",
+  "simple_label_email": "Email",
+  "simple_submit_btn": "🚀 Отправить идею",
+
+  "simple2_label_raw": "Опишите коротко идею или модернизацию",
+  "simple2_placeholder": "Опишите идею свободным текстом...",
+  "simple2_btn_analyze": "Проанализировать",
+  "simple2_preview_title": "📄 Предварительный анализ",
+  "simple2_label_type": "Тип идеи",
+  "simple2_saved_draft": "⚠ Идея сохранена как черновик",
+  "simple2_saved_success": "✅ Идея успешно сохранена",
+  "simple2_error_short": "Введите более развернутое описание.",
+  "simple2_error_analyze": "Ошибка анализа",
+  "simple2_error_save": "Ошибка сохранения",
+  "simple2_btn_save_db": "Сохранить в базе",
+  "simple2_btn_save_changes": "Сохранить изменения",
+
+  "advanced_title": "🧠 Продвинутый режим — Диалог с ассистентом",
+  "advanced_subtitle": "Стратегическая рабочая станция подготовки идеи",
+  "advanced_input_placeholder": "Напиши сообщение...",
+  "advanced_send_btn": "Отправить",
+  "advanced_clear_btn": "Очистить",
+  "advanced_new_session_btn": "Новая сессия",
+  "advanced_status_active": "Активно",
+  "advanced_placeholder_dev": "Функция или раздел в разработке. Полная реализация — в версии MindMesh 2.0.",
+
+  "assistant_greeting": "Привет! Опиши свою идею свободным текстом. Не обязательно идеально — я помогу оформить 🙂",
+  "assistant_need_choice": "⚠️ Сначала выбери, что делать с найденным совпадением ниже.",
+  "assistant_ask_title": "👉 Теперь напиши короткое и понятное название для этой идеи.",
+  "assistant_ask_keywords": "👉 Теперь напиши несколько ключевых слов (через запятую), чтобы идею было легко найти.",
+  "assistant_ask_name": "👉 Теперь напиши своё имя (как тебя указать в авторстве идеи).",
+  "assistant_ask_email": "👉 Теперь укажи свой email (чтобы можно было связаться с тобой при необходимости).",
+  "assistant_review_ready": "✅ Я собрал карточку твоей идеи. Проверь, всё ли здесь правильно:",
+  "assistant_edit_done": "✅ Отлично, я обновил карточку. Посмотри, так лучше?",
+  "assistant_error_generic": "Хм… что-то пошло не так. Давай попробуем ещё раз 🙂",
+
+  "assistant_preview_title": "📄 Предварительный просмотр:",
+  "assistant_label_title": "Название:",
+  "assistant_label_short": "Кратко:",
+  "assistant_label_full": "Полное:",
+  "assistant_label_keywords": "Ключевые слова:",
+  "assistant_label_author": "Автор",
+
+  "assistant_hint_title": "Интересный момент!",
+  "assistant_hint_found": "Похоже, в базе уже есть идея:",
+  "assistant_hint_similarity": "Похожесть",
+  "assistant_btn_view": "Посмотреть",
+  "assistant_btn_improve": "Развивать как улучшение",
+  "assistant_btn_separate": "Оставить как отдельную",
+
+  "assistant_user_view": "Хочу посмотреть похожую идею.",
+  "assistant_reply_view": "Хорошо, позже мы добавим просмотр карточек. Сейчас продолжим оформлять твою идею 🙂",
+
+  "assistant_user_improve": "Хочу развивать эту идею как улучшение.",
+  "assistant_reply_improve": "Отлично! Тогда сделаем акцент на том, чем твоя версия лучше или отличается.",
+
+  "assistant_user_separate": "Хочу оставить эту идею как отдельную.",
+  "assistant_reply_separate": "Хорошо. Тогда продолжаем оформлять твою идею как отдельную 🙂",
+
+  "assistant_btn_save": "Сохранить",
+  "assistant_btn_edit": "Изменить",
+  "assistant_btn_cancel": "Отменить",
+  "assistant_btn_back": "Назад",
+
+  "assistant_edit_title": "Название",
+  "assistant_edit_short": "Краткое",
+  "assistant_edit_full": "Полное",
+  "assistant_edit_keywords": "Ключевые слова",
+  "assistant_edit_name": "Имя",
+  "assistant_edit_email": "Email",
+
+  "assistant_need_draft": "💭 Похоже, идея затрагивает уже существующую тему. Хочешь сохранить её как черновик?",
+  "assistant_btn_save_draft": "Сохранить как Draft",
+  "assistant_btn_not_save": "Не сохранять",
+
+  "assistant_saved_ok": "✅ Идея сохранена!",
+  "assistant_saved_draft_ok": "✅ Идея сохранена как Draft!",
+  "assistant_btn_new": "Новая идея",
+  "assistant_btn_home": "На главную",
+  "assistant_cancelled": "Хорошо, не будем сохранять.",
+
+  "validation_bad_text": "🤖 Похоже, это случайный набор символов. Попробуй написать осмысленно 🙂",
+  
+   "sa_title": "🧠 Центр управления MindMesh",
+  "sa_subtitle": "Control Center",
+
+  "sa_system_status": "📊 Состояние системы",
+  "sa_system_state": "Состояние",
+  "sa_state_working": "Работает",
+  "sa_state_test": "Тестирование",
+  "sa_state_maintenance": "Абслуживание",
+  "sa_test_mode": "Тестовый режим",
+  "sa_maintenance": "Обслуживание",
+  "sa_enable": "Включить",
+  "sa_disable": "Отключить",
+  "sa_apply": "Применить",
+
+  "sa_users": "👥 Пользователи",
+  "sa_users_total": "Всего",
+  "sa_users_new": "Новые",
+  "sa_manage": "Управление",
+
+  "sa_database_control": "🗂 Управление базой",
+  "sa_database_status": "Статус базы",
+  "sa_database_connected": "Подключена",
+
+  "sa_system_log": "📜 Системный лог",
+
+  "sa_ai_control": "🧠 Управление ИИ",
+  "sa_ai_coming": "Настройки ИИ будут доступны в следующей версии."
+}

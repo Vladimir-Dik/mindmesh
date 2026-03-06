@@ -1,0 +1,29 @@
+В пустом месте:
+
+Shift + Правый клик
+
+→ Открыть окно PowerShell здесь (или CMD)
+
+
+uvicorn app:app --reload
+
+
+Если uvicorn не установлен
+
+Выполни:
+
+pip install uvicorn fastapi jinja2 python-multipart
+
+арр. сервер
+
+http://127.0.0.1:8000
+searchwave@gmail.com
+searchwave2@gmail.com
+grigv4@gmail.com
+poligrafmasters@gmail.com
+
+http://127.0.0.1:8000/superadmin
+http://127.0.0.1:8000/login?next=/searchwave?key=7391
+
+
+

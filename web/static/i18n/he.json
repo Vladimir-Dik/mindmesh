@@ -1,0 +1,205 @@
+{
+  "_meta": {
+    "project": "MindMesh",
+    "file": "he.json",
+    "version": "2.2",
+    "date": "24.02.2026",
+    "description": "Hebrew language pack — UI + Assistant translations"
+  },
+
+  "nav_home": "בית",
+  "nav_simple": "מצב פשוט",
+  "nav_advanced": "מצב מתקדם",
+  "footer_text": "MindMesh — מבנה במקום כאוס",
+
+  "user": "אתה",
+  "assistant": "עוזר",
+  "system": "מערכת",
+
+  "login": "כניסה",
+  "logout": "יציאה",
+  "hello_user": "שלום",
+
+  "welcome_title": "ברוכים הבאים ל-MindMesh",
+  "welcome_subtitle": "מערכת לשמירה, ניתוח וחיבור רעיונות.",
+
+  "simple_mode": "🌱 מצב פשוט",
+  "advanced_mode": "🧠 מצב מתקדם",
+  "cabinet": "👤 אזור אישי",
+
+  "home_intro": "MindMesh הוא כלי לעבודה עם רעיונות.",
+  "home_description": "זהו מאגר חי שבו רעיונות מושווים, מנותחים ומתפתחים בעזרת בינה מלאכותית.",
+  "home_point_1": "תיעוד רעיון — מטיוטה ועד קונספט מפותח",
+  "home_point_2": "גילוי רעיונות דומים או קשורים",
+  "home_point_3": "הבנת הקשר, הבדלים ופוטנציאל",
+  "home_point_4": "פיתוח רעיונות מבלי לאבד היסטוריה ובעלות",
+  "home_conclusion": "MindMesh מסייע להביא רעיון מהשלב הראשוני לפרויקט ממשי.",
+
+  "login_title": "🔐 כניסה ל-MindMesh",
+  "login_email": "אימייל",
+  "login_password": "סיסמה (לא חובה)",
+  "login_hint": "אם לא הוגדרה סיסמה, ניתן להיכנס בלעדיה. ניתן להגדיר סיסמה בהמשך.",
+  "login_button": "התחברות",
+
+  "cabinet_title": "אזור אישי",
+  "cabinet_subtitle": "ניהול רעיונות ופרופיל",
+
+  "cabinet_profile_title": "פרופיל",
+  "cabinet_profile_email": "אימייל:",
+  "cabinet_profile_name": "שם:",
+  "cabinet_profile_status": "סטטוס חשבון:",
+  "cabinet_status_basic": "רגיל",
+
+  "cabinet_btn_profile": "פרופיל",
+  "cabinet_btn_settings": "הגדרות",
+
+  "cabinet_ideas_title": "רעיונות",
+  "cabinet_my_ideas": "הרעיונות שלי",
+  "cabinet_drafts": "טיוטות",
+  "cabinet_archive": "ארכיון",
+  "cabinet_ideas_hint": "כאן תופיע היסטוריית הרעיונות, סטטוסים וקשרים.",
+
+  "cabinet_feedback": "משוב",
+  "cabinet_help": "עזרה",
+
+  "simple_title": "🌱 מצב פשוט",
+  "simple_success_title": "✅ הרעיון נשמר בהצלחה",
+  "simple_result_id_label": "מזהה:",
+  "simple_result_author_label": "מחבר:",
+  "simple_result_similarity_label": "התאמת טקסט במסד הנתונים:",
+  "simple_result_duplicate_warn": "⚠ נמצא פרויקט דומה",
+  "simple_add_more_btn": "➕ הוסף רעיון נוסף",
+  "simple_back_home_btn": "🏠 חזרה לדף הבית",
+  
+  "simple_fallback_title": "השמירה נכשלה",
+  "simple_fallback_message": "הרעיון לא נשמר.\nסיבה: {reason}",
+  "simple_fallback_retry": "נסה שוב",
+  "simple_fallback_copy": "העתק טקסט",
+  "simple_fallback_download": "הורד .txt",
+  "simple_fallback_copied": "הטקסט הועתק ללוח.",
+  "simple_fallback_copy_error": "ההעתקה נכשלה.",
+  "simple_fallback_status_not_saved": "לא נשמר במסד הנתונים",
+  "simple_fallback_file_header": "MindMesh — עותק מקומי של רעיון",
+  "simple_fallback_file_date": "תאריך",
+  "simple_fallback_file_author": "מחבר",
+  "simple_fallback_file_email": "אימייל",
+  "simple_fallback_file_similarity": "Similarity",
+  "simple_fallback_file_duplicate": "Duplicate ID",
+  "simple_fallback_file_raw": "טקסט מקורי",  
+
+  "simple_label_title": "כותרת הרעיון",
+  "simple_label_short": "תיאור קצר",
+  "simple_label_full": "תיאור מלא",
+  "simple_label_keywords": "מילות מפתח (מופרדות בפסיקים)",
+  "simple_label_name": "שם",
+  "simple_label_email": "אימייל",
+  "simple_submit_btn": "🚀 שלח רעיון",
+
+  "simple2_label_raw": "תאר בקצרה רעיון או שדרוג",
+  "simple2_placeholder": "תאר את הרעיון שלך בטקסט חופשי...",
+  "simple2_btn_analyze": "נתח",
+  "simple2_preview_title": "📄 תצוגה מקדימה",
+  "simple2_label_type": "סוג רעיון",
+  "simple2_saved_draft": "⚠ הרעיון נשמר כטיוטה",
+  "simple2_saved_success": "✅ הרעיון נשמר בהצלחה",
+  "simple2_error_short": "נא להזין תיאור מפורט יותר.",
+  "simple2_error_analyze": "שגיאת ניתוח",
+  "simple2_error_save": "שגיאת שמירה",
+  "simple2_btn_save_db": "שמור במסד הנתונים",
+  "simple2_btn_save_changes": "שמור שינויים",
+
+  "advanced_title": "🧠 מצב מתקדם — דיאלוג עם העוזר",
+  "advanced_subtitle": "עמדת עבודה אסטרטגית להכנת רעיון",
+  "advanced_input_placeholder": "כתוב הודעה...",
+  "advanced_send_btn": "שלח",
+  "advanced_clear_btn": "נקה",
+  "advanced_new_session_btn": "סשן חדש",
+  "advanced_status_active": "פעיל",
+  "advanced_placeholder_dev": "פונקציה זו בפיתוח. יישום מלא ב-MindMesh 2.0.",
+
+  "assistant_greeting": "שלום! תאר את הרעיון שלך בצורה חופשית. זה לא חייב להיות מושלם — אני אעזור לעצב אותו 🙂",
+  "assistant_need_choice": "⚠️ קודם בחר מה לעשות עם ההתאמה שנמצאה למטה.",
+  "assistant_ask_title": "👉 עכשיו כתוב כותרת קצרה וברורה לרעיון הזה.",
+  "assistant_ask_keywords": "👉 עכשיו כתוב כמה מילות מפתח (מופרדות בפסיקים).",
+  "assistant_ask_name": "👉 עכשיו כתוב את שמך (כפי שיופיע כמחבר).",
+  "assistant_ask_email": "👉 עכשיו כתוב את האימייל שלך (כדי שנוכל ליצור קשר במידת הצורך).",
+  "assistant_review_ready": "✅ יצרתי כרטיס לרעיון שלך. בדוק אם הכל נכון:",
+  "assistant_edit_done": "✅ מצוין, עדכנתי את הכרטיס. זה יותר טוב עכשיו?",
+  "assistant_error_generic": "הממ… משהו השתבש. בוא ננסה שוב 🙂",
+
+  "assistant_preview_title": "📄 תצוגה מקדימה:",
+  "assistant_label_title": "כותרת:",
+  "assistant_label_short": "קצר:",
+  "assistant_label_full": "מלא:",
+  "assistant_label_keywords": "מילות מפתח:",
+  "assistant_label_author": "מחבר",
+
+  "assistant_hint_title": "רגע מעניין!",
+  "assistant_hint_found": "נראה שכבר קיים רעיון כזה במאגר:",
+  "assistant_hint_similarity": "דמיון",
+  "assistant_btn_view": "הצג",
+  "assistant_btn_improve": "פתח כשיפור",
+  "assistant_btn_separate": "השאר כנפרד",
+
+  "assistant_user_view": "אני רוצה לראות את הרעיון הדומה.",
+  "assistant_reply_view": "בסדר, בהמשך נוסיף כרטיסים. בינתיים נמשיך למלא את הרעיון שלך 🙂",
+
+  "assistant_user_improve": "אני רוצה לפתח את זה כשיפור.",
+  "assistant_reply_improve": "מצוין! נתמקד במה שהגרסה שלך עושה טוב יותר או שונה.",
+
+  "assistant_user_separate": "אני רוצה להשאיר את זה כרעיון נפרד.",
+  "assistant_reply_separate": "בסדר. נמשיך למלא את הרעיון שלך כרעיון נפרד 🙂",
+
+  "assistant_btn_save": "שמור",
+  "assistant_btn_edit": "ערוך",
+  "assistant_btn_cancel": "בטל",
+  "assistant_btn_back": "חזור",
+
+  "assistant_edit_title": "כותרת",
+  "assistant_edit_short": "קצר",
+  "assistant_edit_full": "מלא",
+  "assistant_edit_keywords": "מילות מפתח",
+  "assistant_edit_name": "שם",
+  "assistant_edit_email": "אימייל",
+
+  "assistant_need_draft": "💭 נראה שהרעיון נוגע בנושא קיים. האם לשמור כטיוטה?",
+  "assistant_btn_save_draft": "שמור כטיוטה",
+  "assistant_btn_not_save": "אל תשמור",
+
+  "assistant_saved_ok": "✅ הרעיון נשמר!",
+  "assistant_saved_draft_ok": "✅ הרעיון נשמר כטיוטה!",
+  "assistant_btn_new": "רעיון חדש",
+  "assistant_btn_home": "דף הבית",
+  "assistant_cancelled": "בסדר, לא נשמור.",
+
+  "validation_bad_text": "🤖 זה נראה כמו טקסט אקראי. נסה לכתוב משהו בעל משמעות 🙂",
+  
+  "sa_title": "🧠 Центр управления MindMesh",
+  "sa_subtitle": "Control Center",
+
+  "sa_system_status": "📊 Состояние системы",
+  "sa_system_state": "Состояние",
+  "sa_state_working": "Работает",
+  "sa_state_test": "Тестирование",
+  "sa_state_maintenance": "Абслуживание",
+  "sa_test_mode": "Тестовый режим",
+  "sa_maintenance": "Обслуживание",
+  "sa_enable": "Включить",
+  "sa_disable": "Отключить",
+  "sa_apply": "Применить",
+
+  "sa_users": "👥 Пользователи",
+  "sa_users_total": "Всего",
+  "sa_users_new": "Новые",
+  "sa_manage": "Управление",
+
+  "sa_database_control": "🗂 Управление базой",
+  "sa_database_status": "Статус базы",
+  "sa_database_connected": "Подключена",
+
+  "sa_system_log": "📜 Системный лог",
+
+  "sa_ai_control": "🧠 Управление ИИ",
+  "sa_ai_coming": "Настройки ИИ будут доступны в следующей версии."
+  
+}

@@ -1,0 +1,113 @@
+<!--
+  ============================================================
+  Project: MindMesh
+  File: base.html
+  Version: 1.7
+  Date: 18.02.2026
+  Purpose:
+  - Global layout template
+  - Navigation and authentication header
+  - Language switch
+  - Global Soft Maintenance banner support
+  ============================================================
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MindMesh</title>
+
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+
+  <script src="/static/js/i18n.js"></script>
+</head>
+<body>
+
+<!-- ========================================================= -->
+<!-- GLOBAL SOFT MAINTENANCE BANNER                           -->
+<!-- ========================================================= -->
+
+{% if system and system.maintenance == "soft" %}
+  <div style="
+      background:#ff9800;
+      color:#000;
+      padding:10px;
+      text-align:center;
+      font-weight:bold;
+      font-size:0.9em;
+  ">
+    ⚠ System is in maintenance mode.
+    Viewing is available. Editing is temporarily disabled.
+  </div>
+{% endif %}
+
+<header>
+  <!-- LOGO -->
+  <div class="logo">
+    <a href="/"
+       onclick="return safeNavigate(event, '/')"
+       title="MindMesh — живая база идей.
+Сопоставление, анализ и развитие идей с помощью ИИ.
+От замысла — к реальному проекту.">
+      🧠 MindMesh
+    </a>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" data-i18n="nav_home"></a>
+    <a href="/simple" data-i18n="nav_simple"></a>
+    <a href="/advanced" data-i18n="nav_advanced"></a>
+  </nav>
+
+  <!-- RIGHT SIDE -->
+  <div class="right">
+
+    <div class="auth">
+      {% if user %}
+        <span data-i18n="hello_user">Привет</span>,
+        <strong>{{ user.fields.Name or user.fields.Email }}</strong>
+        <a href="/logout" data-i18n="logout">Выйти</a>
+      {% else %}
+        <a href="/login" data-i18n="login">Войти</a>
+      {% endif %}
+    </div>
+
+    <div class="lang">
+      <button onclick="setLanguage('ru')">RU</button>
+      <button onclick="setLanguage('en')">EN</button>
+      <button onclick="setLanguage('he')">HE</button>
+    </div>
+
+  </div>
+</header>
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  <div data-i18n="footer_text"></div>
+</footer>
+
+<script>
+function safeNavigate(e, url) {
+  if (window.isDirty && typeof showUnsavedDialog === "function") {
+    e.preventDefault();
+    showUnsavedDialog(url);
+    return false;
+  }
+  return true;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof applyTranslations === "function") {
+    applyTranslations();
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!--
+MindMesh
+File: advanced.html
+Version: 3.1
+Date: 12.02.2026
+Purpose: Advanced Mode — Strategic Assistant Interface (UI v3, full i18n)
+-->
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card advanced-card">
+
+  <div class="advanced-header">
+    <div>
+      <h2 data-i18n="advanced_title"></h2>
+      <div class="advanced-subtitle" data-i18n="advanced_subtitle"></div>
+    </div>
+
+    <div class="mode-indicator" data-i18n="advanced_status_active"></div>
+  </div>
+
+  <div id="chat" class="chatbox large"></div>
+
+  <div id="inputArea" class="inputArea">
+    <textarea 
+      id="msg" 
+      class="chatTextarea"
+      rows="4"
+      data-i18n-placeholder="advanced_input_placeholder">
+    </textarea>
+
+    <div class="input-buttons">
+      <button 
+        class="btn primary" 
+        onclick="sendMsg()" 
+        data-i18n="advanced_send_btn">
+      </button>
+
+      <button 
+        class="btn subtle" 
+        onclick="clearChat()" 
+        data-i18n="advanced_clear_btn">
+      </button>
+
+      <button 
+        class="btn subtle" 
+        onclick="newSession()" 
+        data-i18n="advanced_new_session_btn">
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script src="/static/js/advanced.js"></script>
+
+<script>
+  if (typeof applyTranslations === "function") {
+    applyTranslations();
+  }
+</script>
+
+{% endblock %}

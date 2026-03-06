@@ -1,0 +1,205 @@
+{
+  "_meta": {
+    "project": "MindMesh",
+    "file": "en.json",
+    "version": "2.2",
+    "date": "24.02.2026",
+    "description": "English language pack — UI + Assistant translations"
+  },
+
+  "nav_home": "Home",
+  "nav_simple": "Simple mode",
+  "nav_advanced": "Advanced mode",
+  "footer_text": "MindMesh — structure instead of chaos",
+
+  "user": "You",
+  "assistant": "Assistant",
+  "system": "System",
+
+  "login": "Login",
+  "logout": "Logout",
+  "hello_user": "Hello",
+
+  "welcome_title": "Welcome to MindMesh",
+  "welcome_subtitle": "A system for saving, analyzing and connecting ideas.",
+
+  "simple_mode": "🌱 Simple mode",
+  "advanced_mode": "🧠 Advanced mode",
+  "cabinet": "👤 Cabinet",
+
+  "home_intro": "MindMesh is a tool for working with ideas.",
+  "home_description": "It is a living database where ideas are compared, analyzed, and developed with AI support.",
+  "home_point_1": "Capture an idea — from draft to refined concept",
+  "home_point_2": "Discover similar and related ideas",
+  "home_point_3": "Understand differences, context, and potential",
+  "home_point_4": "Develop ideas over time without losing history or authorship",
+  "home_conclusion": "MindMesh helps bring ideas from the first thought to a real project.",
+
+  "login_title": "🔐 Sign in to MindMesh",
+  "login_email": "Email",
+  "login_password": "Password (optional)",
+  "login_hint": "If no password is set, you can sign in without it. You can add one later.",
+  "login_button": "Sign in",
+
+  "cabinet_title": "User cabinet",
+  "cabinet_subtitle": "Manage ideas and profile",
+
+  "cabinet_profile_title": "Profile",
+  "cabinet_profile_email": "Email:",
+  "cabinet_profile_name": "Name:",
+  "cabinet_profile_status": "Account status:",
+  "cabinet_status_basic": "Standard",
+
+  "cabinet_btn_profile": "Profile",
+  "cabinet_btn_settings": "Settings",
+
+  "cabinet_ideas_title": "Ideas",
+  "cabinet_my_ideas": "My ideas",
+  "cabinet_drafts": "Drafts",
+  "cabinet_archive": "Archive",
+  "cabinet_ideas_hint": "Your ideas history, statuses, development, and connections will appear here.",
+
+  "cabinet_feedback": "Feedback",
+  "cabinet_help": "Help",
+
+  "simple_title": "🌱 Simple mode",
+  "simple_success_title": "✅ Idea successfully saved",
+  "simple_result_id_label": "ID:",
+  "simple_result_author_label": "Author:",
+  "simple_result_similarity_label": "Text match in database:",
+  "simple_result_duplicate_warn": "⚠ Similar project found",
+  "simple_add_more_btn": "➕ Add another idea",
+  "simple_back_home_btn": "🏠 Back to home",
+  
+  "simple_fallback_title": "Save Failed",
+  "simple_fallback_message": "The idea was not saved.\nReason: {reason}",
+  "simple_fallback_retry": "Retry",
+  "simple_fallback_copy": "Copy Text",
+  "simple_fallback_download": "Download .txt",
+  "simple_fallback_copied": "Text copied to clipboard.",
+  "simple_fallback_copy_error": "Failed to copy text.",
+  "simple_fallback_status_not_saved": "NOT SAVED IN DATABASE",
+  "simple_fallback_file_header": "MindMesh — Local Idea Copy",
+  "simple_fallback_file_date": "Date",
+  "simple_fallback_file_author": "Author",
+  "simple_fallback_file_email": "Email",
+  "simple_fallback_file_similarity": "Similarity",
+  "simple_fallback_file_duplicate": "Duplicate ID",
+  "simple_fallback_file_raw": "Original Input", 
+
+  "simple_label_title": "Idea title",
+  "simple_label_short": "Short description",
+  "simple_label_full": "Full description",
+  "simple_label_keywords": "Keywords (comma separated)",
+  "simple_label_name": "Name",
+  "simple_label_email": "Email",
+  "simple_submit_btn": "🚀 Submit idea",
+
+  "simple2_label_raw": "Briefly describe your idea or improvement",
+  "simple2_placeholder": "Describe your idea in free form...",
+  "simple2_btn_analyze": "Analyze",
+  "simple2_preview_title": "📄 Preview Analysis",
+  "simple2_label_type": "Idea type",
+  "simple2_saved_draft": "⚠ Idea saved as Draft",
+  "simple2_saved_success": "✅ Idea successfully saved",
+  "simple2_error_short": "Please provide a more detailed description.",
+  "simple2_error_analyze": "Analysis error",
+  "simple2_error_save": "Saving error",
+  "simple2_btn_save_db": "Save to database",
+  "simple2_btn_save_changes": "Save changes",
+
+  "advanced_title": "🧠 Advanced mode — Assistant dialog",
+  "advanced_subtitle": "Strategic idea preparation workspace",
+  "advanced_input_placeholder": "Type a message...",
+  "advanced_send_btn": "Send",
+  "advanced_clear_btn": "Clear",
+  "advanced_new_session_btn": "New session",
+  "advanced_status_active": "Active",
+  "advanced_placeholder_dev": "This feature is under development. Full implementation in MindMesh 2.0.",
+
+  "assistant_greeting": "Hi! Describe your idea in free form. It doesn't have to be perfect — I'll help you shape it 🙂",
+  "assistant_need_choice": "⚠️ First choose what to do with the found similarity below.",
+  "assistant_ask_title": "👉 Now write a short and clear title for this idea.",
+  "assistant_ask_keywords": "👉 Now write a few keywords (comma separated) to make the idea easy to find.",
+  "assistant_ask_name": "👉 Now write your name (as it should appear as the author).",
+  "assistant_ask_email": "👉 Now enter your email (so we can contact you if needed).",
+  "assistant_review_ready": "✅ I’ve assembled your idea card. Please check if everything is correct:",
+  "assistant_edit_done": "✅ Great, I updated the card. Is this better now?",
+  "assistant_error_generic": "Hmm… something went wrong. Let’s try again 🙂",
+
+  "assistant_preview_title": "📄 Preview:",
+  "assistant_label_title": "Title",
+  "assistant_label_short": "Short",
+  "assistant_label_full": "Full",
+  "assistant_label_keywords": "Keywords",
+  "assistant_label_author": "Author",
+
+  "assistant_hint_title": "Interesting!",
+  "assistant_hint_found": "It seems this idea already exists in the database:",
+  "assistant_hint_similarity": "Similarity",
+  "assistant_btn_view": "View",
+  "assistant_btn_improve": "Develop as improvement",
+  "assistant_btn_separate": "Keep as separate",
+
+  "assistant_user_view": "I want to view the similar idea.",
+  "assistant_reply_view": "Okay, later we will add idea cards. For now, let's continue describing your idea 🙂",
+
+  "assistant_user_improve": "I want to develop this idea as an improvement.",
+  "assistant_reply_improve": "Great! Then let's focus on how your version is better or different.",
+
+  "assistant_user_separate": "I want to keep this idea as a separate one.",
+  "assistant_reply_separate": "Okay. Then we continue describing your idea as a separate one 🙂",
+
+  "assistant_btn_save": "Save",
+  "assistant_btn_edit": "Edit",
+  "assistant_btn_cancel": "Cancel",
+  "assistant_btn_back": "Back",
+
+  "assistant_edit_title": "Title",
+  "assistant_edit_short": "Short",
+  "assistant_edit_full": "Full",
+  "assistant_edit_keywords": "Keywords",
+  "assistant_edit_name": "Name",
+  "assistant_edit_email": "Email",
+
+  "assistant_need_draft": "💭 It seems your idea touches an existing topic. Do you want to save it as a draft?",
+  "assistant_btn_save_draft": "Save as Draft",
+  "assistant_btn_not_save": "Do not save",
+
+  "assistant_saved_ok": "✅ Idea saved!",
+  "assistant_saved_draft_ok": "✅ Idea saved as Draft!",
+  "assistant_btn_new": "New idea",
+  "assistant_btn_home": "Home",
+  "assistant_cancelled": "Okay, we won't save it.",
+
+  "validation_bad_text": "🤖 This looks like random text. Please try to write something meaningful 🙂",
+  
+  
+  "sa_title": "🧠 SuperAdmin Control Center",
+  "sa_subtitle": "MindMesh — Control Center",
+
+  "sa_system_status": "📊 System Status",
+  "sa_system_state": "Status",
+  "sa_state_working": "Working",
+  "sa_state_test": "Testing",
+  "sa_state_maintenance": "Maintenance",
+  "sa_test_mode": "Test Mode",
+  "sa_maintenance": "Maintenance",
+  "sa_enable": "Enable",
+  "sa_disable": "Disable",
+  "sa_apply": "Apply",
+
+  "sa_users": "👥 Users",
+  "sa_users_total": "Total",
+  "sa_users_new": "New",
+  "sa_manage": "Manage",
+
+  "sa_database_control": "🗂 Database Control",
+  "sa_database_status": "Database Status",
+  "sa_database_connected": "Connected",
+
+  "sa_system_log": "📜 System Log",
+
+  "sa_ai_control": "🧠 AI Control",
+  "sa_ai_coming": "AI configuration will be available in next version."
+}

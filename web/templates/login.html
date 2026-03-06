@@ -1,0 +1,48 @@
+{#
+  ============================================================
+  Project: MindMesh
+  File: login.html
+  Version: 1.4
+  Date: 19.02.2026
+  Purpose:
+  - User login page
+  - Supports light and full access modes
+  - Password optional (for full access)
+  - i18n enabled
+  ============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <h2 data-i18n="login_title"></h2>
+
+  {% if error %}
+    <p class="warn">{{ error }}</p>
+  {% endif %}
+
+  <form method="post" action="/login">
+
+  {% if request.query_params.get("next") %}
+    <input type="hidden"
+           name="next"
+           value="{{ request.query_params.get('next') }}">
+  {% endif %}
+
+
+    <label data-i18n="login_email"></label>
+    <input name="email" type="email" required>
+
+    <label data-i18n="login_password"></label>
+    <input name="password" type="password" minlength="3">
+
+    <p style="font-size:0.9em; opacity:0.8; margin-top:6px;"
+       data-i18n="login_hint">
+    </p>
+
+    <button class="btn" type="submit" data-i18n="login_button"></button>
+  </form>
+</div>
+
+{% endblock %}

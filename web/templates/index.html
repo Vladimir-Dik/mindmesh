@@ -1,0 +1,73 @@
+{#
+  MindMesh
+  File: index.html
+  Version: 1.2
+  Date: 10.02.2026
+  Purpose:
+  - Home page
+  - Project positioning
+  - Entry point to Simple / Advanced / Cabinet
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+
+  <h1 data-i18n="welcome_title">
+    Добро пожаловать в MindMesh
+  </h1>
+
+  <p style="font-size:1.05em; margin-top:10px;"
+     data-i18n="home_intro">
+    MindMesh — инструмент для работы с идеями.
+  </p>
+
+  <p style="margin-top:10px;"
+     data-i18n="home_description">
+    Это живая база, где идеи не просто хранятся,
+    а сопоставляются, анализируются и развиваются с помощью ИИ.
+  </p>
+
+  <ul style="margin-top:18px; line-height:1.7; padding-left:18px;">
+    <li data-i18n="home_point_1"></li>
+    <li data-i18n="home_point_2"></li>
+    <li data-i18n="home_point_3"></li>
+    <li data-i18n="home_point_4"></li>
+  </ul>
+
+  <p style="margin-top:16px;"
+     data-i18n="home_conclusion">
+  </p>
+
+  <div class="buttons" style="margin-top:20px;">
+    <a class="btn"
+       href="/simple"
+       data-i18n="simple_mode">
+       🌱 Простой режим
+    </a>
+
+    <a class="btn secondary"
+       href="/advanced"
+       data-i18n="advanced_mode">
+       🧠 Продвинутый режим
+    </a>
+
+    {% if user %}
+      <a class="btn secondary"
+         href="/cabinet"
+         data-i18n="cabinet">
+         👤 Кабинет
+      </a>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+  if (typeof applyTranslations === "function") {
+    applyTranslations();
+  }
+</script>
+
+{% endblock %}

@@ -1,0 +1,85 @@
+{#
+  ============================================================
+  Project: MindMesh
+  File: kabinet.html
+  Version: 1.4
+  Date: 19.02.2026
+  Purpose:
+  - User cabinet
+  - Access level awareness (light / full)
+  - All UI strings moved to i18n (RU/EN/HE)
+  ============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+
+  <!-- HEADER -->
+  <h1 data-i18n="cabinet_title"></h1>
+  <p style="opacity:0.8; margin-top:6px;" data-i18n="cabinet_subtitle"></p>
+
+  <!-- PASSWORD NOTICE -->
+  {% if user and user.access_level == "user_light" %}
+    <div class="warn" style="margin-top:15px;">
+      <span data-i18n="cabinet_password_notice"></span>
+      <a href="/set-password" style="margin-left:10px;" data-i18n="cabinet_set_password_link"></a>
+    </div>
+  {% endif %}
+
+  <hr>
+
+  <!-- PROFILE -->
+  <h3 data-i18n="cabinet_profile_title"></h3>
+
+  <p>
+    <b data-i18n="cabinet_profile_email"></b>
+    {{ user.fields.Email }}
+  </p>
+
+  <p>
+    <b data-i18n="cabinet_profile_name"></b>
+    {{ user.fields.Name or "—" }}
+  </p>
+
+  <p>
+    <b data-i18n="cabinet_profile_status"></b>
+    {% if user.access_level == "user_full" %}
+      <span data-i18n="cabinet_access_full"></span>
+    {% else %}
+      <span data-i18n="cabinet_access_limited"></span>
+    {% endif %}
+  </p>
+
+  <div class="buttons" style="margin-top:10px;">
+    <a class="btn small secondary" href="#" data-i18n="cabinet_btn_profile"></a>
+    <a class="btn small secondary" href="#" data-i18n="cabinet_btn_settings"></a>
+
+    <a class="btn small secondary" href="/set-password" data-i18n="cabinet_change_password"></a>
+  </div>
+
+  <hr>
+
+  <!-- IDEAS -->
+  <h3 data-i18n="cabinet_ideas_title"></h3>
+
+  <div class="buttons">
+    <a class="btn small" href="#" data-i18n="cabinet_my_ideas"></a>
+    <a class="btn small secondary" href="#" data-i18n="cabinet_drafts"></a>
+    <a class="btn small secondary" href="#" data-i18n="cabinet_archive"></a>
+  </div>
+
+  <p style="margin-top:10px; opacity:0.75;" data-i18n="cabinet_ideas_hint"></p>
+
+  <hr>
+
+  <!-- FOOTER LINKS -->
+  <div style="display:flex; gap:12px; font-size:0.9em; opacity:0.8;">
+    <a href="#" data-i18n="cabinet_feedback"></a>
+    <a href="#" data-i18n="cabinet_help"></a>
+  </div>
+
+</div>
+
+{% endblock %}

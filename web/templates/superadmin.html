@@ -1,0 +1,157 @@
+{#
+============================================================
+Project: MindMesh
+File: searchwave.html
+Version: 1.1 (Workdesk Stable)
+Date: 19.02.2026
+Purpose:
+- SuperAdmin Workdesk
+- Safe system control (Apply logic)
+- Database indicator
+- Users statistics
+- RU / EN i18n ready
+============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+
+  <h1 data-i18n="sa_title"></h1>
+  <p style="opacity:0.7;" data-i18n="sa_subtitle"></p>
+
+  <hr>
+
+<!-- ================= SYSTEM STATUS ================= -->
+<h3 data-i18n="sa_system_status"></h3>
+
+<div class="sa-grid">
+
+  <!-- SYSTEM STATE -->
+  <div class="sa-label" data-i18n="sa_system_state"></div>
+  <div class="sa-value">
+    <span id="systemStateValue">
+      {% if system.maintenance != "none" %}
+        {{ system.maintenance }}
+      {% elif system.test_mode %}
+        test
+      {% else %}
+        working
+      {% endif %}
+    </span>
+  </div>
+
+  <!-- TEST MODE -->
+  <div class="sa-label" data-i18n="sa_test_mode"></div>
+  <div class="sa-value">
+
+    <span>
+      {{ "true" if system.test_mode else "false" }}
+    </span>
+
+    <div class="sa-controls">
+      <label>
+        <input type="radio" name="testmode" value="on"
+               {% if system.test_mode %}checked{% endif %}>
+        <span data-i18n="sa_enable"></span>
+      </label>
+
+      <label>
+        <input type="radio" name="testmode" value="off"
+               {% if not system.test_mode %}checked{% endif %}>
+        <span data-i18n="sa_disable"></span>
+      </label>
+    </div>
+
+  </div>
+
+  <!-- MAINTENANCE -->
+  <div class="sa-label" data-i18n="sa_maintenance"></div>
+  <div class="sa-value">
+
+    <span>{{ system.maintenance }}</span>
+
+    <select id="maintenanceSelect">
+      <option value="none"
+        {% if system.maintenance == "none" %}selected{% endif %}>
+        none
+      </option>
+      <option value="soft"
+        {% if system.maintenance == "soft" %}selected{% endif %}>
+        soft
+      </option>
+      <option value="full"
+        {% if system.maintenance == "full" %}selected{% endif %}>
+        full
+      </option>
+    </select>
+
+  </div>
+
+</div>
+
+<div class="sa-apply">
+  <button class="btn"
+          onclick="applySystemChanges()"
+          data-i18n="sa_apply"></button>
+</div>
+
+<hr>
+
+
+
+  <!-- ================= DATABASE ================= -->
+  <h3 data-i18n="sa_database_control"></h3>
+
+  <div class="sa-status-row">
+
+    <span>
+      <b data-i18n="sa_database_status"></b>:
+      <span id="dbStatusIndicator" style="color:lime;">
+        ● <span data-i18n="sa_database_connected"></span>
+      </span>
+    </span>
+
+    <a href="/admin/database"
+       class="btn small secondary"
+       data-i18n="sa_manage"></a>
+
+  </div>
+
+  <hr>
+
+  <!-- ================= SYSTEM LOG ================= -->
+  <h3 data-i18n="sa_system_log"></h3>
+
+  <div id="systemLog"
+     style="
+       max-height:220px;
+       overflow:auto;
+       background:#111;
+       padding:12px;
+       color:#eaeaea;
+       font-family:monospace;
+       font-size:13px;
+       border-radius:6px;
+       border:1px solid #333;
+     ">
+  </div>
+
+  <hr>
+
+  <!-- ================= AI CONTROL ================= -->
+  <h3 data-i18n="sa_ai_control"></h3>
+  <p style="opacity:0.6;" data-i18n="sa_ai_coming"></p>
+
+</div>
+
+<script>
+  if (typeof applyTranslations === "function") {
+    applyTranslations();
+  }
+</script>
+
+<script src="/static/js/superadmin_workdesk.js"></script>
+
+{% endblock %}

@@ -1,0 +1,18 @@
+{
+  "test_mode": false,
+  "maintenance": "none",
+  "activated_by": null,
+  "log": [
+    "Test Mode set to True",
+    "Maintenance disabled",
+    "Test Mode set to False",
+    "Test Mode set to True",
+    "Soft Maintenance enabled",
+    "Soft Maintenance enabled",
+    "Maintenance disabled",
+    "Full Maintenance enabled",
+    "Maintenance disabled",
+    "Test Mode set to False",
+    "Maintenance disabled"
+  ]
+}

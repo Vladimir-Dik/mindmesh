@@ -1,0 +1,192 @@
+<!--
+MindMesh
+File: simple.html
+Version: 2.3
+Date: 24.02.2026
+Purpose:
+- Simple Mode 2.0
+- Single input field
+- Analyze -> Preview -> Actions
+- Analyze button is NOT submit (prevents GET /simple?raw_text=...)
+- Edit mode with structured fields (local UI only)
+- Modal supports dynamic buttons + email prompt for 401
+- Full i18n
+-->
+
+{% extends "base.html" %}
+{% block content %}
+
+  <div class="card simple-card"
+	 data-username="{{ user['fields']['Name'] if user else '' }}"
+     data-useremail="{{ user['fields']['Email'] if user else '' }}">
+
+  <h2 data-i18n="simple_title">🌱 Простой режим</h2>
+
+  <!-- INPUT BLOCK -->
+  <div id="simpleStepInput">
+
+    <p class="simple-description" data-i18n="simple2_label_raw">
+      Опишите коротко идею или модернизацию
+    </p>
+
+    <form id="simpleForm" class="simple-form" action="javascript:void(0);">
+      <textarea
+        id="raw_text"
+        name="raw_text"
+        class="simple-textarea"
+        rows="6"
+        required
+        data-i18n-placeholder="simple2_placeholder"
+        placeholder="Опишите идею свободным текстом..."></textarea>
+
+      <div class="simple-actions">
+        <!-- IMPORTANT: type="button" (NOT submit) -->
+        <button
+          type="button"
+          class="btn primary"
+          id="btnAnalyze"
+          data-i18n="simple2_btn_analyze">
+          Проанализировать
+        </button>
+      </div>
+    </form>
+
+  </div>
+
+  <!-- PREVIEW BLOCK -->
+  <div id="simpleStepPreview" style="display:none;">
+
+    <h3 class="simple-preview-title" data-i18n="simple2_preview_title">
+      📄 Предварительный анализ
+    </h3>
+
+ <div class="simple-preview-grid">
+
+  <div class="simple-preview-row">
+    <div class="simple-preview-label" data-i18n="assistant_label_author">Автор:</div>
+    <div class="simple-preview-value" id="pv_author"></div>
+  </div>
+
+  <div class="simple-preview-row">
+    <div class="simple-preview-label" data-i18n="simple_label_email">Email:</div>
+    <div class="simple-preview-value" id="pv_email"></div>
+  </div>
+
+  <div class="simple-preview-row">
+    <div class="simple-preview-label" data-i18n="assistant_label_title">Название:</div>
+    <div class="simple-preview-value" id="pv_title"></div>
+  </div>
+
+  <div class="simple-preview-row">
+    <div class="simple-preview-label" data-i18n="assistant_label_short">Кратко:</div>
+    <div class="simple-preview-value" id="pv_short"></div>
+  </div>
+
+  <div class="simple-preview-row">
+    <div class="simple-preview-label" data-i18n="assistant_label_full">Полное:</div>
+    <div class="simple-preview-value" id="pv_full"></div>
+  </div>
+
+  <div class="simple-preview-row">
+    <div class="simple-preview-label" data-i18n="assistant_label_keywords">Ключевые слова:</div>
+    <div class="simple-preview-value" id="pv_keywords"></div>
+  </div>
+
+  <div class="simple-preview-row">
+    <div class="simple-preview-label" data-i18n="simple2_label_type">Тип идеи</div>
+    <div class="simple-preview-value" id="pv_type"></div>
+  </div>
+
+  <div class="simple-preview-row">
+    <div class="simple-preview-label" data-i18n="simple_result_similarity_label">Похожесть:</div>
+    <div class="simple-preview-value" id="pv_similarity"></div>
+  </div>
+
+</div>
+
+    <!-- DUPLICATE BLOCK (на будущее можно скрыть логикой) -->
+    <div id="dupBlock" class="simple-dup" style="display:none;">
+      <div class="simple-dup-warn">
+        ⚠ <span id="dupText"></span>
+      </div>
+
+      <!-- ACTIONS when duplicate exists (placeholders now) -->
+    <div class="buttons simple-btn-row">
+        <button type="button" class="btn subtle" id="btnView" data-i18n="assistant_btn_view"></button>
+        <button type="button" class="btn subtle" id="btnImprove" data-i18n="assistant_btn_improve"></button>
+        <button type="button" class="btn subtle" id="btnSeparate" data-i18n="assistant_btn_separate"></button>
+      </div>
+    </div>
+
+    <!-- MAIN ACTIONS -->
+    <div class="buttons simple-btn-row">
+      <button type="button"
+        class="btn primary"
+        id="btnSave"
+        data-i18n="simple2_btn_save_db">
+      </button>
+      <button type="button" class="btn secondary" id="btnEdit" data-i18n="assistant_btn_edit"></button>
+      <button type="button" class="btn subtle" id="btnNew" data-i18n="assistant_btn_new"></button>
+      <button type="button" class="btn subtle" id="btnCancel" data-i18n="assistant_btn_cancel"></button>
+    </div>
+
+    <div id="anonHint" class="simple-anon-hint" style="display:none;"></div>
+
+  </div>
+
+  <!-- EDIT BLOCK -->
+  <div id="simpleStepEdit" style="display:none;">
+
+    <h3 class="simple-preview-title">✏️ <span data-i18n="assistant_btn_edit">Изменить</span></h3>
+
+    <form id="editForm" class="simple-form" action="javascript:void(0);">
+
+      <label data-i18n="assistant_edit_title">Название</label>
+      <input type="text" id="edit_title" class="simple-input">
+
+      <label data-i18n="assistant_edit_short">Краткое</label>
+      <textarea id="edit_short" class="simple-textarea" rows="3"></textarea>
+
+      <label data-i18n="assistant_edit_full">Полное</label>
+      <textarea id="edit_full" class="simple-textarea" rows="6"></textarea>
+
+      <label data-i18n="assistant_edit_keywords">Ключевые слова</label>
+      <input type="text" id="edit_keywords" class="simple-input" placeholder="ключ1, ключ2">
+
+      <label data-i18n="assistant_edit_name">Имя</label>
+      <input type="text" id="edit_name" class="simple-input">
+
+      <label data-i18n="assistant_edit_email">Email</label>
+      <input type="email" id="edit_email" class="simple-input" placeholder="email@example.com">
+
+      <div class="buttons simple-btn-row">
+       <button type="button"
+        class="btn primary"
+        id="btnSaveEdited"
+        data-i18n="simple2_btn_save_changes">
+       </button> 
+      <button type="button" class="btn subtle" id="btnCancelEdit" data-i18n="assistant_btn_cancel"></button>
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div id="mmModalOverlay" class="mm-modal-overlay" style="display:none;">
+  <div class="mm-modal">
+    <div class="mm-modal-title" id="mmModalTitle">MindMesh</div>
+    <div class="mm-modal-body" id="mmModalBody"></div>
+    <div class="mm-modal-actions" id="mmModalActions"></div>
+  </div>
+</div>
+
+<script src="/static/js/simple.js"></script>
+
+<script>
+  if (typeof applyTranslations === "function") applyTranslations();
+</script>
+
+{% endblock %}
