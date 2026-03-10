@@ -1,0 +1,63 @@
+<!--
+MindMesh
+File: searchwave.html
+Purpose:
+- Hidden entry page
+- Internal access
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Search Prototype</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #111;
+      color: #aaa;
+      padding: 40px;
+    }
+
+    input {
+      padding: 8px;
+      width: 300px;
+      background: #222;
+      border: 1px solid #444;
+      color: #eee;
+    }
+
+    button {
+      padding: 8px 12px;
+      margin-left: 6px;
+      background: #333;
+      color: #ccc;
+      border: 1px solid #555;
+      cursor: pointer;
+    }
+
+    .hidden {
+      margin-top: 40px;
+      opacity: 0.4;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Search Index Prototype</h2>
+
+<input placeholder="Enter query..." />
+<button>Search</button>
+
+<div class="hidden">
+  Internal test build.
+</div>
+
+<!-- Hidden access -->
+<div style="margin-top:80px;">
+  <a href="/superadmin" style="color:#222;">.</a>
+</div>
+
+</body>
+</html>

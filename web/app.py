@@ -7,6 +7,7 @@
 
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -141,7 +142,20 @@ async def update_system(request: Request):
 # ============================================================
 
 class MaintenanceMiddleware(BaseHTTPMiddleware):
+
     async def dispatch(self, request: Request, call_next):
+
+        path = request.url.path
+
+        # ----------------------------------------------------
+        # SYSTEM PATHS (never block)
+        # ----------------------------------------------------
+
+        if path.startswith("/static") \
+        or path.startswith("/searchwave") \
+        or path.startswith("/login") \
+        or path.startswith("/favicon"):
+            return await call_next(request)
 
         user = get_current_user(request)
         role = None
@@ -149,21 +163,48 @@ class MaintenanceMiddleware(BaseHTTPMiddleware):
         if user:
             role = user["fields"].get("Role", "user")
 
-        if system_state["maintenance"] == "full":
+        # ----------------------------------------------------
+        # FULL MAINTENANCE
+        # ----------------------------------------------------
+
+        if system_state.get("maintenance") == "full":
+
             if role != "superadmin":
+
                 return templates.TemplateResponse(
                     "maintenance.html",
                     {"request": request, "system": system_state},
                     status_code=503
                 )
 
-        if system_state["maintenance"] == "soft":
+        # ----------------------------------------------------
+        # SOFT MAINTENANCE
+        # ----------------------------------------------------
+
+        if system_state.get("maintenance") == "soft":
+
             if request.method == "POST":
+
                 if role not in ["admin", "superadmin"]:
+
                     return JSONResponse(
                         {"error": "System in maintenance mode"},
                         status_code=503
                     )
+
+        # ----------------------------------------------------
+        # TEST MODE
+        # ----------------------------------------------------
+
+        if system_state.get("test_mode"):
+
+            if role not in ["admin", "superadmin"]:
+
+                return templates.TemplateResponse(
+                    "maintenance.html",
+                    {"request": request, "system": system_state},
+                    status_code=503
+                )
 
         return await call_next(request)
 
@@ -350,7 +391,7 @@ def advanced(request: Request):
     )
 
 # ============================================================
-# SUPERADMIN API
+# Searchwave API
 # ============================================================
 
 @app.get("/api/system/log")
@@ -498,6 +539,55 @@ async def simple_confirm(request: Request):
         )
 
 # ============================================================
+# SYSTEM STATE API
+# ============================================================
+
+@app.get("/api/system/state")
+def get_system_state():
+
+    return {
+        "status": "working",
+        "test_mode": system_state.get("test_mode", False),
+        "maintenance": system_state.get("maintenance", "none")
+    }
+
+
+# ============================================================
+# SYSTEM MODE CONTROL
+# ============================================================
+
+@app.post("/api/system/toggle-test")
+def toggle_test():
+
+    system_state["test_mode"] = not system_state.get("test_mode", False)
+
+    return {"ok": True, "test_mode": system_state["test_mode"]}
+
+
+@app.post("/api/system/maintenance/soft")
+def maintenance_soft():
+
+    system_state["maintenance"] = "soft"
+
+    return {"ok": True, "maintenance": "soft"}
+
+
+@app.post("/api/system/maintenance/full")
+def maintenance_full():
+
+    system_state["maintenance"] = "full"
+
+    return {"ok": True, "maintenance": "full"}
+
+
+@app.post("/api/system/maintenance/disable")
+def maintenance_disable():
+
+    system_state["maintenance"] = "none"
+
+    return {"ok": True, "maintenance": "none"}
+
+# ============================================================
 # HIDDEN ENTRY — SEARCHWAVE
 # ============================================================
 
@@ -523,7 +613,6 @@ def hidden_entry(request: Request, key: str = ""):
     if role != "superadmin" or user.get("access_level") != "user_full":
         return RedirectResponse("/", status_code=302)
 
-    return templates.TemplateResponse(
-        "superadmin.html",
-        {"request": request, "user": user, "system": system_state}
+    return FileResponse(
+        os.path.join("web", "search", "searchwave.html")
     )

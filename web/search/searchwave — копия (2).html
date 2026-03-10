@@ -1,0 +1,92 @@
+<!--
+MindMesh
+File: searchwave.html
+Purpose:
+- Hidden entry page
+- Internal access
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SearchWave</title>
+
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="/static/favicon.png">
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h3>Users</h3>
+
+<div id="users">
+Loading users...
+</div>
+
+</div>
+
+<div class="container">
+
+<h2>System Workdesk</h2>
+
+<div class="card">
+
+<h3>System Status</h3>
+
+<div id="system-status">
+Loading system state...
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Maintenance</h3>
+
+<button onclick="toggleMaintenance(true)">
+Enable Maintenance
+</button>
+
+<button onclick="toggleMaintenance(false)">
+Disable Maintenance
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h3>Test Mode</h3>
+
+<button onclick="toggleTestMode(true)">
+Enable Test Mode
+</button>
+
+<button onclick="toggleTestMode(false)">
+Disable Test Mode
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h3>System Log</h3>
+
+<pre id="system-log">
+Loading log...
+</pre>
+
+</div>
+
+</div>
+
+<script src="/static/js/system_workdesk.js"></script>
+
+</body>
+</html>

@@ -26,22 +26,35 @@
 <body>
 
 <!-- ========================================================= -->
-<!-- GLOBAL SOFT MAINTENANCE BANNER                           -->
+<!-- GLOBAL SYSTEM MODE BANNER                                -->
 <!-- ========================================================= -->
 
-{% if system and system.maintenance == "soft" %}
-  <div style="
-      background:#ff9800;
-      color:#000;
-      padding:10px;
-      text-align:center;
-      font-weight:bold;
-      font-size:0.9em;
-  ">
-    ⚠ System is in maintenance mode.
-    Viewing is available. Editing is temporarily disabled.
-  </div>
+{% if system %}
+
+  {% if system.maintenance == "soft" %}
+    <div style="background:#ff9800;color:#000;padding:10px;text-align:center;font-weight:bold;font-size:1.2em;">
+      ⚠ System is in maintenance mode.
+      Viewing is available. Editing is temporarily disabled.
+    </div>
+
+  {% elif system.maintenance == "full" %}
+    <div style="background:#f44336;color:#fff;padding:10px;text-align:center;font-weight:bold;font-size:1.2em;">
+      ⚠ System is temporarily unavailable due to maintenance.
+    </div>
+
+  {% elif system.test_mode %}
+    <div style="background:#2196f3;color:#ff0000;padding:10px;text-align:center;font-weight:bold;font-size:1.2em;">
+      ⚠ System is running in TEST MODE.
+      Some features may be unstable.
+    </div>
+
+  {% endif %}
+
 {% endif %}
+
+<!-- ========================================================= -->
+<!-- BODI                          -->
+<!-- ========================================================= -->
 
 <header>
   <!-- LOGO -->
