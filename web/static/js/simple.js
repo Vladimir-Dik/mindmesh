@@ -1,8 +1,11 @@
 /*
-  MindMesh
+  ============================================================
+  Project: MindMesh
   File: simple.js
-  Version: 3.5
-  Date: 28.02.2026
+  Version: 3.7/1
+  Date: 29.03.2026
+  Purpose:
+  - Simple mode frontend logic
   Fix:
   - Keep ALL existing modules/flows (no cuts)
   - Similarity: normalize + pretty percent output (0..1 -> 0..100)
@@ -10,6 +13,10 @@
   - Analyze button uses requestSubmit() when available
   - classifyError(): use mm_t() (not t()) to avoid runtime errors
   - Fallback text uses formatted similarity
+  - Read Degraded Mode: analysis works even if Airtable duplicate check is unavailable
+  - Write Degraded Mode: buffer_saved handled without false success
+  - Syntax repaired after manual edits
+  ============================================================
 */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -21,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let pendingAuthorEmail = null;
   let pendingAuthorFirstName = null;
   let pendingAuthorLastName = null;
+  let readDegradedMode = false;
 
   // ================= HELPERS =================
 
@@ -64,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function formatSimilarityPercent(value) {
     const v = normalizeSimilarity(value);
-    // 1 decimal looks nice; you can change to 0 decimals if needed
+   // 1 decimal looks nice; you can change to 0 decimals if needed																						 
     return v.toFixed(1) + "%";
   }
 
@@ -139,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return s;
   }
 
-  // safe translator with fallback text
+  // safe translator with fallback text														   
   function tr(key, fallback, vars) {
     const s = mm_t(key, vars);
     return (s === key) ? (fallback || key) : s;
@@ -169,13 +177,13 @@ document.addEventListener("DOMContentLoaded", function () {
     el("pv_keywords").innerText = (analysis.keywords || []).join(", ");
     el("pv_type").innerText = analysis.idea_type || "Idea";
 
-    // ✅ pretty similarity
+  // ✅ pretty similarity									  
     el("pv_similarity").innerText = formatSimilarityPercent(similarity);
 
     const dupBlock = el("dupBlock");
     const dupText = el("dupText");
 
-    if (duplicateTitle && dupBlock && dupText) {
+    if (duplicateTitle && !readDegradedMode && dupBlock && dupText) {
       dupBlock.style.display = "block";
       dupText.innerText = tr("simple_duplicate_label", "Похожая идея: ") + duplicateTitle;
     } else if (dupBlock) {
@@ -237,10 +245,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
       currentAnalysis = j.analysis || null;
       currentDuplicateId = j.duplicate_id || null;
+      console.log("AI DEBUG:", j.analysis ? j.analysis.analysis_notes : null);
       currentDuplicateTitle = j.duplicate_title || null;
-
-      // ✅ normalize similarity
+    // ✅ normalize similarity											 
       currentSimilarity = normalizeSimilarity(j.similarity || 0);
+
+      readDegradedMode = Boolean(j.read_degraded_mode || j.duplicate_check_unavailable);
+
+      if (readDegradedMode) {
+        currentDuplicateId = null;
+        currentDuplicateTitle = null;
+        currentSimilarity = 0;
+
+        showModal(
+          tr("simple_warning_title", "Внимание"),
+          tr(
+            "simple_warning_duplicate_unavailable",
+            "Проверка по базе временно недоступна. Анализ выполнен без сравнения с базой."
+          )
+        );
+      }
 
       renderPreviewFromAnalysis(currentAnalysis, currentSimilarity, currentDuplicateTitle);
       showBlock("simpleStepPreview");
@@ -255,7 +279,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const form = el("simpleForm");
       if (!form) return;
 
-      // requestSubmit() is the most correct way (triggers submit handlers)
+      // requestSubmit() is the most correct way (triggers submit handlers)																										
       if (typeof form.requestSubmit === "function") {
         form.requestSubmit();
       } else {
@@ -389,213 +413,250 @@ document.addEventListener("DOMContentLoaded", function () {
       try { j = await r.json(); } catch (e) {}
       return { r, j };
     } catch (e) {
-      return { r: null, j: {}, network_error: true, error_message: (e && e.message) ? e.message : "Network error" };
+      return {
+        r: null,
+        j: {},
+        network_error: true,
+        error_message: (e && e.message) ? e.message : "Network error"
+      };
     }
   }
 
   // ================= Modal Email =================
 
-function showEmailPromptAndSave() {
-  const overlay = el("mmModalOverlay");
-  const titleEl = el("mmModalTitle");
-  const bodyEl = el("mmModalBody");
-  const actionsEl = el("mmModalActions");
+  function showEmailPromptAndSave() {
+    const overlay = el("mmModalOverlay");
+    const titleEl = el("mmModalTitle");
+    const bodyEl = el("mmModalBody");
+    const actionsEl = el("mmModalActions");
 
-  if (!overlay || !titleEl || !bodyEl || !actionsEl) {
-    console.error("Modal elements not found in DOM");
-    return;
-  }
-
-  titleEl.innerText = tr("simple_email_prompt_title", "Введите данные");
-  bodyEl.innerText = tr(
-    "simple_email_prompt_text",
-    "Чтобы сохранить идею, укажите email и имя. Пароль не обязателен."
-  );
-
-  actionsEl.innerHTML = "";
-
-  // --- Prefill из edit / dataset ---
-  const u = getUserFromDataset();
-  const editEmail = el("edit_email") ? (el("edit_email").value || "").trim() : "";
-  const editName = el("edit_name") ? (el("edit_name").value || "").trim() : "";
-
-  const baseEmail = editEmail || (u.email || "").trim();
-
-  let baseFirst = "";
-  let baseLast = "";
-
-  const baseName = editName || (u.name || "").trim();
-  if (baseName) {
-    const parts = baseName.split(/\s+/).filter(Boolean);
-    baseFirst = parts[0] || "";
-    baseLast = parts.slice(1).join(" ") || "";
-  }
-
-  // --- Inputs ---
-  const inputEmail = document.createElement("input");
-  inputEmail.type = "email";
-  inputEmail.placeholder = tr("simple_email_prompt_email_ph", "email@example.com");
-  inputEmail.value = baseEmail;
-  inputEmail.style.width = "100%";
-  inputEmail.style.boxSizing = "border-box";
-  inputEmail.style.marginBottom = "10px";
-
-  const inputFirst = document.createElement("input");
-  inputFirst.type = "text";
-  inputFirst.placeholder = tr("simple_email_prompt_first_ph", "Имя");
-  inputFirst.value = pendingAuthorFirstName || baseFirst;
-  inputFirst.style.width = "100%";
-  inputFirst.style.boxSizing = "border-box";
-  inputFirst.style.marginBottom = "10px";
-
-  const inputLast = document.createElement("input");
-  inputLast.type = "text";
-  inputLast.placeholder = tr("simple_email_prompt_last_ph", "Фамилия");
-  inputLast.value = pendingAuthorLastName || baseLast;
-  inputLast.style.width = "100%";
-  inputLast.style.boxSizing = "border-box";
-  inputLast.style.marginBottom = "10px";
-
-  actionsEl.appendChild(inputEmail);
-  actionsEl.appendChild(inputFirst);
-  actionsEl.appendChild(inputLast);
-
-// --- Inline error box (UX-stable, multilingual safe) ---
-  const errorBox = document.createElement("div");
-  errorBox.style.color = "#c62828";
-  errorBox.style.marginBottom = "10px";
-  errorBox.style.fontSize = "0.9em";
-  actionsEl.appendChild(errorBox);
-
-  function setModalError(msgKey, fallback) {
-  errorBox.innerText = tr(msgKey, fallback);
-	}  
-
-  const row = document.createElement("div");
-  row.style.display = "flex";
-  row.style.gap = "10px";
-
-  const saveBtn = document.createElement("button");
-  saveBtn.type = "button";
-  saveBtn.className = "btn primary";
-  saveBtn.innerText = tr("simple_email_prompt_save", "Сохранить");
-
-  const cancelBtn = document.createElement("button");
-  cancelBtn.type = "button";
-  cancelBtn.className = "btn subtle";
-  cancelBtn.innerText = tr("simple_email_prompt_cancel", "Отмена");
-
-  cancelBtn.onclick = function () {
-    overlay.style.display = "none";
-  };
-
-  saveBtn.onclick = async function () {
-    const email = (inputEmail.value || "").trim();
-    const first = (inputFirst.value || "").trim();
-    const last = (inputLast.value || "").trim();
-
-   setModalError("", "");
-
-	if (!email) {
-	setModalError("simple_error_email_required", "Email обязателен.");
-	return;
-	}
-
-	if (!first) {
-	setModalError("simple_error_name_required", "Имя обязательно.");
-	return;
-	}
-
-    // сохраним введённое, чтобы не терялось при повторных попытках
-    pendingAuthorEmail = email;
-    pendingAuthorFirstName = first;
-    pendingAuthorLastName = last;
-
-    const displayName = (first + " " + last).trim();
-
-    // Обновим edit поля, чтобы Preview показывал автора
-    if (el("edit_email")) el("edit_email").value = email;
-    if (el("edit_name")) el("edit_name").value = displayName;
-
-    const raw = el("raw_text") ? (el("raw_text").value || "") : "";
-
-    const { r, j } = await saveToServer({
-      analysis: currentAnalysis,
-      raw_text: raw,
-      duplicate_id: currentDuplicateId,
-      similarity: currentSimilarity,
-      name: displayName,      // важно: сервер уже умеет принимать name
-      email: email,
-      first_name: first,      // доп. поля — сервер может игнорировать, не мешают
-      last_name: last
-    });
-
-    if (!r) {
-	setModalError("simple_error_network", "Ошибка сети.");
-	return;
-	}
-
-	if (!r.ok) {
-	const msg = j?.message || j?.error || "Ошибка сервера";
-	errorBox.innerText = msg; // серверное сообщение как есть
-	return;
-	}
-
-// Закрываем ТОЛЬКО при успехе
-overlay.style.display = "none";
-
-    showModal(tr("simple_success_title", "Готово"), tr("simple_saved_ok", "Идея сохранена. ID: ") + (j.idea_id || "(no id)"));
-  };
-// =================                 =================/
-  row.appendChild(saveBtn);
-  row.appendChild(cancelBtn);
-  actionsEl.appendChild(row);
-
-  overlay.style.display = "flex";
-  setTimeout(() => {
-    if (!inputEmail.value) inputEmail.focus();
-    else if (!inputFirst.value) inputFirst.focus();
-    else inputLast.focus();
-  }, 50);
-}
-
-// ================= RE-ANALYZE AFTER EDIT =================
-
-async function reanalyzeCurrent() {
-
-  if (!currentAnalysis) return;
-
-  const raw = el("raw_text") ? (el("raw_text").value || "") : "";
-
-  // Берём обновлённый full (он уже изменён через applyEditFormToCurrent)
-  const textForAnalyze =
-    currentAnalysis.full ||
-    currentAnalysis.short ||
-    raw;
-
-  try {
-    const r = await fetch("/api/simple/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ raw_text: textForAnalyze })
-    });
-
-    const j = await r.json();
-
-    if (!r.ok || j.error) {
-      console.warn("Re-analyze failed, keeping previous analysis");
+    if (!overlay || !titleEl || !bodyEl || !actionsEl) {
+      console.error("Modal elements not found in DOM");
       return;
     }
 
-    // Обновляем данные анализа
-    currentDuplicateId = j.duplicate_id || null;
-    currentDuplicateTitle = j.duplicate_title || null;
-    currentSimilarity = normalizeSimilarity(j.similarity || 0);
+    titleEl.innerText = tr("simple_email_prompt_title", "Введите данные");
+    bodyEl.innerText = tr(
+      "simple_email_prompt_text",
+      "Чтобы сохранить идею, укажите email и имя. Пароль не обязателен."
+    );
 
-  } catch (e) {
-    console.warn("Re-analyze network error", e);
+    actionsEl.innerHTML = "";
+
+    // --- Prefill из edit / dataset ---
+    const u = getUserFromDataset();
+    const editEmail = el("edit_email") ? (el("edit_email").value || "").trim() : "";
+    const editName = el("edit_name") ? (el("edit_name").value || "").trim() : "";
+
+    const baseEmail = editEmail || (u.email || "").trim();
+
+    let baseFirst = "";
+    let baseLast = "";
+
+    const baseName = editName || (u.name || "").trim();
+    if (baseName) {
+      const parts = baseName.split(/\s+/).filter(Boolean);
+      baseFirst = parts[0] || "";
+      baseLast = parts.slice(1).join(" ") || "";
+    }
+
+    // --- Inputs ---
+    const inputEmail = document.createElement("input");
+    inputEmail.type = "email";
+    inputEmail.placeholder = tr("simple_email_prompt_email_ph", "email@example.com");
+    inputEmail.value = baseEmail;
+    inputEmail.style.width = "100%";
+    inputEmail.style.boxSizing = "border-box";
+    inputEmail.style.marginBottom = "10px";
+
+    const inputFirst = document.createElement("input");
+    inputFirst.type = "text";
+    inputFirst.placeholder = tr("simple_email_prompt_first_ph", "Имя");
+    inputFirst.value = pendingAuthorFirstName || baseFirst;
+    inputFirst.style.width = "100%";
+    inputFirst.style.boxSizing = "border-box";
+    inputFirst.style.marginBottom = "10px";
+
+    const inputLast = document.createElement("input");
+    inputLast.type = "text";
+    inputLast.placeholder = tr("simple_email_prompt_last_ph", "Фамилия");
+    inputLast.value = pendingAuthorLastName || baseLast;
+    inputLast.style.width = "100%";
+    inputLast.style.boxSizing = "border-box";
+    inputLast.style.marginBottom = "10px";
+
+    actionsEl.appendChild(inputEmail);
+    actionsEl.appendChild(inputFirst);
+    actionsEl.appendChild(inputLast);
+
+    // --- Inline error box ---
+    const errorBox = document.createElement("div");
+    errorBox.style.color = "#c62828";
+    errorBox.style.marginBottom = "10px";
+    errorBox.style.fontSize = "0.9em";
+    actionsEl.appendChild(errorBox);
+
+    function setModalError(msgKey, fallback) {
+      errorBox.innerText = tr(msgKey, fallback);
+    }
+
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.gap = "10px";
+
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "btn primary";
+    saveBtn.innerText = tr("simple_email_prompt_save", "Сохранить");
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.className = "btn subtle";
+    cancelBtn.innerText = tr("simple_email_prompt_cancel", "Отмена");
+
+    cancelBtn.onclick = function () {
+      overlay.style.display = "none";
+    };
+
+    saveBtn.onclick = async function () {
+      const email = (inputEmail.value || "").trim();
+      const first = (inputFirst.value || "").trim();
+      const last = (inputLast.value || "").trim();
+
+      setModalError("", "");
+
+      if (!email) {
+        setModalError("simple_error_email_required", "Email обязателен.");
+        return;
+      }
+
+      if (!first) {
+        setModalError("simple_error_name_required", "Имя обязательно.");
+        return;
+      }
+
+      // сохраним введённое, чтобы не терялось при повторных попытках
+      pendingAuthorEmail = email;
+      pendingAuthorFirstName = first;
+      pendingAuthorLastName = last;
+
+      const displayName = (first + " " + last).trim();
+
+      // Обновим edit поля, чтобы Preview показывал автора
+      if (el("edit_email")) el("edit_email").value = email;
+      if (el("edit_name")) el("edit_name").value = displayName;
+
+      const raw = el("raw_text") ? (el("raw_text").value || "") : "";
+
+      const { r, j } = await saveToServer({
+        analysis: currentAnalysis,
+        raw_text: raw,
+        duplicate_id: currentDuplicateId,
+        similarity: currentSimilarity,
+        name: displayName,      // важно: сервер уже умеет принимать name
+        email: email,
+        first_name: first,     // доп. поля — сервер может игнорировать, не мешают
+        last_name: last
+      });
+
+      if (!r) {
+        setModalError("simple_error_network", "Ошибка сети.");
+        return;
+      }
+
+      if (j.status === "buffer_saved") {
+        overlay.style.display = "none";
+
+        showModal(
+          tr("simple_buffer_saved_title", "Сохранено в резерв"),
+          tr(
+            "simple_buffer_saved_message",
+            "База временно недоступна. Идея сохранена в резервный буфер."
+          ) + (j.local_id ? ("\nLocal ID: " + j.local_id) : "")
+        );
+        return;
+      }
+
+      if (!r.ok) {
+        const msg = j?.message || j?.error || "Ошибка сервера";
+        errorBox.innerText = msg;
+        return;
+      }
+
+      // Закрываем только при успехе
+      overlay.style.display = "none";
+
+      showModal(
+        tr("simple_success_title", "Готово"),
+        tr("simple_saved_ok", "Идея сохранена. ID: ") + (j.idea_id || "(no id)")
+      );
+    };
+// =================                 =================/																					   
+
+    row.appendChild(saveBtn);
+    row.appendChild(cancelBtn);
+    actionsEl.appendChild(row);
+
+    overlay.style.display = "flex";
+    setTimeout(() => {
+      if (!inputEmail.value) inputEmail.focus();
+      else if (!inputFirst.value) inputFirst.focus();
+      else inputLast.focus();
+    }, 50);
   }
-}
+
+  // ================= RE-ANALYZE AFTER EDIT =================
+
+  async function reanalyzeCurrent() {
+    if (!currentAnalysis) return;
+
+    const raw = el("raw_text") ? (el("raw_text").value || "") : "";
+
+// Берём обновлённый full (он уже изменён через applyEditFormToCurrent)																																		 
+    const textForAnalyze =
+      currentAnalysis.full ||
+      currentAnalysis.short ||
+      raw;
+
+    try {
+      const r = await fetch("/api/simple/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ raw_text: textForAnalyze })
+      });
+
+      const j = await r.json();
+
+      if (!r.ok || j.error) {
+        console.warn("Re-analyze failed, keeping previous analysis");
+        return;
+      }
+
+  // Обновляем данные анализа																	   
+      currentDuplicateId = j.duplicate_id || null;
+      currentDuplicateTitle = j.duplicate_title || null;
+      currentSimilarity = normalizeSimilarity(j.similarity || 0);
+
+      readDegradedMode = Boolean(j.read_degraded_mode || j.duplicate_check_unavailable);
+
+      if (readDegradedMode) {
+        currentDuplicateId = null;
+        currentDuplicateTitle = null;
+        currentSimilarity = 0;
+
+        showModal(
+          tr("simple_warning_title", "Внимание"),
+          tr(
+            "simple_warning_duplicate_unavailable",
+            "Проверка по базе временно недоступна. Анализ выполнен без сравнения с базой."
+          )
+        );
+      }
+
+    } catch (e) {
+      console.warn("Re-analyze network error", e);
+    }
+  }
 
   // ================= EDIT FLOW =================
 
@@ -605,13 +666,13 @@ async function reanalyzeCurrent() {
     el("edit_title").value = currentAnalysis.title || "";
     el("edit_short").value = currentAnalysis.short || "";
 
-    // full: если нет, подставим исходный raw_text
+  // full: если нет, подставим исходный raw_text																							  
     const raw = (el("raw_text") && el("raw_text").value) ? el("raw_text").value : "";
     el("edit_full").value = currentAnalysis.full || currentAnalysis.short || raw || "";
 
     el("edit_keywords").value = (currentAnalysis.keywords || []).join(", ");
 
-    // имя/почта: из user dataset, если залогинен
+   // имя/почта: из user dataset, если залогинен																								  
     const u = getUserFromDataset();
     if (el("edit_name")) el("edit_name").value = u.name || "";
     if (el("edit_email")) el("edit_email").value = u.email || "";
@@ -645,92 +706,101 @@ async function reanalyzeCurrent() {
     });
   }
 
-const btnSaveEdited = el("btnSaveEdited");
-if (btnSaveEdited) {
-  btnSaveEdited.addEventListener("click", async function () {
+  const btnSaveEdited = el("btnSaveEdited");
+  if (btnSaveEdited) {
+    btnSaveEdited.addEventListener("click", async function () {
 
-    if (!currentAnalysis) {
-      showModal(
-        tr("simple_error_title", "Ошибка"),
-        tr("simple_error_no_analysis", "Нет данных анализа.")
+      if (!currentAnalysis) {
+        showModal(
+          tr("simple_error_title", "Ошибка"),
+          tr("simple_error_no_analysis", "Нет данных анализа.")
+        );
+        return;
+      }
+
+      applyEditFormToCurrent();
+
+      await reanalyzeCurrent();
+
+      renderPreviewFromAnalysis(
+        currentAnalysis,
+        currentSimilarity,
+        currentDuplicateTitle
       );
-      return;
-    }
 
-    applyEditFormToCurrent();
-
-    // 🔄 повторный анализ
-    await reanalyzeCurrent();
-
-    renderPreviewFromAnalysis(
-      currentAnalysis,
-      currentSimilarity,
-      currentDuplicateTitle
-    );
-
-    showBlock("simpleStepPreview");
-  });
-
+      showBlock("simpleStepPreview");
+    });
   }
 
-// ================= SAVE (DB BUTTON) =================
+  // ================= SAVE (DB BUTTON) =================
 
-const btnSave = el("btnSave");
-if (btnSave) {
-  btnSave.addEventListener("click", async function () {
+  const btnSave = el("btnSave");
+  if (btnSave) {
+    btnSave.addEventListener("click", async function () {
 
-    if (!currentAnalysis) {
+      if (!currentAnalysis) {
+        showModal(
+          tr("simple_error_title", "Ошибка"),
+          tr("simple_error_press_analyze", "Сначала нажмите «Проанализировать».")
+        );
+        return;
+      }
+
+      const raw = el("raw_text") ? (el("raw_text").value || "") : "";
+      const editName = el("edit_name") ? (el("edit_name").value || "") : "";
+      const editEmail = el("edit_email") ? (el("edit_email").value || "") : "";
+
+      const finalName =
+        editName ||
+        ((pendingAuthorFirstName || "") + " " + (pendingAuthorLastName || "")).trim();
+
+      const finalEmail =
+        editEmail ||
+        pendingAuthorEmail ||
+        "";
+
+      const { r, j } = await saveToServer({
+        analysis: currentAnalysis,
+        raw_text: raw,
+        duplicate_id: currentDuplicateId,
+        similarity: currentSimilarity,
+        name: finalName,
+        email: finalEmail
+      });
+
+      if (!r) {
+        showFallbackModal("Network error");
+        return;
+      }
+
+      // сервер просит email
+      if (r.status === 401 || j.status === "need_email") {
+        showEmailPromptAndSave();
+        return;
+      }
+
+      if (j.status === "buffer_saved") {
+        showModal(
+          tr("simple_buffer_saved_title", "Сохранено в резерв"),
+          tr(
+            "simple_buffer_saved_message",
+            "База временно недоступна. Идея сохранена в резервный буфер."
+          ) + (j.local_id ? ("\nLocal ID: " + j.local_id) : "")
+        );
+        return;
+      }
+
+      if (!r.ok) {
+        showFallbackModal(j.message || j.error || "Ошибка сервера");
+        return;
+      }
+
       showModal(
-        tr("simple_error_title", "Ошибка"),
-        tr("simple_error_press_analyze", "Сначала нажмите «Проанализировать».")
+        tr("simple_success_title", "Успешно"),
+        tr("simple_success_saved_id", "Идея сохранена. ID: ") + (j.idea_id || "(no id)")
       );
-      return;
-    }
-
-    const raw = el("raw_text") ? (el("raw_text").value || "") : "";
-    const editName = el("edit_name") ? (el("edit_name").value || "") : "";
-    const editEmail = el("edit_email") ? (el("edit_email").value || "") : "";
-
-    const finalName =
-      editName ||
-      ((pendingAuthorFirstName || "") + " " + (pendingAuthorLastName || "")).trim();
-
-    const finalEmail =
-      editEmail ||
-      pendingAuthorEmail ||
-      "";
-
-    const { r, j } = await saveToServer({
-      analysis: currentAnalysis,
-      raw_text: raw,
-      duplicate_id: currentDuplicateId,
-      similarity: currentSimilarity,
-      name: finalName,
-      email: finalEmail
     });
-
-    if (!r) {
-      showFallbackModal("Network error");
-      return;
-    }
-
-    // сервер просит email
-    if (r.status === 401 || j.status === "need_email") {
-      showEmailPromptAndSave();
-      return;
-    }
-
-    if (!r.ok) {
-      showFallbackModal(j.message || j.error || "Ошибка сервера");
-      return;
-    }
-
-    showModal(
-      tr("simple_success_title", "Успешно"),
-      tr("simple_success_saved_id", "Идея сохранена. ID: ") + (j.idea_id || "(no id)")
-    );
-  });
-}
+  }
 
   // ================= NEW / CANCEL =================
 
@@ -804,5 +874,68 @@ if (btnSave) {
       serverComponent: "Unknown"
     };
   }
+
+// ================= DOWNLOAD PROJECT =================
+
+const btnDownloadProject = el("btnDownloadProject");
+
+if (btnDownloadProject) {
+  btnDownloadProject.addEventListener("click", function () {
+
+    if (!currentAnalysis) {
+      showModal(
+        tr("simple_error_title", "Ошибка"),
+        "Нет данных для сохранения. Сначала выполните анализ."
+      );
+      return;
+    }
+
+    const raw = el("raw_text") ? el("raw_text").value : "";
+    const u = getUserFromDataset();
+
+    const editName = el("edit_name") ? (el("edit_name").value || "") : "";
+    const editEmail = el("edit_email") ? (el("edit_email").value || "") : "";
+
+    const authorName = (editName || u.name || "Unknown").trim();
+    const authorEmail = (editEmail || u.email || "Not provided").trim();
+
+    const now = new Date().toLocaleString();
+
+    const text =
+      "MindMesh Project Export\n" +
+      "================================\n\n" +
+
+      "Date:\n" + now + "\n\n" +
+
+      "Author:\n" + authorName + "\n" +
+      "Email:\n" + authorEmail + "\n\n" +
+
+      "Title:\n" + (currentAnalysis.title || "") + "\n\n" +
+
+      "Short Description:\n" + (currentAnalysis.short || "") + "\n\n" +
+
+      "Full Description:\n" + (currentAnalysis.full || "") + "\n\n" +
+
+      "Keywords:\n" + ((currentAnalysis.keywords || []).join(", ")) + "\n\n" +
+
+      "--------------------------------\n" +
+      "Original Input:\n" + raw;
+
+    const fileName =
+      "MindMesh_Project_" +
+      new Date().toISOString().slice(0,19).replace(/[:T]/g,"-") +
+      ".txt";
+
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+
+    URL.revokeObjectURL(url);
+  });
+}
 
 });

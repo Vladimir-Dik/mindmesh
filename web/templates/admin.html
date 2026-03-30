@@ -1,0 +1,193 @@
+<!--
+============================================================
+Project: MindMesh
+File: admin.html
+Version: 1.0
+Date: 22.03.2026
+Purpose:
+Admin Panel (admin / topadmin)
+============================================================
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>MindMesh Admin</title>
+
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="/static/favicon.png">
+
+</head>
+
+<body>
+
+<div class="container">
+<div class="card">
+
+<h1>⚙️ MindMesh Admin Center</h1>
+<p style="opacity:0.7;">Operations Panel</p>
+
+<hr>
+
+<h3>Panels</h3>
+
+<div class="admin-card">
+
+<div style="display:flex; gap:10px; align-items:center;">
+
+<select id="panelSelector" class="btn small">
+<option value="">Select panel...</option>
+<option value="/moderator">Moderator</option>
+<option value="/cabinet">User Cabinet</option>
+<option value="/simple">Simple Mode</option>
+<option value="/advanced">Advanced Mode</option>
+</select>
+
+<button class="btn small" onclick="openPanel()">
+Open →
+</button>
+
+</div>
+
+</div>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- USERS OVERVIEW                                        -->
+<!-- ===================================================== -->
+
+<h3>Users</h3>
+
+<div class="admin-card">
+
+<div class="ideas-line">
+
+<div class="ideas-left">
+<b>Total Users:</b>
+<span id="admin_total_users">loading...</span>
+</div>
+
+<div class="ideas-right">
+<button class="btn small" onclick="openUsersPanel()">
+Manage →
+</button>
+</div>
+
+</div>
+
+</div>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- IDEAS OVERVIEW                                        -->
+<!-- ===================================================== -->
+
+<h3>Ideas</h3>
+
+<div class="admin-card">
+
+<div class="ideas-line">
+
+<div class="ideas-left">
+<b>Total Ideas:</b>
+<span id="admin_total_ideas">loading...</span>
+</div>
+
+<div class="ideas-right">
+Today: <span id="admin_ideas_today">-</span>
+&nbsp;&nbsp; Week: <span id="admin_ideas_week">-</span>
+&nbsp;&nbsp; Month: <span id="admin_ideas_month">-</span>
+</div>
+
+</div>
+
+<ul id="admin_ideas_stats"></ul>
+
+</div>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- MODERATION                                            -->
+<!-- ===================================================== -->
+
+<h3>Moderation</h3>
+
+<div class="admin-card">
+
+<p><b>Review Queue:</b> <span id="admin_review_queue">-</span></p>
+<p><b>AI Pending:</b> <span id="admin_ai_pending">-</span></p>
+<p><b>Duplicates:</b> <span id="admin_duplicates">-</span></p>
+
+</div>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- COMMUNICATION                                         -->
+<!-- ===================================================== -->
+
+<h3>Communication</h3>
+
+<div class="admin-card">
+
+<div class="buttons">
+<button class="btn small">Send Message</button>
+<button class="btn small secondary">Notifications</button>
+</div>
+
+</div>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- LOGS                                                  -->
+<!-- ===================================================== -->
+
+<h3>Admin Log</h3>
+
+<div class="log" id="admin-log">
+Loading...
+</div>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- SYSTEM CONTROLS (TOPADMIN ONLY)                       -->
+<!-- ===================================================== -->
+
+<div id="topadmin_block" style="display:none;">
+
+<h3>System Controls</h3>
+
+<div class="admin-card">
+
+<div class="buttons">
+
+<button class="btn small" onclick="toggleTest()">Test Mode</button>
+
+<button class="btn small secondary" onclick="setSoft()">Soft Maint</button>
+<button class="btn small secondary" onclick="setFull()">Full Maint</button>
+<button class="btn small" onclick="disableMaint()">Disable</button>
+
+</div>
+
+</div>
+
+<hr>
+
+</div>
+
+</div>
+</div>
+
+<script src="/static/js/system_workdesk.js"></script>
+<script src="/static/js/admin_panel.js"></script>
+
+</body>
+</html>

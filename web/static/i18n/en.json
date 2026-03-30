@@ -107,6 +107,8 @@
   "simple2_error_save": "Saving error",
   "simple2_btn_save_db": "Save to database",
   "simple2_btn_save_changes": "Save changes",
+  "simple_btn_download": "Download project",
+  "simple_btn_download_project": "⬇ Download project",
   "simple2_need_email_title": "To save the idea, enter your email",
   "simple2_need_email_body": "This takes 5 seconds. Password is not required.",
   "simple2_email_placeholder": "Your email",
@@ -114,6 +116,8 @@
   "simple2_email_invalid": "Please enter a valid email.",
   "simple2_next_version": "Will be available in the next version.",
   "simple2_dup_found": "It looks like the database already has an idea:",											
+  "simple_duplicate_check_unavailable": "Database check is temporarily unavailable. Analysis completed without database comparison.",
+  "simple_warning_title": "Notice",  
 
   "advanced_title": "🧠 Advanced mode — Assistant dialog",
   "advanced_subtitle": "Strategic idea preparation workspace",

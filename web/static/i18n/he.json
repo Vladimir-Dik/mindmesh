@@ -120,6 +120,8 @@
   "simple2_error_save": "שגיאת שמירה",
   "simple2_btn_save_db": "שמור במסד הנתונים",
   "simple2_btn_save_changes": "שמור שינויים",
+  "simple_btn_download": "⬇ הורד פרויקט",
+  "simple_btn_download_project": "⬇ הורד פרויקט",
   "simple2_need_email_title": "כדי לשמור את הרעיון, הזן אימייל",
   "simple2_need_email_body": "זה לוקח 5 שניות. אין צורך בסיסמה.",
   "simple2_email_placeholder": "האימייל שלך",
@@ -127,6 +129,8 @@
   "simple2_email_invalid": "נא להזין אימייל תקין.",
   "simple2_next_version": "יהיה זמין בגרסה הבאה.",
   "simple2_dup_found": "נראה שכבר יש רעיון במאגר:",													   
+  "simple_duplicate_check_unavailable": "בדיקת המאגר אינה זמינה זמנית. הניתוח הושלם ללא השוואה למאגר.",
+  "simple_warning_title": "שים לב",
 
   "advanced_title": "🧠 מצב מתקדם — דיאלוג עם העוזר",
   "advanced_subtitle": "עמדת עבודה אסטרטגית להכנת רעיון",

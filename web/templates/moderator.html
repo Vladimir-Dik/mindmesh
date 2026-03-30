@@ -1,0 +1,171 @@
+<!--
+============================================================
+Project: MindMesh
+File: moderator.html
+Version: 1.0
+Date: 22.03.2026
+Purpose:
+Moderator Panel
+============================================================
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>MindMesh Moderator</title>
+
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="/static/favicon.png">
+
+</head>
+
+<body>
+
+<div class="container">
+<div class="card">
+
+<h1>🧩 MindMesh Moderator Center</h1>
+<p style="opacity:0.7;">Moderation Panel</p>
+
+<hr>
+
+<h3>Panels</h3>
+
+<div class="admin-card">
+
+<div style="display:flex; gap:10px; align-items:center;">
+
+<select id="panelSelector" class="btn small">
+<option value="">Select panel...</option>
+<option value="/cabinet">User Cabinet</option>
+<option value="/simple">Simple Mode</option>
+<option value="/advanced">Advanced Mode</option>
+</select>
+
+<button class="btn small" onclick="openPanel()">
+Open →
+</button>
+
+</div>
+
+</div>
+
+<hr>
+
+<h3>Users Overview</h3>
+
+<div class="admin-card">
+
+<div class="ideas-line">
+
+<div class="ideas-left">
+<b>Total Users:</b>
+<span id="moderator_total_users">loading...</span>
+</div>
+
+<div class="ideas-right">
+<button class="btn small" onclick="openUsersPanel()">
+Manage Users →
+</button>
+</div>
+
+</div>
+
+</div>
+
+<hr>
+
+<h3>Ideas Overview</h3>
+
+<div class="admin-card">
+
+<div id="ideas_loading">
+Загрузка, ждите...
+</div>
+
+<div class="ideas-line">
+
+<div class="ideas-left">
+<b>Total Ideas:</b>
+<span id="moderator_total_ideas">loading...</span>
+</div>
+
+<div class="ideas-right">
+Today: <span id="moderator_ideas_today">-</span>
+&nbsp;&nbsp; Week: <span id="moderator_ideas_week">-</span>
+&nbsp;&nbsp; Month: <span id="moderator_ideas_month">-</span>
+</div>
+
+</div>
+
+<ul id="moderator_ideas_stats"></ul>
+
+</div>
+
+<hr>
+
+<h3>Очередь модерации</h3>
+
+<div class="admin-card">
+
+<p><b>Очередь отзывов:</b> <span id="moderator_review_queue">-</span></p>
+<p><b>ИИ в процессе разработки:</b> <span id="moderator_ai_pending">-</span></p>
+<p><b>Duplicates:</b> <span id="moderator_duplicates">-</span></p>
+
+</div>
+
+
+<hr>
+
+<h3>Communication</h3>
+
+<div class="admin-card">
+
+<div class="ideas-line">
+
+<div class="ideas-left">
+<b>Messages:</b>
+<span id="messages_count">loading...</span>
+</div>
+
+<div class="ideas-right">
+<span id="messages_indicator" style="color:#ff3b3b; display:none;">
+● New
+</span>
+</div>
+
+</div>
+
+<div class="buttons">
+
+<button class="btn small" onclick="openMessages()">
+Open Messages →
+</button>
+
+<button class="btn small secondary">
+Send Message
+</button>
+
+</div>
+
+</div>
+
+<hr>
+
+<h3>Moderator Log</h3>
+
+<div class="log" id="moderator-log">
+Loading...
+</div>
+
+</div>
+</div>
+
+<script src="/static/js/system_workdesk.js"></script>
+<script src="/static/js/moderator_panel.js"></script>
+
+</body>
+</html>

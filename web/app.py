@@ -17,8 +17,13 @@ import os
 import uuid
 import bcrypt
 import json
+import datetime
 
-# ============================================================
+# =====================временный блок=======================================
+SUPERADMIN_EMAIL = "searchwave@gmail.com"
+SUPERADMIN_PASSWORD = "123456"  # временно, потом вынесем в .env
+
+
 # INIT APP
 # ============================================================
 
@@ -97,6 +102,18 @@ def get_current_user(request: Request):
     session_data = SESSIONS.get(sid)
     if not session_data:
         return None
+
+    # --- local superadmin bypass ---
+    if session_data.get("user_id") == "superadmin_local":
+        return {
+            "id": "superadmin_local",
+            "fields": {
+                "Email": SUPERADMIN_EMAIL,
+                "Name": "SuperAdmin",
+                "Role": "superadmin"
+            },
+            "access_level": "user_full"
+        }
 
     user = core.get_user_by_id(session_data["user_id"])
     if not user:
@@ -244,7 +261,45 @@ def login_submit(
 ):
 
     email = email.strip().lower()
-    user = core.find_user_by_email(email)
+
+    # ================= SUPERADMIN BYPASS =================
+    if email == SUPERADMIN_EMAIL:
+        if not password or password != SUPERADMIN_PASSWORD:
+            return templates.TemplateResponse(
+                "login.html",
+                {
+                    "request": request,
+                    "error": "Неверный пароль",
+                    "system": system_state
+                }
+            )
+
+        sid = str(uuid.uuid4())
+
+        SESSIONS[sid] = {
+            "user_id": "superadmin_local",
+            "access_level": "user_full"
+        }
+
+        redirect_target = next if next else "/"
+        resp = RedirectResponse(redirect_target, status_code=302)
+        resp.set_cookie("mindmesh_session", sid, httponly=True)
+        return resp
+
+    # ================= NORMAL LOGIN =================
+    try:
+        user = core.find_user_by_email(email)
+
+    except core.AirtableTemporaryUnavailable:
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "error": "База пользователей временно недоступна. Попробуйте позже.",
+                "system": system_state
+            },
+            status_code=503
+        )
 
     if not user:
         user_id = core.create_user(
@@ -291,6 +346,8 @@ def login_submit(
     resp = RedirectResponse(redirect_target, status_code=302)
     resp.set_cookie("mindmesh_session", sid, httponly=True)
     return resp
+
+
 
 
 @app.get("/logout")
@@ -427,6 +484,128 @@ def list_users(request: Request):
 
     return {"users": simplified}
 
+# ============================================================
+# TOPADMIN PANEL
+# ============================================================
+
+@app.get("/topadmin", response_class=HTMLResponse)
+def topadmin_panel(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return RedirectResponse("/login?next=/topadmin", status_code=302)
+
+    role = user["fields"].get("Role", "user")
+
+    if role not in ["topadmin", "superadmin"]:
+        return RedirectResponse("/", status_code=302)
+
+    return FileResponse(
+        os.path.join("web", "search", "topadmin.html")
+    )
+
+# ============================================================
+# ADMIN PANEL
+# ============================================================
+
+@app.get("/admin", response_class=HTMLResponse)
+def admin_panel(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return RedirectResponse("/login?next=/admin", status_code=302)
+
+    role = user["fields"].get("Role", "user")
+
+    if role not in ["admin", "topadmin", "superadmin"]:
+        return RedirectResponse("/", status_code=302)
+
+    return templates.TemplateResponse(
+        "admin.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state
+        }
+    )
+
+# ============================================================
+# MODERATOR PANEL
+# ============================================================
+
+@app.get("/moderator", response_class=HTMLResponse)
+def moderator_panel(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return RedirectResponse("/login?next=/moderator", status_code=302)
+
+    role = user["fields"].get("Role", "user")
+
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return RedirectResponse("/", status_code=302)
+
+    return templates.TemplateResponse(
+        "moderator.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state
+        }
+    )
+
+# ============================================================
+# MESSAGES  
+# ============================================================
+
+@app.get("/messages", response_class=HTMLResponse)
+def messages_page(request: Request):
+
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login?next=/messages", status_code=302)
+
+    role = user["fields"].get("Role", "user")
+
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return RedirectResponse("/", status_code=302)
+
+    return templates.TemplateResponse(
+        "messages.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state
+        }
+    )
+
+# ============================================================
+# API для списка сообщений   заглушка временная
+# ============================================================
+@app.get("/api/messages/list")
+def messages_list(request: Request):
+
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=403)
+
+    return {
+        "items": [
+            {
+                "title": "System notification",
+                "preview": "Messages module created and ready for development.",
+                "time": "now"
+            },
+            {
+                "title": "Moderator note",
+                "preview": "User clarification flow will be added next.",
+                "time": "today"
+            }
+        ]
+    }
 
 # ============================================================
 # SIMPLE MODE ANALYZE  ✅ FIXED
@@ -443,21 +622,32 @@ async def simple_analyze(request: Request):
     # --- intake analysis ---
     analysis = analyze_intake(raw_text)
 
-    # analysis can return {"error": "..."}
     if isinstance(analysis, dict) and "error" in analysis:
         return JSONResponse({"error": analysis["error"]}, status_code=400)
 
-    # --- duplicate search (Airtable) ---
     pat = core.load_env()
-
-    # what we compare: title is the best query (fallback to full)
     query = analysis.get("title") or analysis.get("full") or str(raw_text)
 
-    best, score = core.find_best_duplicate(
+    dup_result = core.safe_find_best_duplicate(
         pat,
         query,
         analysis.get("keywords", [])
     )
+
+    # --- degraded mode: Airtable duplicate check unavailable ---
+    if dup_result.get("degraded"):
+        return {
+            "analysis": analysis,
+            "duplicate_id": None,
+            "duplicate_title": None,
+            "similarity": 0,
+            "duplicate_check_unavailable": True,
+            "read_degraded_mode": True,
+            "debug_note": dup_result.get("error")
+        }
+
+    best = dup_result.get("best")
+    score = dup_result.get("score", 0.0)
 
     similarity = int(score * 100) if score else 0
     duplicate_id = None
@@ -471,7 +661,9 @@ async def simple_analyze(request: Request):
         "analysis": analysis,
         "duplicate_id": duplicate_id,
         "duplicate_title": duplicate_title,
-        "similarity": similarity
+        "similarity": similarity,
+        "duplicate_check_unavailable": False,
+        "read_degraded_mode": False
     }
  
 # ============================================================
@@ -498,7 +690,7 @@ async def simple_confirm(request: Request):
 
     data = await request.json()
 
-    analysis = data.get("analysis")
+    analysis = data.get("analysis") or {}
     raw_text = data.get("raw_text", "")
     duplicate_id = data.get("duplicate_id")
     similarity = data.get("similarity", 0)
@@ -533,8 +725,83 @@ async def simple_confirm(request: Request):
         }
 
     except Exception as e:
+        err_text = str(e)
+        err_lower = err_text.lower()
+
+        # --- treat Airtable temporary problems as buffer-save scenario ---
+        is_temp = (
+            "429" in err_text or
+            "timeout" in err_lower or
+            "connection" in err_lower or
+            "temporary unavailable" in err_lower or
+            "503" in err_text or
+            "502" in err_text or
+            "504" in err_text or
+            "500" in err_text
+        )
+
+        if is_temp:
+            try:
+                now_utc = datetime.datetime.utcnow().isoformat()
+
+                buffer_result = core.save_simple_buffer_record({
+                    "created_at": now_utc,
+                    "raw_text": raw_text,
+                    "title": analysis.get("title", ""),
+                    "short": analysis.get("short", ""),
+                    "full": analysis.get("full", ""),
+                    "keywords": analysis.get("keywords", []),
+                    "author_name": name,
+                    "author_email": email,
+                    "duplicate_id": duplicate_id,
+                    "similarity": similarity,
+                    "intake_mode": "simple",
+                    "assistant_version": "Simple 2.0",
+                    "error_code": "AIRTABLE_TEMP_UNAVAILABLE",
+                    "error_text": err_text,
+                    "save_stage": "confirm"
+                })
+
+                # optional failure log
+                try:
+                    core.create_simple_failure_log({
+                        "local_id": buffer_result.get("local_id"),
+                        "created_at": now_utc,
+                        "mode_version": "Simple 2.0",
+                        "error_code": "AIRTABLE_TEMP_UNAVAILABLE",
+                        "user_message": "Saved to local buffer",
+                        "tech_message": err_text,
+                        "http_status": 429 if "429" in err_text else 500,
+                        "endpoint": "/api/simple/confirm",
+                        "email": email,
+                        "title": analysis.get("title", ""),
+                        "keywords": ", ".join(analysis.get("keywords", [])),
+                        "raw_input_length": len(raw_text or ""),
+                        "similarity": similarity,
+                        "duplicate_id": duplicate_id,
+                        "server_time_utc": now_utc,
+                        "server_component": "Airtable"
+                    })
+                except Exception:
+                    pass
+
+                return {
+                    "status": "buffer_saved",
+                    "local_id": buffer_result.get("local_id"),
+                    "message": "Database temporarily unavailable. Idea saved to reserve buffer."
+                }
+
+            except Exception as buffer_error:
+                return JSONResponse(
+                    {
+                        "status": "hard_fail",
+                        "message": f"Buffer save failed: {str(buffer_error)}"
+                    },
+                    status_code=500
+                )
+
         return JSONResponse(
-            {"status": "error", "message": str(e)},
+            {"status": "error", "message": err_text},
             status_code=500
         )
 
@@ -586,6 +853,113 @@ def maintenance_disable():
     system_state["maintenance"] = "none"
 
     return {"ok": True, "maintenance": "none"}
+    
+# ============================================================
+# USERS_COUNT
+# ============================================================  
+@app.get("/api/admin/users_count")
+def admin_users_count(request: Request):
+
+    user = get_current_user(request)
+    if not require_superadmin(user):
+        return JSONResponse({"error": "Unauthorized"}, status_code=403)
+
+    try:
+        users = core.get_all_users()
+        return {"total_users": len(users)}
+    except Exception as e:
+        return {"total_users": 0, "error": str(e)}
+        
+# ============================================================
+# admin API
+# ============================================================        
+        
+@app.get("/api/admin/ideas_stats")
+def ideas_stats():
+
+    from core import load_env, ideas_url, airtable_headers
+    import requests
+    import datetime
+
+    pat = load_env()
+    url = ideas_url(pat)
+    headers = airtable_headers(pat)
+
+    r = requests.get(url, headers=headers)
+    r.raise_for_status()
+
+    records = r.json().get("records", [])
+
+    stats = {}
+    total = len(records)
+
+    today = datetime.date.today()
+    week_start = today - datetime.timedelta(days=7)
+    month_start = today - datetime.timedelta(days=30)
+
+    ideas_today = 0
+    ideas_week = 0
+    ideas_month = 0
+
+    for rec in records:
+
+        fields = rec.get("fields", {})
+        status = fields.get("Status", "Unknown")
+
+        stats[status] = stats.get(status, 0) + 1
+
+        date = fields.get("Date Added")
+
+        if date:
+            d = datetime.datetime.fromisoformat(
+                date.replace("Z", "")
+            ).date()
+
+            if d == today:
+                ideas_today += 1
+
+            if d >= week_start:
+                ideas_week += 1
+
+            if d >= month_start:
+                ideas_month += 1
+
+    return {
+        "total": total,
+        "today": ideas_today,
+        "week": ideas_week,
+        "month": ideas_month,
+        "stats": stats
+    }
+
+# ============================================================
+# AUTH INFO
+# ============================================================
+
+@app.get("/api/auth/me")
+def auth_me(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return {
+            "is_authenticated": False,
+            "role": "guest",
+            "name": "Guest",
+            "email": None,
+            "auth_type": "anonymous"
+        }
+
+    return {
+        "is_authenticated": True,
+        "role": user["fields"].get("Role", "user"),
+        "name": user["fields"].get("Name", "") or "User",
+        "email": user["fields"].get("Email", ""),
+        "auth_type": "local password",
+        "access_level": user.get("access_level", "user_light")
+    }
+    
+
 
 # ============================================================
 # HIDDEN ENTRY — SEARCHWAVE

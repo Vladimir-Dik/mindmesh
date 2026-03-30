@@ -1,0 +1,84 @@
+<!--
+============================================================
+Project: MindMesh
+File: messages.html
+Version: 1.0
+Date: 23.03.2026
+Purpose:
+Messages Center
+============================================================
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>MindMesh Messages</title>
+
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="/static/favicon.png">
+
+</head>
+
+<body>
+
+<div class="container">
+<div class="card">
+
+<h1>✉️ MindMesh Messages</h1>
+<p style="opacity:0.7;">Communication Center</p>
+
+<hr>
+
+<h3>Messages Overview</h3>
+
+<div class="admin-card">
+
+<div class="ideas-line">
+
+<div class="ideas-left">
+<b>Unread Messages:</b>
+<span id="messages_total">loading...</span>
+</div>
+
+<div class="ideas-right">
+<button class="btn small" onclick="refreshMessages()">
+Refresh
+</button>
+</div>
+
+</div>
+
+</div>
+
+<hr>
+
+<h3>Dialogs</h3>
+
+<div class="log" id="messages-list">
+Loading...
+</div>
+
+<hr>
+
+<h3>Quick Actions</h3>
+
+<div class="admin-card">
+
+<div class="buttons">
+<button class="btn small">New Message</button>
+<button class="btn small secondary">Templates</button>
+<button class="btn small secondary">Notifications</button>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<script src="/static/js/messages_panel.js"></script>
+
+</body>
+</html>

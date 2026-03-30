@@ -2,10 +2,10 @@
 ============================================================
 Project: MindMesh
 File: searchwave.html
-Version: 1.2
-Date: 08.03.2026
+Version: 2.1
+Date: 12.03.2026
 Purpose:
-Hidden SuperAdmin control center
+SuperAdmin Control Center
 ============================================================
 -->
 
@@ -15,7 +15,7 @@ Hidden SuperAdmin control center
 <head>
 
 <meta charset="UTF-8">
-<title>MindMesh SuperAdmin</title>
+<title>MindMesh Control Center</title>
 
 <link rel="stylesheet" href="/static/css/style.css">
 <link rel="icon" href="/static/favicon.png">
@@ -29,85 +29,160 @@ Hidden SuperAdmin control center
 <div class="card">
 
 <h1>🧠 SearchWave Control Center</h1>
-<p style="opacity:0.7;">MindMesh — начало</p>
+<p style="opacity:0.7;">MindMesh — Control Center</p>
+
+<!-- выбор панели   -->
+<hr>
+
+<h3>Panels</h3>
+
+<div class="admin-card">
+
+<div style="display:flex; gap:10px; align-items:center;">
+
+<select id="panelSelector" class="btn small">
+
+<option value="">Select panel...</option>
+
+<option value="/topadmin">TopAdmin Panel</option>
+<option value="/admin">Admin Panel</option>
+<option value="/moderator">Moderator Panel</option>
+<option value="/cabinet">User Cabinet</option>
+<option value="/simple">Simple Mode</option>
+<option value="/advanced">Advanced Mode</option>
+
+</select>
+
+<button class="btn small" onclick="openPanel()">
+Open →
+</button>
+
+</div>
+
+</div>
+
+<hr>
+
+<h3>Current Session</h3>
+
+<p><b>User:</b> <span id="currentUserName">Loading...</span></p>
+<!-- <p><b>Email:</b> <span id="currentUserEmail">Loading...</span></p>
+<p><b>Role:</b> <span id="currentUserRole">Loading...</span></p>
+<p><b>Auth:</b> <span id="currentUserAuth">Loading...</span></p>
+<p><b>Access:</b> <span id="currentUserAccess">Loading...</span></p>  -->
 
 <hr>
 
 <!-- ===================================================== -->
-<!-- SYSTEM STATUS MODULE                                  -->
+<!-- SYSTEM STATUS / CONTROLS                              -->
 <!-- ===================================================== -->
 
-<h3>System Status</h3>
+<h3>System Status Control</h3>
 
-<p>
+<table class="status-table">
+
+<tr>
+<td>
 <b>Test Mode:</b>
 <span id="testModeStatus">Loading...</span>
-</p>
+</td>
 
-<p>
+<td class="buttons">
+<button class="btn small" onclick="toggleTest()">Toggle Test</button>
+</td>
+</tr>
+
+<tr>
+<td>
 <b>Maintenance:</b>
 <span id="maintenanceStatus">Loading...</span>
+</td>
+
+<td class="buttons">
+<button class="btn small secondary" onclick="setSoft()">Soft Maint</button>
+<button class="btn small secondary" onclick="setFull()">Full Maint</button>
+<button class="btn small" onclick="disableMaint()">Disable</button>
+</td>
+</tr>
+
+<tr>
+<td>
+<b>Database:</b>
+<span id="databaseStatus">Checking...</span>
+</td>
+
+<td class="buttons">
+<button class="btn small" onclick="scrollToLog()">System Log</button>
+</td>
+</tr>
+
+</table>
+
+<!-- ===================================================== -->
+<!-- LAST LOG EVENTS                                       -->
+<!-- ===================================================== -->
+
+<div class="log-preview" id="log-preview">
+Loading last events...
+</div>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- SYSTEM OVERVIEW                                       -->
+<!-- ===================================================== -->
+
+<h3>System Overview</h3>
+
+<div class="admin-card">
+
+<p>
+<b>Total Users:</b>
+<span class="stat-number" id="total_users">loading...</span>
 </p>
 
-<hr>
-
-<!-- ===================================================== -->
-<!-- SYSTEM CONTROLS MODULE                                -->
-<!-- ===================================================== -->
-
-<h3>System Controls</h3>
-
 <div class="buttons">
-
-<button class="btn small" onclick="toggleTest()">
-Toggle Test Mode
+<button class="btn small" onclick="openUsersPanel()">
+Manage Users →
 </button>
-
-<button class="btn small secondary" onclick="setSoft()">
-Soft Maintenance
-</button>
-
-<button class="btn small secondary" onclick="setFull()">
-Full Maintenance
-</button>
-
-<button class="btn small" onclick="disableMaint()">
-Disable Maintenance
-</button>
+</div>
 
 </div>
 
 <hr>
 
-<!-- ===================================================== -->
-<!-- USER CONTROL MODULE                                   -->
-<!-- ===================================================== -->
+<!-- ==============загрузка статистики базы===Ideas Overview ==================== -->
 
-<h3>Users</h3>
+<h3>Ideas Overview</h3>
 
-<div id="users">
-Loading users...
+<div class="admin-card">
+
+<div class="ideas-line">
+
+<div class="ideas-left">
+<b>Total Ideas:</b>
+<span id="ideas_total">loading...</span>
 </div>
 
-<hr>
-
-<!-- ===================================================== -->
-<!-- SYSTEM LOG                                            -->
-<!-- ===================================================== -->
-
-<h3>System Log</h3>
-
-<div class="log" id="system-log">
-Loading log...
+<div class="ideas-right">
+Today: <span id="ideas_today">-</span>
+&nbsp;&nbsp; Week: <span id="ideas_week">-</span>
+&nbsp;&nbsp; Month: <span id="ideas_month">-</span>
 </div>
 
-<hr>
+</div>
+
+<ul id="ideas_stats"></ul>
+
+</div>
 
 <!-- ===================================================== -->
-<!-- FUTURE MODULES                                        -->
+<!-- AI CONTROL (FUTURE MODULE)                            -->
 <!-- ===================================================== -->
+<hr>
 
 <h3>AI Control</h3>
+
 <p style="opacity:0.7;">
 Similarity threshold, AI review mode, reindex (v2).
 </p>
