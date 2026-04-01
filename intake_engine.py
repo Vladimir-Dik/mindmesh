@@ -425,16 +425,19 @@ def sanitize_ai_result(raw_text: str, ai_data: dict) -> dict:
 
 def analyze_with_ai(raw_text: str) -> dict | None:
     client = get_openai_client()
+
     if client is None:
+        print("AI: client is None → fallback")
         return None
 
     model = os.getenv("OPENAI_MODEL", DEFAULT_OPENAI_MODEL).strip() or DEFAULT_OPENAI_MODEL
     prompt = build_ai_prompt(raw_text)
 
+    print("OPENAI MODEL:", model)
+
     try:
         response = client.responses.create(
             model=model,
-            print("OPENAI MODEL:", model)
             input=prompt,
             temperature=0.2,
             max_output_tokens=400,
@@ -442,18 +445,23 @@ def analyze_with_ai(raw_text: str) -> dict | None:
 
         text = getattr(response, "output_text", "") or ""
 
-        print("AI RAW OUTPUT:")
+        print("=== AI RAW OUTPUT START ===")
         print(text)
+        print("=== AI RAW OUTPUT END ===")
 
-        parsed = parse_ai_json(text)
-
-        if not parsed:
-            print("AI PARSE FAILED")
+        if not text.strip():
+            print("AI ERROR: empty response")
             return None
 
-        print("AI PARSED OK:", parsed)
+        cleaned = strip_markdown_code_block(text)
 
-        return sanitize_ai_result(raw_text, parsed)
+        try:
+            parsed = json.loads(cleaned)
+            print("AI PARSED OK:", parsed)
+            return sanitize_ai_result(raw_text, parsed)
+        except Exception as e:
+            print("AI PARSE ERROR:", str(e))
+            return None
 
     except Exception as e:
         print("AI ERROR:", str(e))
