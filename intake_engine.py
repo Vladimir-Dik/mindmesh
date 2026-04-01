@@ -453,7 +453,7 @@ def analyze_with_ai(raw_text: str) -> dict | None:
             print("AI ERROR: empty response")
             return None
 
-        cleaned = strip_markdown_code_block(text)
+        cleaned = text.replace("```json", "").replace("```", "").strip()
 
         try:
             parsed = json.loads(cleaned)
