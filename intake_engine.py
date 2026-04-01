@@ -280,10 +280,21 @@ def get_openai_client():
     load_dotenv()
 
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    if not api_key or OpenAI is None:
+
+    print("OPENAI KEY EXISTS:", bool(api_key))
+    print("OPENAI MODULE EXISTS:", OpenAI is not None)
+
+    if not api_key:
+        print("OPENAI CLIENT: no OPENAI_API_KEY")
+        return None
+
+    if OpenAI is None:
+        print("OPENAI CLIENT: OpenAI import failed")
         return None
 
     base_url = os.getenv("OPENAI_BASE_URL", "").strip()
+    print("OPENAI BASE URL:", base_url if base_url else "(default)")
+
     if base_url:
         return OpenAI(api_key=api_key, base_url=base_url)
 
@@ -423,6 +434,7 @@ def analyze_with_ai(raw_text: str) -> dict | None:
     try:
         response = client.responses.create(
             model=model,
+            print("OPENAI MODEL:", model)
             input=prompt,
             temperature=0.2,
             max_output_tokens=400,
