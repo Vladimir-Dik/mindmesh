@@ -281,19 +281,19 @@ def get_openai_client():
 
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
 
-    print("OPENAI KEY EXISTS:", bool(api_key))
-    print("OPENAI MODULE EXISTS:", OpenAI is not None)
+    # ==   print("OPENAI KEY EXISTS:", bool(api_key))
+    # ==   print("OPENAI MODULE EXISTS:", OpenAI is not None)
 
     if not api_key:
-        print("OPENAI CLIENT: no OPENAI_API_KEY")
+        # ==   print("OPENAI CLIENT: no OPENAI_API_KEY")
         return None
 
     if OpenAI is None:
-        print("OPENAI CLIENT: OpenAI import failed")
+        # ==   print("OPENAI CLIENT: OpenAI import failed")
         return None
 
     base_url = os.getenv("OPENAI_BASE_URL", "").strip()
-    print("OPENAI BASE URL:", base_url if base_url else "(default)")
+    # ==   print("OPENAI BASE URL:", base_url if base_url else "(default)")
 
     if base_url:
         return OpenAI(api_key=api_key, base_url=base_url)
@@ -375,7 +375,7 @@ def parse_ai_json(text: str) -> dict | None:
         try:
             return json.loads(obj.group(1))
         except Exception as e:
-          print("AI ERROR:", str(e))
+          # ==   print("AI ERROR:", str(e))
           return None
 
     return None
@@ -427,13 +427,13 @@ def analyze_with_ai(raw_text: str) -> dict | None:
     client = get_openai_client()
 
     if client is None:
-        print("AI: client is None → fallback")
+        # ==   print("AI: client is None → fallback")
         return None
 
     model = os.getenv("OPENAI_MODEL", DEFAULT_OPENAI_MODEL).strip() or DEFAULT_OPENAI_MODEL
     prompt = build_ai_prompt(raw_text)
 
-    print("OPENAI MODEL:", model)
+    # ==   print("OPENAI MODEL:", model)
 
     try:
         response = client.responses.create(
@@ -445,26 +445,26 @@ def analyze_with_ai(raw_text: str) -> dict | None:
 
         text = getattr(response, "output_text", "") or ""
 
-        print("=== AI RAW OUTPUT START ===")
-        print(text)
-        print("=== AI RAW OUTPUT END ===")
+        # ==   print("=== AI RAW OUTPUT START ===")
+        # ==   print(text)
+        # ==   print("=== AI RAW OUTPUT END ===")
 
         if not text.strip():
-            print("AI ERROR: empty response")
+            # ==   print("AI ERROR: empty response")
             return None
 
         cleaned = text.replace("```json", "").replace("```", "").strip()
 
         try:
             parsed = json.loads(cleaned)
-            print("AI PARSED OK:", parsed)
+            # ==   print("AI PARSED OK:", parsed)
             return sanitize_ai_result(raw_text, parsed)
         except Exception as e:
-            print("AI PARSE ERROR:", str(e))
+            # ==   print("AI PARSE ERROR:", str(e))
             return None
 
     except Exception as e:
-        print("AI ERROR:", str(e))
+        # ==   print("AI ERROR:", str(e))
         return None
 
 

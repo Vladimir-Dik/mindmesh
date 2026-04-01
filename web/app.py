@@ -620,15 +620,15 @@ async def simple_analyze(request: Request):
         return JSONResponse({"error": "No text provided"}, status_code=400)
 
     # --- intake analysis ---
-    print("=== SIMPLE ANALYZE START ===")
-    print("RAW INPUT:", raw_text)
+    # ==   print("=== SIMPLE ANALYZE START ===")
+    # ==   print("RAW INPUT:", raw_text)
     
     analysis = analyze_intake(raw_text)
     
-    print("=== SIMPLE ANALYZE RESULT ===")
-    print(analysis)
+    # ==   print("=== SIMPLE ANALYZE RESULT ===")
+    # ==   print(analysis)
     
-    print("AI MODE:", "AI" if "analysis_notes" in analysis and "ai_primary" in analysis.get("analysis_notes", []) else "FALLBACK")
+    # ==   print("AI MODE:", "AI" if "analysis_notes" in analysis and "ai_primary" in analysis.get("analysis_notes", []) else "FALLBACK")
 
     if isinstance(analysis, dict) and "error" in analysis:
         return JSONResponse({"error": analysis["error"]}, status_code=400)
