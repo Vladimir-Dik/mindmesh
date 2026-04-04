@@ -415,7 +415,7 @@
   "topadmin_notifications": "התראות",
   "topadmin_system_log": "יומן מערכת",
   
-  "settings_title": "הגדרות",
+"settings_title": "הגדרות",
 "settings_subtitle": "פרמטרים של ממשק, אבטחה והתראות",
 "settings_interface_title": "ממשק",
 "settings_language_title": "שפת הממשק",
@@ -436,5 +436,10 @@
 "settings_btn_integrations": "אינטגרציות",
 "settings_future_hint": "חלקי ההגדרות הוכנו. הפעולות יתווספו בהמשך.",
 "settings_quick_links_title": "קישורים מהירים",
-"settings_back_to_cabinet": "חזרה לאזור האישי"
+"settings_back_to_cabinet": "חזרה לאזור האישי",
+
+"my_ideas_title": "הרעיונות שלי",
+"my_ideas_subtitle": "רשימת הרעיונות שלך",
+"my_ideas_status": "סטטוס",
+"my_ideas_empty": "אין לך רעיונות עדיין"
 }

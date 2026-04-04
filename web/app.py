@@ -645,6 +645,53 @@ async def feedback_update_status(request: Request):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 # ============================================================
+# MY IDEAS
+# ============================================================
+
+@app.get("/my-ideas", response_class=HTMLResponse)
+def my_ideas_page(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+
+    user_id = user.get("id")
+    items = []
+
+    try:
+        records = core.list_ideas_records()
+
+        for rec in records:
+            fields = rec.get("fields", {})
+            authors = fields.get("Author", []) or []
+
+            if user_id not in authors:
+                continue
+
+            items.append({
+                "id": rec.get("id"),
+                "idea_id": fields.get("IdeaID"),
+                "title": fields.get("Title"),
+                "status": fields.get("Status"),
+                "date": fields.get("Date Added")
+            })
+
+    except Exception:
+        items = []
+
+    return templates.TemplateResponse(
+        "my_ideas.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state,
+            "items": items
+        }
+    )
+
+
+# ============================================================
 # HELP
 # ============================================================
 

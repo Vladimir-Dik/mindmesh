@@ -231,6 +231,35 @@ def ensure_user(email: str, name: str = ""):
 
 def ideas_url(pat):
     return f"https://api.airtable.com/v0/{pat['base_id']}/{pat['ideas_table']}"
+    
+# =======================список идей===================  
+
+def list_ideas_records():
+    pat = load_env()
+    url = ideas_url(pat)
+    headers = airtable_headers(pat)
+
+    all_records = []
+    offset = None
+
+    while True:
+        params = {}
+
+        if offset:
+            params["offset"] = offset
+
+        r = requests.get(url, headers=headers, params=params, timeout=20)
+        r.raise_for_status()
+
+        data = r.json()
+        records = data.get("records", [])
+        all_records.extend(records)
+
+        offset = data.get("offset")
+        if not offset:
+            break
+
+    return all_records    
 
 # =======================нормализация текста=====================================
 

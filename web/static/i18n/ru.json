@@ -448,5 +448,9 @@
 "settings_btn_integrations": "Интеграции",
 "settings_future_hint": "Разделы настроек подготовлены. Действия будут добавлены позже.",
 "settings_quick_links_title": "Быстрые переходы",
-"settings_back_to_cabinet": "Назад в кабинет"
+"settings_back_to_cabinet": "Назад в кабинет",
+"my_ideas_title": "Мои идеи",
+"my_ideas_subtitle": "Список ваших идей",
+"my_ideas_status": "Статус",
+"my_ideas_empty": "У вас пока нет идей"
 }

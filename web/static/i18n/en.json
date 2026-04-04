@@ -448,5 +448,9 @@
 "settings_btn_integrations": "Integrations",
 "settings_future_hint": "Settings sections are prepared. Actions will be added later.",
 "settings_quick_links_title": "Quick links",
-"settings_back_to_cabinet": "Back to cabinet"
+"settings_back_to_cabinet": "Back to cabinet",
+"my_ideas_title": "My ideas",
+"my_ideas_subtitle": "List of your ideas",
+"my_ideas_status": "Status",
+"my_ideas_empty": "You have no ideas yet"
 }
