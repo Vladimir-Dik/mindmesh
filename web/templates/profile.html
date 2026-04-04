@@ -1,0 +1,139 @@
+{#
+  ============================================================
+  Project: MindMesh
+  File: profile.html
+  Version: 1.1
+  Date: 04.04.2026
+  Purpose:
+  - User profile page
+  - Separate from cabinet dashboard
+  - Informative structure without heavy final design
+  ============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+
+  <!-- HEADER -->
+  <h1 data-i18n="profile_title"></h1>
+  <p style="opacity:0.8; margin-top:6px;" data-i18n="profile_subtitle"></p>
+
+  <hr>
+
+  <!-- USER CARD -->
+  <h3 data-i18n="profile_main_title"></h3>
+
+  <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+
+    <p>
+      <b data-i18n="profile_name"></b>
+      {{ user.fields.Name or "—" }}
+    </p>
+
+    <p>
+      <b data-i18n="profile_email"></b>
+      {{ user.fields.Email }}
+    </p>
+
+    <p>
+      <b data-i18n="profile_status"></b>
+      {% if user.access_level == "user_full" %}
+        <span data-i18n="cabinet_access_full"></span>
+      {% else %}
+        <span data-i18n="cabinet_access_limited"></span>
+      {% endif %}
+    </p>
+
+  </div>
+
+  <div class="buttons" style="margin-top:14px;">
+    <a class="btn small secondary" href="/set-password" data-i18n="cabinet_change_password"></a>
+    <a class="btn small secondary" href="/my-messages" data-i18n="cabinet_open_messages"></a>
+  </div>
+
+  <hr>
+
+  <!-- PROFILE DATA -->
+  <h3 data-i18n="profile_data_title">Данные профиля</h3>
+
+  <div style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
+
+    <div>
+      <b data-i18n="profile_name"></b>
+      <div style="margin-top:6px;">
+        <input type="text" value="{{ user.fields.Name or '' }}" style="width:100%; max-width:420px;" disabled>
+      </div>
+    </div>
+
+    <div>
+      <b data-i18n="profile_email"></b>
+      <div style="margin-top:6px;">
+        <input type="text" value="{{ user.fields.Email or '' }}" style="width:100%; max-width:420px;" disabled>
+      </div>
+    </div>
+
+    <div>
+      <b data-i18n="profile_contacts_title">Контактные данные</b>
+      <p style="opacity:0.7; margin-top:6px;" data-i18n="profile_contacts_hint">
+        Раздел подготовлен. Редактирование будет добавлено позже.
+      </p>
+    </div>
+
+  </div>
+
+  <hr>
+
+  <!-- ACCOUNT STATUS -->
+  <h3 data-i18n="profile_account_title">Статус аккаунта</h3>
+
+  <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+
+    <p>
+      <b data-i18n="profile_status"></b>
+      {% if user.access_level == "user_full" %}
+        <span data-i18n="cabinet_access_full"></span>
+      {% else %}
+        <span data-i18n="cabinet_access_limited"></span>
+      {% endif %}
+    </p>
+
+    <p style="opacity:0.75;" data-i18n="profile_status_hint">
+      Здесь позже появятся данные о верификации, повышении статуса и доступных возможностях.
+    </p>
+
+  </div>
+
+  <hr>
+
+  <!-- FUTURE FEATURES -->
+  <h3 data-i18n="profile_future_title">Возможности аккаунта</h3>
+
+  <div class="buttons">
+    <a class="btn small secondary" href="#" data-i18n="profile_btn_main_data">Данные профиля</a>
+    <a class="btn small secondary" href="#" data-i18n="profile_btn_contacts">Контактные данные</a>
+    <a class="btn small secondary" href="#" data-i18n="profile_btn_billing">Биллинг</a>
+    <a class="btn small secondary" href="#" data-i18n="profile_btn_bonuses">Бонусы</a>
+    <a class="btn small secondary" href="#" data-i18n="profile_btn_upgrade">Запрос на повышение статуса</a>
+  </div>
+
+  <p style="margin-top:14px; opacity:0.75;" data-i18n="profile_future_hint"></p>
+
+  <hr>
+
+  <!-- QUICK LINKS -->
+  <h3 data-i18n="profile_quick_links_title">Быстрые переходы</h3>
+
+  <div class="buttons">
+    <a class="btn small secondary" href="/cabinet" data-i18n="profile_back_to_cabinet"></a>
+    <a class="btn small secondary" href="#" data-i18n="cabinet_my_ideas"></a>
+    <a class="btn small secondary" href="#" data-i18n="cabinet_drafts"></a>
+    <a class="btn small secondary" href="#" data-i18n="cabinet_archive"></a>
+    <a class="btn small secondary" href="/feedback" data-i18n="cabinet_feedback"></a>
+    <a class="btn small secondary" href="/help" data-i18n="cabinet_help"></a>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -2,8 +2,8 @@
   "_meta": {
     "project": "MindMesh",
     "file": "en.json",
-    "version": "2.2",
-    "date": "24.02.2026",
+    "version": "2.3",
+    "date": "04.04.2026",
     "description": "English language pack — UI + Assistant translations"
   },
 
@@ -62,6 +62,47 @@
   "cabinet_feedback": "Feedback",
   "cabinet_help": "Help",
 
+  "profile_title": "Profile",
+  "profile_subtitle": "Profile data management",
+  "profile_main": "Main",
+  "profile_main_title": "Main",
+  "profile_email": "Email:",
+  "profile_name": "Name:",
+  "profile_save": "Save",
+  "profile_status": "Status:",
+  "profile_sections_title": "Profile sections",
+  "profile_btn_main_data": "Main data",
+  "profile_btn_contacts": "Contact data",
+  "profile_btn_billing": "Billing",
+  "profile_btn_bonuses": "Bonuses",
+  "profile_btn_upgrade": "Request status upgrade",
+  "profile_future": "Additional",
+  "profile_future_hint": "Profile sections are prepared. Actions will be added later.",
+  "profile_back_to_cabinet": "Back to cabinet",
+  "profile_data_title": "Profile data",
+  "profile_contacts_title": "Contact data",
+  "profile_contacts_hint": "This section is prepared. Editing will be added later.",
+  "profile_account_title": "Account status",
+  "profile_status_hint": "Verification, status upgrade, and available capabilities will appear here later.",
+  "profile_future_title": "Account capabilities",
+  "profile_quick_links_title": "Quick links",
+  "profile_btn_main_data": "Profile data",
+
+  "cabinet_messages_title": "Messages",
+  "cabinet_messages_label": "Messages:",
+  "cabinet_messages_answered": "Answered:",
+  "cabinet_open_messages": "Open messages →",
+
+  "user_messages_title": "User Messages",
+  "user_messages_subtitle": "Your messages and admin replies",
+  "user_messages_subject": "Subject:",
+  "user_messages_date": "Date:",
+  "user_messages_status": "Status:",
+  "user_messages_message": "Message:",
+  "user_messages_reply": "Admin reply:",
+  "user_messages_empty": "No messages yet.",
+  "user_messages_back": "Back to cabinet",
+
   "simple_title": "🌱 Simple mode",
   "simple_success_title": "✅ Idea successfully saved",
   "simple_result_id_label": "ID:",
@@ -70,7 +111,7 @@
   "simple_result_duplicate_warn": "⚠ Similar project found",
   "simple_add_more_btn": "➕ Add another idea",
   "simple_back_home_btn": "🏠 Back to home",
-  
+
   "simple_fallback_title": "Save Failed",
   "simple_fallback_message": "The idea was not saved.\nReason: {reason}",
   "simple_fallback_retry": "Retry",
@@ -85,7 +126,7 @@
   "simple_fallback_file_email": "Email",
   "simple_fallback_file_similarity": "Similarity",
   "simple_fallback_file_duplicate": "Duplicate ID",
-  "simple_fallback_file_raw": "Original Input", 
+  "simple_fallback_file_raw": "Original Input",
 
   "simple_label_title": "Idea title",
   "simple_label_short": "Short description",
@@ -115,9 +156,9 @@
   "simple2_email_btn": "Save",
   "simple2_email_invalid": "Please enter a valid email.",
   "simple2_next_version": "Will be available in the next version.",
-  "simple2_dup_found": "It looks like the database already has an idea:",											
+  "simple2_dup_found": "It looks like the database already has an idea:",
   "simple_duplicate_check_unavailable": "Database check is temporarily unavailable. Analysis completed without database comparison.",
-  "simple_warning_title": "Notice",  
+  "simple_warning_title": "Notice",
 
   "advanced_title": "🧠 Advanced mode — Assistant dialog",
   "advanced_subtitle": "Strategic idea preparation workspace",
@@ -184,29 +225,24 @@
   "assistant_cancelled": "Okay, we won't save it.",
 
   "validation_bad_text": "🤖 This looks like random text. Please try to write something meaningful 🙂",
-  
+
   "sa_title": "🧠 SuperAdmin Control Center",
   "sa_subtitle": "MindMesh — structure instead of idea chaos",
-
   "sa_system_status": "📊 System Status",
   "sa_system_state": "Status",
   "sa_test_mode": "Test Mode",
   "sa_maintenance": "Maintenance",
   "sa_state_working": "Working",
-
   "sa_system_controls": "System Controls",
   "sa_toggle_test": "Toggle Test Mode",
   "sa_soft": "Soft Maintenance",
   "sa_full": "Full Maintenance",
-  "sa_disable": "Disable Maintenance",
+  "sa_disable": "Disable",
   "sa_state_test": "Testing",
   "sa_state_maintenance": "Maintenance",
-  "sa_test_mode": "Test Mode",
-  "sa_maintenance": "Maintenance",
   "sa_enable": "Enable",
-  "sa_disable": "Disable",
   "sa_apply": "Apply",
-  
+
   "sa_user_control": "User Control",
   "sa_user_control_desc": "Role assignment, account status, verification (v2).",
 
@@ -215,18 +251,18 @@
 
   "sa_ai_control": "AI Control",
   "sa_ai_control_desc": "Similarity threshold, AI review mode, reindexing (v2).",
-    
+
   "set_password_title": "🔐 Change Password",
   "set_password_label": "New Password",
   "set_password_save": "Save",
   "set_password_cancel": "Cancel",
-  
+
   "cabinet_password_notice": "🔒 Set a password to unlock full access.",
   "cabinet_set_password_link": "Set password",
   "cabinet_access_full": "Full access",
   "cabinet_access_limited": "Limited access",
   "cabinet_change_password": "🔐 Change password",
- 
+
   "sa_users": "👥 Users",
   "sa_users_total": "Total",
   "sa_users_new": "New",
@@ -237,10 +273,8 @@
   "sa_database_connected": "Connected",
 
   "sa_system_log": "📜 System Log",
-
-  "sa_ai_control": "🧠 AI Control",
   "sa_ai_coming": "AI configuration will be available in next version.",
-  
+
   "feedback_title": "Feedback",
   "feedback_subtitle": "Report an issue, problem, or suggestion.",
   "feedback_label_subject": "Subject",
@@ -275,7 +309,7 @@
   "help_btn_simple": "Open Simple mode",
   "help_btn_advanced": "Open Advanced mode",
   "help_btn_feedback": "Go to Feedback",
-  
+
   "messages_title": "✉️ MindMesh Messages",
   "messages_subtitle": "Communication Center",
   "messages_overview": "Messages Overview",
@@ -306,7 +340,7 @@
   "admin_panel_moderator": "Moderator",
   "admin_panel_cabinet": "User Cabinet",
   "admin_panel_simple": "Simple Mode",
-  "admin_panel_advanced":  "advanced Mode",
+  "admin_panel_advanced": "Advanced Mode",
   "admin_open": "Open →",
   "admin_users": "Users",
   "admin_total_users_label": "Total Users:",
@@ -318,12 +352,12 @@
   "admin_month": "Month",
   "admin_moderation": "Moderation",
   "admin_review_queue": "Review Queue:",
-  "admin_ai_pending": "aI Pending:",
+  "admin_ai_pending": "AI Pending:",
   "admin_duplicates": "Duplicates:",
   "admin_communication": "Communication",
   "admin_send_message": "Send Message",
   "admin_notifications": "Notifications",
-  "admin_log": "admin Log",
+  "admin_log": "Admin Log",
   "admin_system_controls": "System Controls",
   "admin_test_mode": "Test Mode",
   "admin_soft_maint": "Soft Maint",
@@ -331,7 +365,7 @@
   "admin_disable": "Disable",
 
   "moderator_title": "🧩 MindMesh Moderator Center",
-  "moderator_subtitle":   "moderation Panel",
+  "moderator_subtitle": "Moderation Panel",
   "moderator_panels": "Panels",
   "moderator_select_panel": "Select panel...",
   "moderator_panel_cabinet": "User Cabinet",
@@ -340,7 +374,7 @@
   "moderator_open": "Open →",
   "moderator_users_overview": "Users Overview",
   "moderator_total_users_label": "Total Users:",
-  "moderator_manage_users":  "Manage Users →",
+  "moderator_manage_users": "Manage Users →",
   "moderator_ideas_overview": "Ideas Overview",
   "moderator_loading": "Loading, please wait...",
   "moderator_total_ideas_label": "Total Ideas:",
@@ -356,7 +390,7 @@
   "moderator_open_messages": "Open Messages →",
   "moderator_send_message": "Send Message",
   "moderator_log": "Moderator Log",
-  
+
   "topadmin_title": "🛠 MindMesh TopAdmin Center",
   "topadmin_subtitle": "Extended Admin Panel",
   "topadmin_panels": "Panels",
@@ -392,5 +426,27 @@
   "topadmin_communication": "Communication",
   "topadmin_send_message": "Send Message",
   "topadmin_notifications": "Notifications",
-  "topadmin_system_log": "System Log"
+  "topadmin_system_log": "System Log",
+  "settings_title": "Settings",
+"settings_subtitle": "Interface, security, and notification settings",
+"settings_interface_title": "Interface",
+"settings_language_title": "Interface language",
+"settings_language_hint": "The language is currently changed through the buttons in the top panel.",
+"settings_theme_title": "Theme",
+"settings_theme_hint": "This section is prepared. Theme settings will be added later.",
+"settings_security_title": "Security",
+"settings_password_title": "Password",
+"settings_password_hint": "You can set or change your password for full access.",
+"settings_notifications_title": "Notifications",
+"settings_email_notifications_title": "Email notifications",
+"settings_email_notifications_hint": "This section is prepared. Notification settings will be added later.",
+"settings_system_messages_title": "System messages",
+"settings_system_messages_hint": "System and admin notification settings will appear here later.",
+"settings_future_title": "Additional",
+"settings_btn_privacy": "Privacy",
+"settings_btn_access": "Access",
+"settings_btn_integrations": "Integrations",
+"settings_future_hint": "Settings sections are prepared. Actions will be added later.",
+"settings_quick_links_title": "Quick links",
+"settings_back_to_cabinet": "Back to cabinet"
 }

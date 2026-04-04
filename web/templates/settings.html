@@ -1,0 +1,119 @@
+{#
+  ============================================================
+  Project: MindMesh
+  File: settings.html
+  Version: 1.0
+  Date: 04.04.2026
+  Purpose:
+  - User settings page
+  - Separate module from cabinet
+  - Prepared for future account configuration
+  ============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+
+  <!-- HEADER -->
+  <h1 data-i18n="settings_title"></h1>
+  <p style="opacity:0.8; margin-top:6px;" data-i18n="settings_subtitle"></p>
+
+  <hr>
+
+  <!-- INTERFACE -->
+  <h3 data-i18n="settings_interface_title">Интерфейс</h3>
+
+  <div style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
+
+    <div>
+      <b data-i18n="settings_language_title">Язык интерфейса</b>
+      <p style="opacity:0.75; margin-top:6px;" data-i18n="settings_language_hint">
+        Сейчас язык меняется через кнопки в верхней панели.
+      </p>
+    </div>
+
+    <div>
+      <b data-i18n="settings_theme_title">Тема оформления</b>
+      <p style="opacity:0.75; margin-top:6px;" data-i18n="settings_theme_hint">
+        Раздел подготовлен. Настройки темы будут добавлены позже.
+      </p>
+    </div>
+
+  </div>
+
+  <hr>
+
+  <!-- SECURITY -->
+  <h3 data-i18n="settings_security_title">Безопасность</h3>
+
+  <div style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
+
+    <div>
+      <b data-i18n="settings_password_title">Пароль</b>
+      <p style="opacity:0.75; margin-top:6px;" data-i18n="settings_password_hint">
+        Вы можете установить или изменить пароль для полного доступа.
+      </p>
+    </div>
+
+    <div class="buttons" style="margin-top:4px;">
+      <a class="btn small secondary" href="/set-password" data-i18n="cabinet_change_password"></a>
+    </div>
+
+  </div>
+
+  <hr>
+
+  <!-- NOTIFICATIONS -->
+  <h3 data-i18n="settings_notifications_title">Уведомления</h3>
+
+  <div style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
+
+    <div>
+      <b data-i18n="settings_email_notifications_title">Email-уведомления</b>
+      <p style="opacity:0.75; margin-top:6px;" data-i18n="settings_email_notifications_hint">
+        Раздел подготовлен. Настройки уведомлений будут добавлены позже.
+      </p>
+    </div>
+
+    <div>
+      <b data-i18n="settings_system_messages_title">Системные сообщения</b>
+      <p style="opacity:0.75; margin-top:6px;" data-i18n="settings_system_messages_hint">
+        Здесь позже появится настройка уведомлений от системы и администрации.
+      </p>
+    </div>
+
+  </div>
+
+  <hr>
+
+  <!-- FUTURE -->
+  <h3 data-i18n="settings_future_title">Дополнительно</h3>
+
+  <div class="buttons">
+    <a class="btn small secondary" href="#" data-i18n="settings_btn_privacy">Приватность</a>
+    <a class="btn small secondary" href="#" data-i18n="settings_btn_access">Доступ</a>
+    <a class="btn small secondary" href="#" data-i18n="settings_btn_integrations">Интеграции</a>
+  </div>
+
+  <p style="margin-top:14px; opacity:0.75;" data-i18n="settings_future_hint">
+    Разделы настроек подготовлены. Действия будут добавлены позже.
+  </p>
+
+  <hr>
+
+  <!-- QUICK LINKS -->
+  <h3 data-i18n="settings_quick_links_title">Быстрые переходы</h3>
+
+  <div class="buttons">
+    <a class="btn small secondary" href="/cabinet" data-i18n="settings_back_to_cabinet"></a>
+    <a class="btn small secondary" href="/profile" data-i18n="cabinet_btn_profile"></a>
+    <a class="btn small secondary" href="/my-messages" data-i18n="cabinet_open_messages"></a>
+    <a class="btn small secondary" href="/feedback" data-i18n="cabinet_feedback"></a>
+    <a class="btn small secondary" href="/help" data-i18n="cabinet_help"></a>
+  </div>
+
+</div>
+
+{% endblock %}

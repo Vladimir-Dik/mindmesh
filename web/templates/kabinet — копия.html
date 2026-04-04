@@ -2,11 +2,10 @@
   ============================================================
   Project: MindMesh
   File: kabinet.html
-  Version: 1.5
-  Date: 04.04.2026
+  Version: 1.4
+  Date: 19.02.2026
   Purpose:
   - User cabinet
-  - Dashboard / entry point to profile, ideas, messages
   - Access level awareness (light / full)
   - All UI strings moved to i18n (RU/EN/HE)
   ============================================================
@@ -31,7 +30,7 @@
 
   <hr>
 
-  <!-- PROFILE SUMMARY -->
+  <!-- PROFILE -->
   <h3 data-i18n="cabinet_profile_title"></h3>
 
   <p>
@@ -54,8 +53,9 @@
   </p>
 
   <div class="buttons" style="margin-top:10px;">
-    <a class="btn small secondary" href="/profile" data-i18n="cabinet_btn_profile"></a>
-    <a class="btn small secondary" href="/settings" data-i18n="cabinet_btn_settings"></a>
+    <a class="btn small secondary" href="#" data-i18n="cabinet_btn_profile"></a>
+    <a class="btn small secondary" href="#" data-i18n="cabinet_btn_settings"></a>
+
     <a class="btn small secondary" href="/set-password" data-i18n="cabinet_change_password"></a>
   </div>
 
@@ -71,27 +71,6 @@
   </div>
 
   <p style="margin-top:10px; opacity:0.75;" data-i18n="cabinet_ideas_hint"></p>
-
-  <hr>
-
-  <!-- COMMUNICATION -->
-  <h3 data-i18n="cabinet_messages_title"></h3>
-
-  <div class="ideas-line">
-    <div class="ideas-left">
-      <span data-i18n="cabinet_messages_label"></span>
-      <span>{{ user_messages_total }}</span>
-    </div>
-
-    <div class="ideas-right">
-      <span data-i18n="cabinet_messages_answered"></span>
-      <span>{{ user_messages_answered }}</span>
-    </div>
-  </div>
-
-  <div class="buttons" style="margin-top:10px;">
-    <a class="btn small secondary" href="/my-messages" data-i18n="cabinet_open_messages"></a>
-  </div>
 
   <hr>
 

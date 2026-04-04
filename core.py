@@ -169,6 +169,22 @@ def get_all_users():
             break
 
     return all_records
+    
+def update_user_name(user_id: str, name: str):
+    pat = load_env()
+    url = f"{users_url(pat)}/{user_id}"
+    headers = airtable_headers(pat)
+
+    payload = {
+        "fields": {
+            "Name": name
+        }
+    }
+
+    r = requests.patch(url, headers=headers, json=payload)
+    r.raise_for_status()
+
+    return True    
 
 
 # ============================================================

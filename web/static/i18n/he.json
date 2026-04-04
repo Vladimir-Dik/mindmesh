@@ -2,8 +2,8 @@
   "_meta": {
     "project": "MindMesh",
     "file": "he.json",
-    "version": "2.2",
-    "date": "24.02.2026",
+    "version": "2.3",
+    "date": "04.04.2026",
     "description": "Hebrew language pack — UI + Assistant translations"
   },
 
@@ -26,8 +26,7 @@
   "simple_mode": "🌱 מצב פשוט",
   "advanced_mode": "🧠 מצב מתקדם",
   "cabinet": "👤 אזור אישי",
-  
-  
+
   "set_password_title": "🔐 שינוי סיסמה",
   "set_password_label": "סיסמה חדשה",
   "set_password_save": "שמור",
@@ -37,8 +36,6 @@
   "cabinet_access_full": "גישה מלאה",
   "cabinet_access_limited": "גישה מוגבלת",
   "cabinet_change_password": "🔐 שנה סיסמה",
-								   
-
 
   "home_intro": "MindMesh הוא כלי לעבודה עם רעיונות.",
   "home_description": "זהו מאגר חי שבו רעיונות מושווים, מנותחים ומתפתחים בעזרת בינה מלאכותית.",
@@ -75,6 +72,47 @@
   "cabinet_feedback": "משוב",
   "cabinet_help": "עזרה",
 
+  "profile_title": "פרופיל",
+  "profile_subtitle": "ניהול נתוני פרופיל",
+  "profile_main": "ראשי",
+  "profile_main_title": "ראשי",
+  "profile_email": "אימייל:",
+  "profile_name": "שם:",
+  "profile_save": "שמור",
+  "profile_status": "סטטוס:",
+  "profile_sections_title": "אזורי פרופיל",
+  "profile_btn_main_data": "נתונים ראשיים",
+  "profile_btn_contacts": "פרטי קשר",
+  "profile_btn_billing": "חיוב",
+  "profile_btn_bonuses": "בונוסים",
+  "profile_btn_upgrade": "בקשה לשדרוג סטטוס",
+  "profile_future": "נוסף",
+  "profile_future_hint": "אזורי הפרופיל הוכנו. הפעולות יתווספו בהמשך.",
+  "profile_back_to_cabinet": "חזרה לאזור האישי",
+  "profile_data_title": "נתוני פרופיל",
+  "profile_contacts_title": "פרטי קשר",
+  "profile_contacts_hint": "החלק הוכן. אפשרות העריכה תתווסף בהמשך.",
+  "profile_account_title": "סטטוס חשבון",
+  "profile_status_hint": "כאן יופיעו בהמשך נתוני אימות, שדרוג סטטוס ויכולות זמינות.",
+  "profile_future_title": "יכולות החשבון",
+  "profile_quick_links_title": "קישורים מהירים",
+  "profile_btn_main_data": "נתוני פרופיל",
+
+  "cabinet_messages_title": "הודעות",
+  "cabinet_messages_label": "הודעות:",
+  "cabinet_messages_answered": "נענו:",
+  "cabinet_open_messages": "פתח הודעות →",
+
+  "user_messages_title": "הודעות המשתמש",
+  "user_messages_subtitle": "ההודעות שלך ותשובות ההנהלה",
+  "user_messages_subject": "נושא:",
+  "user_messages_date": "תאריך:",
+  "user_messages_status": "סטטוס:",
+  "user_messages_message": "הודעה:",
+  "user_messages_reply": "תשובת ההנהלה:",
+  "user_messages_empty": "אין הודעות כרגע.",
+  "user_messages_back": "חזרה לאזור האישי",
+
   "simple_title": "🌱 מצב פשוט",
   "simple_success_title": "✅ הרעיון נשמר בהצלחה",
   "simple_result_id_label": "מזהה:",
@@ -83,7 +121,7 @@
   "simple_result_duplicate_warn": "⚠ נמצא פרויקט דומה",
   "simple_add_more_btn": "➕ הוסף רעיון נוסף",
   "simple_back_home_btn": "🏠 חזרה לדף הבית",
-  
+
   "simple_fallback_title": "השמירה נכשלה",
   "simple_fallback_message": "הרעיון לא נשמר.\nסיבה: {reason}",
   "simple_fallback_retry": "נסה שוב",
@@ -98,7 +136,7 @@
   "simple_fallback_file_email": "אימייל",
   "simple_fallback_file_similarity": "Similarity",
   "simple_fallback_file_duplicate": "Duplicate ID",
-  "simple_fallback_file_raw": "טקסט מקורי",  
+  "simple_fallback_file_raw": "טקסט מקורי",
 
   "simple_label_title": "כותרת הרעיון",
   "simple_label_short": "תיאור קצר",
@@ -128,7 +166,7 @@
   "simple2_email_btn": "שמור",
   "simple2_email_invalid": "נא להזין אימייל תקין.",
   "simple2_next_version": "יהיה זמין בגרסה הבאה.",
-  "simple2_dup_found": "נראה שכבר יש רעיון במאגר:",													   
+  "simple2_dup_found": "נראה שכבר יש רעיון במאגר:",
   "simple_duplicate_check_unavailable": "בדיקת המאגר אינה זמינה זמנית. הניתוח הושלם ללא השוואה למאגר.",
   "simple_warning_title": "שים לב",
 
@@ -197,10 +235,9 @@
   "assistant_cancelled": "בסדר, לא נשמור.",
 
   "validation_bad_text": "🤖 זה נראה כמו טקסט אקראי. נסה לכתוב משהו בעל משמעות 🙂",
-  
+
   "sa_title": "🧠 Центр управления MindMesh",
   "sa_subtitle": "Control Center",
-
   "sa_system_status": "📊 Состояние системы",
   "sa_system_state": "Состояние",
   "sa_state_working": "Работает",
@@ -225,11 +262,11 @@
 
   "sa_ai_control": "🧠 Управление ИИ",
   "sa_ai_coming": "Настройки ИИ будут доступны в следующей версии.",
-  
+
   "feedback_title": "משוב",
-  "feedback_subtitle": "דווח על שגיאה, בעיה או הצעה.",  
-  "feedback_label_subject": "נושא",  
-  "feedback_label_message": "הודעה",   
+  "feedback_subtitle": "דווח על שגיאה, בעיה או הצעה.",
+  "feedback_label_subject": "נושא",
+  "feedback_label_message": "הודעה",
   "feedback_label_email": "אימייל",
   "feedback_label_name": "שם",
   "feedback_placeholder_subject": "ציין בקצרה את הנושא",
@@ -259,7 +296,7 @@
   "help_btn_simple": "פתח מצב פשוט",
   "help_btn_advanced": "פתח מצב מתקדם",
   "help_btn_feedback": "עבור למשוב",
-  
+
   "messages_title": "✉️ הודעות MindMesh",
   "messages_subtitle": "מרכז תקשורת",
   "messages_overview": "סקירת הודעות",
@@ -340,7 +377,7 @@
   "moderator_open_messages": "פתח הודעות →",
   "moderator_send_message": "שלח הודעה",
   "moderator_log": "יומן מודרטור",
-  
+
   "topadmin_title": "🛠 מרכז TopAdmin של MindMesh",
   "topadmin_subtitle": "פאנל מנהל מורחב",
   "topadmin_panels": "פאנלים",
@@ -376,5 +413,28 @@
   "topadmin_communication": "תקשורת",
   "topadmin_send_message": "שלח הודעה",
   "topadmin_notifications": "התראות",
-  "topadmin_system_log": "יומן מערכת"
+  "topadmin_system_log": "יומן מערכת",
+  
+  "settings_title": "הגדרות",
+"settings_subtitle": "פרמטרים של ממשק, אבטחה והתראות",
+"settings_interface_title": "ממשק",
+"settings_language_title": "שפת הממשק",
+"settings_language_hint": "כעת השפה משתנה דרך הכפתורים בלוח העליון.",
+"settings_theme_title": "ערכת נושא",
+"settings_theme_hint": "החלק הוכן. הגדרות ערכת הנושא יתווספו בהמשך.",
+"settings_security_title": "אבטחה",
+"settings_password_title": "סיסמה",
+"settings_password_hint": "אפשר להגדיר או לשנות סיסמה לקבלת גישה מלאה.",
+"settings_notifications_title": "התראות",
+"settings_email_notifications_title": "התראות אימייל",
+"settings_email_notifications_hint": "החלק הוכן. הגדרות ההתראות יתווספו בהמשך.",
+"settings_system_messages_title": "הודעות מערכת",
+"settings_system_messages_hint": "כאן תופיע בהמשך הגדרת הודעות מהמערכת ומההנהלה.",
+"settings_future_title": "נוסף",
+"settings_btn_privacy": "פרטיות",
+"settings_btn_access": "גישה",
+"settings_btn_integrations": "אינטגרציות",
+"settings_future_hint": "חלקי ההגדרות הוכנו. הפעולות יתווספו בהמשך.",
+"settings_quick_links_title": "קישורים מהירים",
+"settings_back_to_cabinet": "חזרה לאזור האישי"
 }

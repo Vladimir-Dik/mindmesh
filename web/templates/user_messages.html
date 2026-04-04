@@ -1,0 +1,80 @@
+{#
+  ============================================================
+  Project: MindMesh
+  File: user_messages.html
+  Version: 1.0
+  Date: 04.04.2026
+  Purpose:
+  - User messages page
+  - Shows feedback messages and admin replies for current user
+  ============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+
+  <h1 data-i18n="user_messages_title"></h1>
+  <p style="opacity:0.8; margin-top:6px;" data-i18n="user_messages_subtitle"></p>
+
+  <hr>
+
+  <div class="ideas-line">
+    <div class="ideas-left">
+      <span data-i18n="cabinet_messages_label"></span>
+      <span>{{ items|length }}</span>
+    </div>
+
+    <div class="ideas-right">
+      <span data-i18n="cabinet_messages_answered"></span>
+      <span>{{ answered_count }}</span>
+    </div>
+  </div>
+
+  <hr>
+
+  {% if items %}
+    {% for item in items %}
+      <div style="padding:12px 0; border-bottom:1px solid #e5e7eb;">
+
+        <p>
+          <b data-i18n="user_messages_subject"></b>
+          {{ item.subject or "—" }}
+        </p>
+
+        <p>
+          <b data-i18n="user_messages_date"></b>
+          {{ item.date or "—" }}
+        </p>
+
+        <p>
+          <b data-i18n="user_messages_status"></b>
+          {{ item.status or "New" }}
+        </p>
+
+        <p>
+          <b data-i18n="user_messages_message"></b>
+          {{ item.message or "—" }}
+        </p>
+
+        {% if item.answer_text %}
+          <p>
+            <b data-i18n="user_messages_reply"></b>
+            {{ item.answer_text }}
+          </p>
+        {% endif %}
+
+      </div>
+    {% endfor %}
+  {% else %}
+    <p style="opacity:0.75;" data-i18n="user_messages_empty"></p>
+  {% endif %}
+
+  <div class="buttons" style="margin-top:20px;">
+    <a class="btn small secondary" href="/cabinet" data-i18n="user_messages_back"></a>
+  </div>
+
+</div>
+
+{% endblock %}

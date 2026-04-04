@@ -371,56 +371,21 @@ def cabinet(request: Request):
 
     user = get_current_user(request)
 
+# защита: кабинет только для залогиненных                                                                               
     if not user:
         return RedirectResponse("/login", status_code=302)
-
-    user_email = (user["fields"].get("Email") or "").strip().lower()
-
-    user_messages_total = 0
-    user_messages_answered = 0
-
-    try:
-        records = core.list_feedback_records()
-
-        for rec in records:
-            fields = rec.get("fields", {})
-
-            email = (
-                fields.get("fldnpx1rtg3XjEYx6")
-                or fields.get("Email")
-                or ""
-            ).strip().lower()
-
-            if email != user_email:
-                continue
-
-            user_messages_total += 1
-
-            status_value = (
-                fields.get("fldH2ZVXQPq07ATdU")
-                or fields.get("Status")
-                or ""
-            )
-
-            if status_value == "Answered":
-                user_messages_answered += 1
-
-    except Exception:
-        pass
 
     return templates.TemplateResponse(
         "kabinet.html",
         {
             "request": request,
             "user": user,
-            "system": system_state,
-            "user_messages_total": user_messages_total,
-            "user_messages_answered": user_messages_answered
+            "system": system_state
         }
     )
 
 # ============================================================
-# PROFILE
+# CABINET  profile
 # ============================================================
 
 @app.get("/profile", response_class=HTMLResponse)
@@ -437,80 +402,6 @@ def profile_page(request: Request):
             "request": request,
             "user": user,
             "system": system_state
-        }
-    )
-
-# ============================================================
-# settings
-# ============================================================
-@app.get("/settings", response_class=HTMLResponse)
-def settings_page(request: Request):
-    user = get_current_user(request)
-    if not user:
-        return RedirectResponse("/login", status_code=302)
-
-    return templates.TemplateResponse(
-        "settings.html",
-        {
-            "request": request,
-            "user": user,
-            "system": system_state
-        }
-    )
-
-# ============================================================
-# USER MESSAGES
-# ============================================================
-
-@app.get("/my-messages", response_class=HTMLResponse)
-def user_messages_page(request: Request):
-
-    user = get_current_user(request)
-
-    if not user:
-        return RedirectResponse("/login", status_code=302)
-
-    user_email = (user["fields"].get("Email") or "").strip().lower()
-
-    items = []
-
-    try:
-        records = core.list_feedback_records()
-
-        for rec in records:
-            fields = rec.get("fields", {})
-
-            email = (
-                fields.get("fldnpx1rtg3XjEYx6")
-                or fields.get("Email")
-                or ""
-            ).strip().lower()
-
-            if email != user_email:
-                continue
-
-            items.append({
-                "id": rec.get("id"),
-                "date": fields.get("fldmrXTsjH2P0RrAd") or fields.get("Date"),
-                "subject": fields.get("fldFJa7ZFFGallWxH") or fields.get("Subject"),
-                "message": fields.get("fld7bhc2zngIgj1B2") or fields.get("Message"),
-                "status": fields.get("fldH2ZVXQPq07ATdU") or fields.get("Status") or "New",
-                "answer_text": fields.get("fldpb9lEkDObdhFuV") or fields.get("AnswerText")
-            })
-
-    except Exception:
-        items = []
-
-    answered_count = sum(1 for x in items if x.get("status") == "Answered")
-
-    return templates.TemplateResponse(
-        "user_messages.html",
-        {
-            "request": request,
-            "user": user,
-            "system": system_state,
-            "items": items,
-            "answered_count": answered_count
         }
     )
 

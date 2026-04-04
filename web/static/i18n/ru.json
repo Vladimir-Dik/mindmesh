@@ -2,8 +2,8 @@
   "_meta": {
     "project": "MindMesh",
     "file": "ru.json",
-    "version": "2.2",
-    "date": "24.02.2026",
+    "version": "2.6",
+    "date": "04.04.2026",
     "description": "Russian language pack — UI + Assistant translations"
   },
 
@@ -37,8 +37,8 @@
 
   "login_title": "🔐 Вход в MindMesh",
   "login_email": "Email",
-  "login_password": "Пароль (необязательно)",
-  "login_hint": "Если пароль не задан — вход будет выполнен без него. Вы сможете задать пароль позже.",
+  "login_password": "Пароль",
+  "login_hint": "Если пароль установлен — введите его для полного доступа.",
   "login_button": "Войти",
 
   "cabinet_title": "Личный кабинет",
@@ -61,7 +61,47 @@
 
   "cabinet_feedback": "Обратная связь",
   "cabinet_help": "Справка",
- 
+
+  "profile_title": "Профиль",
+  "profile_subtitle": "Управление данными профиля",
+  "profile_main": "Основное",
+  "profile_main_title": "Основное",
+  "profile_email": "Email:",
+  "profile_name": "Имя:",
+  "profile_save": "Сохранить",
+  "profile_status": "Статус:",
+  "profile_sections_title": "Разделы профиля",
+  "profile_btn_main_data": "Данные профиля",
+  "profile_btn_contacts": "Контактные данные",
+  "profile_btn_billing": "Биллинг",
+  "profile_btn_bonuses": "Бонусы",
+  "profile_btn_upgrade": "Запрос на повышение статуса",
+  "profile_future": "Дополнительно",
+  "profile_future_hint": "Разделы профиля подготовлены. Действия будут добавлены позже.",
+  "profile_back_to_cabinet": "Назад в кабинет",
+  "profile_data_title": "Данные профиля",
+  "profile_contacts_title": "Контактные данные",
+  "profile_contacts_hint": "Раздел подготовлен. Редактирование будет добавлено позже.",
+  "profile_account_title": "Статус аккаунта",
+  "profile_status_hint": "Здесь позже появятся данные о верификации, повышении статуса и доступных возможностях.",
+  "profile_future_title": "Возможности аккаунта",
+  "profile_quick_links_title": "Быстрые переходы",
+
+  "cabinet_messages_title": "Сообщения",
+  "cabinet_messages_label": "Сообщения:",
+  "cabinet_messages_answered": "Отвечено:",
+  "cabinet_open_messages": "Открыть сообщения →",
+
+  "user_messages_title": "Сообщения пользователя",
+  "user_messages_subtitle": "Ваши сообщения и ответы администрации",
+  "user_messages_subject": "Тема:",
+  "user_messages_date": "Дата:",
+  "user_messages_status": "Статус:",
+  "user_messages_message": "Сообщение:",
+  "user_messages_reply": "Ответ администрации:",
+  "user_messages_empty": "Сообщений пока нет.",
+  "user_messages_back": "Назад в кабинет",
+
   "simple_title": "🌱 Простой режим",
   "simple_success_title": "✅ Идея успешно сохранена",
   "simple_result_id_label": "ID:",
@@ -70,7 +110,7 @@
   "simple_result_duplicate_warn": "⚠ Найден похожий проект",
   "simple_add_more_btn": "➕ Добавить ещё одну идею",
   "simple_back_home_btn": "🏠 На главную",
-  
+
   "simple_fallback_title": "Сохранение не удалось",
   "simple_fallback_message": "Идея не была сохранена.\nПричина: {reason}",
   "simple_fallback_retry": "Повторить попытку",
@@ -86,7 +126,6 @@
   "simple_fallback_file_similarity": "Similarity",
   "simple_fallback_file_duplicate": "Duplicate ID",
   "simple_fallback_file_raw": "Исходный текст",
-
 
   "simple_label_title": "Название идеи",
   "simple_label_short": "Краткое описание",
@@ -116,7 +155,7 @@
   "simple2_email_btn": "Сохранить",
   "simple2_email_invalid": "Пожалуйста, введите корректный email.",
   "simple2_next_version": "Будет доступно в следующей версии.",
-  "simple2_dup_found": "Похоже, в базе уже есть идея:",											
+  "simple2_dup_found": "Похоже, в базе уже есть идея:",
   "simple_duplicate_check_unavailable": "Проверка по базе временно недоступна. Анализ выполнен без сравнения с базой.",
   "simple_warning_title": "Внимание",
 
@@ -185,44 +224,9 @@
   "assistant_cancelled": "Хорошо, не будем сохранять.",
 
   "validation_bad_text": "🤖 Похоже, это случайный набор символов. Попробуй написать осмысленно 🙂",
-  
-  "sa_title": "🧠 Центр управления SEARCHWAVE",
-  "sa_subtitle": "MindMesh — структура вместо хаоса идей",
 
-  "sa_system_state": "Состояние системы",
-  "sa_test_mode": "Тестовый режим",
-  "sa_maintenance": "Обслуживание",
-
-  "sa_system_controls": "Управление системой",
-  "sa_toggle_test": "Переключить тестовый режим",
-  "sa_soft": "Мягкий режим обслуживания",
-  "sa_full": "Полный режим обслуживания",
-  "sa_disable": "Отключить обслуживание",
-
-  "sa_user_control": "Управление пользователями",
-  "sa_user_control_desc": "Назначение ролей, статус аккаунта, верификация (v2).",
-
-  "sa_idea_control": "Управление идеями",
-  "sa_idea_control_desc": "Работа с дубликатами, изменение статусов, архивирование (v2).",
-
-  "sa_ai_control": "Управление ИИ",
-  "sa_ai_control_desc": "Порог совпадения, режим проверки ИИ, переиндексация (v2).",
-  "login_password": "Пароль",
-  "login_hint": "Если пароль установлен — введите его для полного доступа.",
-
-  "set_password_title": "🔐 Смена пароля",
-  "set_password_label": "Новый пароль",
-  "set_password_save": "Сохранить",
-  "set_password_cancel": "назад",
-
-  "cabinet_password_notice": "🔒 Для полного доступа установите пароль.",
-  "cabinet_set_password_link": "Установить пароль",
-  "cabinet_access_full": "Полный доступ",
-  "cabinet_access_limited": "Ограниченный доступ",
-  "cabinet_change_password": "🔐 Сменить пароль",																
-   "sa_title": "🧠 Центр управления MindMesh",
+  "sa_title": "🧠 Центр управления MindMesh",
   "sa_subtitle": "Control Center",
-
   "sa_system_status": "📊 Состояние системы",
   "sa_system_state": "Состояние",
   "sa_state_working": "Работает",
@@ -246,8 +250,31 @@
   "sa_system_log": "📜 Системный лог",
 
   "sa_ai_control": "🧠 Управление ИИ",
+  "sa_ai_control_desc": "Порог совпадения, режим проверки ИИ, переиндексация (v2).",
   "sa_ai_coming": "Настройки ИИ будут доступны в следующей версии.",
-  
+
+  "sa_system_controls": "Управление системой",
+  "sa_toggle_test": "Переключить тестовый режим",
+  "sa_soft": "Мягкий режим обслуживания",
+  "sa_full": "Полный режим обслуживания",
+
+  "sa_user_control": "Управление пользователями",
+  "sa_user_control_desc": "Назначение ролей, статус аккаунта, верификация (v2).",
+
+  "sa_idea_control": "Управление идеями",
+  "sa_idea_control_desc": "Работа с дубликатами, изменение статусов, архивирование (v2).",
+
+  "set_password_title": "🔐 Смена пароля",
+  "set_password_label": "Новый пароль",
+  "set_password_save": "Сохранить",
+  "set_password_cancel": "назад",
+
+  "cabinet_password_notice": "🔒 Для полного доступа установите пароль.",
+  "cabinet_set_password_link": "Установить пароль",
+  "cabinet_access_full": "Полный доступ",
+  "cabinet_access_limited": "Ограниченный доступ",
+  "cabinet_change_password": "🔐 Сменить пароль",
+
   "feedback_title": "Обратная связь",
   "feedback_subtitle": "Сообщите об ошибке, проблеме или предложении.",
   "feedback_label_subject": "Тема",
@@ -282,7 +309,8 @@
   "help_btn_simple": "Открыть простой режим",
   "help_btn_advanced": "Открыть продвинутый режим",
   "help_btn_feedback": "Перейти к обратной связи",
- "messages_title": "✉️ Сообщения MindMesh",
+
+  "messages_title": "✉️ Сообщения MindMesh",
   "messages_subtitle": "Центр коммуникаций",
   "messages_overview": "Обзор сообщений",
   "messages_unread": "Непрочитанные сообщения:",
@@ -398,5 +426,27 @@
   "topadmin_communication": "Коммуникации",
   "topadmin_send_message": "Отправить сообщение",
   "topadmin_notifications": "Уведомления",
-  "topadmin_system_log": "Системный лог"  
+  "topadmin_system_log": "Системный лог",
+  "settings_title": "Настройки",
+"settings_subtitle": "Параметры интерфейса, безопасности и уведомлений",
+"settings_interface_title": "Интерфейс",
+"settings_language_title": "Язык интерфейса",
+"settings_language_hint": "Сейчас язык меняется через кнопки в верхней панели.",
+"settings_theme_title": "Тема оформления",
+"settings_theme_hint": "Раздел подготовлен. Настройки темы будут добавлены позже.",
+"settings_security_title": "Безопасность",
+"settings_password_title": "Пароль",
+"settings_password_hint": "Вы можете установить или изменить пароль для полного доступа.",
+"settings_notifications_title": "Уведомления",
+"settings_email_notifications_title": "Email-уведомления",
+"settings_email_notifications_hint": "Раздел подготовлен. Настройки уведомлений будут добавлены позже.",
+"settings_system_messages_title": "Системные сообщения",
+"settings_system_messages_hint": "Здесь позже появится настройка уведомлений от системы и администрации.",
+"settings_future_title": "Дополнительно",
+"settings_btn_privacy": "Приватность",
+"settings_btn_access": "Доступ",
+"settings_btn_integrations": "Интеграции",
+"settings_future_hint": "Разделы настроек подготовлены. Действия будут добавлены позже.",
+"settings_quick_links_title": "Быстрые переходы",
+"settings_back_to_cabinet": "Назад в кабинет"
 }
