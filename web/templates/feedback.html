@@ -1,0 +1,193 @@
+{#
+  ============================================================
+  Project: MindMesh
+  File: feedback.html
+  Version: 1.0
+  Date: 02.04.2026
+  Purpose:
+  - Feedback page
+  - Page form + fallback modal
+  ============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <h1 data-i18n="feedback_title"></h1>
+  <p style="opacity:0.8; margin-top:6px;" data-i18n="feedback_subtitle"></p>
+
+  <hr>
+
+  <form id="feedbackForm">
+    <label for="feedbackSubject" data-i18n="feedback_label_subject"></label>
+    <input id="feedbackSubject" type="text" data-i18n-placeholder="feedback_placeholder_subject">
+
+    <label for="feedbackMessage" data-i18n="feedback_label_message"></label>
+    <textarea id="feedbackMessage" rows="8" data-i18n-placeholder="feedback_placeholder_message"></textarea>
+
+    <label for="feedbackEmail" data-i18n="feedback_label_email"></label>
+    <input
+      id="feedbackEmail"
+      type="email"
+      value="{{ user.fields.Email if user else '' }}"
+      data-i18n-placeholder="feedback_placeholder_email"
+    >
+
+    <label for="feedbackName" data-i18n="feedback_label_name"></label>
+    <input
+      id="feedbackName"
+      type="text"
+      value="{{ user.fields.Name if user and user.fields.Name else '' }}"
+      data-i18n-placeholder="feedback_placeholder_name"
+    >
+
+    <div class="buttons">
+      <button type="submit" class="btn" data-i18n="feedback_btn_send"></button>
+      <a href="/cabinet" class="btn secondary" data-i18n="feedback_btn_back"></a>
+    </div>
+
+    <p id="feedbackStatus" style="margin-top:12px; opacity:0.8;"></p>
+  </form>
+</div>
+
+<div id="fbFallbackOverlay" class="mm-modal-overlay">
+  <div class="mm-modal">
+    <div class="mm-modal-title" data-i18n="feedback_fallback_title"></div>
+    <div class="mm-modal-body" id="fbFallbackBody"></div>
+    <div class="mm-modal-actions">
+      <button class="btn subtle" id="fbCopyBtn" data-i18n="feedback_fallback_copy"></button>
+      <button class="btn secondary" id="fbDownloadBtn" data-i18n="feedback_fallback_download"></button>
+      <button class="btn" id="fbCloseBtn" data-i18n="feedback_fallback_close"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const form = document.getElementById("feedbackForm");
+  const subjectEl = document.getElementById("feedbackSubject");
+  const messageEl = document.getElementById("feedbackMessage");
+  const emailEl = document.getElementById("feedbackEmail");
+  const nameEl = document.getElementById("feedbackName");
+  const statusEl = document.getElementById("feedbackStatus");
+
+  const overlay = document.getElementById("fbFallbackOverlay");
+  const bodyEl = document.getElementById("fbFallbackBody");
+  const copyBtn = document.getElementById("fbCopyBtn");
+  const downloadBtn = document.getElementById("fbDownloadBtn");
+  const closeBtn = document.getElementById("fbCloseBtn");
+
+  function tr(key, fallback) {
+    if (typeof t === "function") {
+      const v = t(key);
+      return v && v !== key ? v : fallback;
+    }
+    return fallback;
+  }
+
+  function buildFallbackText(reason) {
+    return [
+      "MindMesh Feedback Fallback",
+      "Date: " + new Date().toISOString(),
+      "Page: /feedback",
+      "Name: " + (nameEl.value || ""),
+      "Email: " + (emailEl.value || ""),
+      "Subject: " + (subjectEl.value || ""),
+      "Reason: " + (reason || ""),
+      "",
+      "Message:",
+      messageEl.value || ""
+    ].join("\n");
+  }
+
+  function openFallback(reason) {
+    bodyEl.textContent =
+      tr("feedback_fallback_message", "The message could not be sent. A local copy has been prepared.") +
+      "\n\n" +
+      tr("feedback_fallback_reason", "Reason: ") +
+      (reason || "-");
+
+    overlay.style.display = "flex";
+  }
+
+  function closeFallback() {
+    overlay.style.display = "none";
+  }
+
+  async function copyFallback() {
+    const text = buildFallbackText("send_failed");
+    try {
+      await navigator.clipboard.writeText(text);
+      statusEl.textContent = tr("feedback_fallback_copied", "Text copied.");
+    } catch (e) {
+      statusEl.textContent = tr("feedback_fallback_copy_error", "Copy failed.");
+    }
+  }
+
+  function downloadFallback() {
+    const text = buildFallbackText("send_failed");
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "mindmesh_feedback_fallback.txt";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const subject = subjectEl.value.trim();
+    const message = messageEl.value.trim();
+    const email = emailEl.value.trim();
+    const name = nameEl.value.trim();
+
+    statusEl.textContent = "";
+
+    if (!message) {
+      statusEl.textContent = tr("feedback_error_empty", "Please enter a message.");
+      return;
+    }
+
+    try {
+      const r = await fetch("/api/feedback/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject,
+          message,
+          email,
+          name,
+          page: "/feedback"
+        })
+      });
+
+      const j = await r.json().catch(() => ({}));
+	  if (j.status === "buffer_saved") {
+      openFallback("buffer_saved");
+      return;
+      }
+
+      if (!r.ok || j.status !== "ok") {
+        openFallback(j.message || "send_failed");
+        return;
+      }
+
+      statusEl.textContent = tr("feedback_success", "Message sent.");
+      form.reset();
+    } catch (err) {
+      openFallback(err?.message || "network_error");
+    }
+  });
+
+  copyBtn.addEventListener("click", copyFallback);
+  downloadBtn.addEventListener("click", downloadFallback);
+  closeBtn.addEventListener("click", closeFallback);
+})();
+</script>
+
+{% endblock %}

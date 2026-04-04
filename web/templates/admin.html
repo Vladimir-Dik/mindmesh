@@ -2,8 +2,8 @@
 ============================================================
 Project: MindMesh
 File: admin.html
-Version: 1.0
-Date: 22.03.2026
+Version: 1.1
+Date: 03.04.2026
 Purpose:
 Admin Panel (admin / topadmin)
 ============================================================
@@ -19,34 +19,41 @@ Admin Panel (admin / topadmin)
 
 <link rel="stylesheet" href="/static/css/style.css">
 <link rel="icon" href="/static/favicon.png">
+<script src="/static/js/i18n.js"></script>
 
 </head>
 
 <body>
 
+<div style="display:flex; gap:6px; margin:12px 0 0 12px;">
+  <button class="btn small subtle" onclick="setLanguage('ru')">RU</button>
+  <button class="btn small subtle" onclick="setLanguage('en')">EN</button>
+  <button class="btn small subtle" onclick="setLanguage('he')">HE</button>
+</div>
+
 <div class="container">
 <div class="card">
 
-<h1>⚙️ MindMesh Admin Center</h1>
-<p style="opacity:0.7;">Operations Panel</p>
+<h1 data-i18n="admin_title">⚙️ MindMesh Admin Center</h1>
+<p style="opacity:0.7;" data-i18n="admin_subtitle">Operations Panel</p>
 
 <hr>
 
-<h3>Panels</h3>
+<h3 data-i18n="admin_panels">Panels</h3>
 
 <div class="admin-card">
 
 <div style="display:flex; gap:10px; align-items:center;">
 
 <select id="panelSelector" class="btn small">
-<option value="">Select panel...</option>
-<option value="/moderator">Moderator</option>
-<option value="/cabinet">User Cabinet</option>
-<option value="/simple">Simple Mode</option>
-<option value="/advanced">Advanced Mode</option>
+<option value="" data-i18n="admin_select_panel">Select panel...</option>
+<option value="/moderator" data-i18n="admin_panel_moderator">Moderator</option>
+<option value="/cabinet" data-i18n="admin_panel_cabinet">User Cabinet</option>
+<option value="/simple" data-i18n="admin_panel_simple">Simple Mode</option>
+<option value="/advanced" data-i18n="admin_panel_advanced">Advanced Mode</option>
 </select>
 
-<button class="btn small" onclick="openPanel()">
+<button class="btn small" onclick="openPanel()" data-i18n="admin_open">
 Open →
 </button>
 
@@ -56,23 +63,19 @@ Open →
 
 <hr>
 
-<!-- ===================================================== -->
-<!-- USERS OVERVIEW                                        -->
-<!-- ===================================================== -->
-
-<h3>Users</h3>
+<h3 data-i18n="admin_users">Users</h3>
 
 <div class="admin-card">
 
 <div class="ideas-line">
 
 <div class="ideas-left">
-<b>Total Users:</b>
+<b data-i18n="admin_total_users_label">Total Users:</b>
 <span id="admin_total_users">loading...</span>
 </div>
 
 <div class="ideas-right">
-<button class="btn small" onclick="openUsersPanel()">
+<button class="btn small" onclick="openUsersPanel()" data-i18n="admin_manage">
 Manage →
 </button>
 </div>
@@ -83,25 +86,23 @@ Manage →
 
 <hr>
 
-<!-- ===================================================== -->
-<!-- IDEAS OVERVIEW                                        -->
-<!-- ===================================================== -->
-
-<h3>Ideas</h3>
+<h3 data-i18n="admin_ideas">Ideas</h3>
 
 <div class="admin-card">
 
 <div class="ideas-line">
 
 <div class="ideas-left">
-<b>Total Ideas:</b>
+<b data-i18n="admin_total_ideas_label">Total Ideas:</b>
 <span id="admin_total_ideas">loading...</span>
 </div>
 
 <div class="ideas-right">
-Today: <span id="admin_ideas_today">-</span>
-&nbsp;&nbsp; Week: <span id="admin_ideas_week">-</span>
-&nbsp;&nbsp; Month: <span id="admin_ideas_month">-</span>
+<span data-i18n="admin_today">Today</span>: <span id="admin_ideas_today">-</span>
+&nbsp;&nbsp;
+<span data-i18n="admin_week">Week</span>: <span id="admin_ideas_week">-</span>
+&nbsp;&nbsp;
+<span data-i18n="admin_month">Month</span>: <span id="admin_ideas_month">-</span>
 </div>
 
 </div>
@@ -112,44 +113,32 @@ Today: <span id="admin_ideas_today">-</span>
 
 <hr>
 
-<!-- ===================================================== -->
-<!-- MODERATION                                            -->
-<!-- ===================================================== -->
-
-<h3>Moderation</h3>
+<h3 data-i18n="admin_moderation">Moderation</h3>
 
 <div class="admin-card">
 
-<p><b>Review Queue:</b> <span id="admin_review_queue">-</span></p>
-<p><b>AI Pending:</b> <span id="admin_ai_pending">-</span></p>
-<p><b>Duplicates:</b> <span id="admin_duplicates">-</span></p>
+<p><b data-i18n="admin_review_queue">Review Queue:</b> <span id="admin_review_queue">-</span></p>
+<p><b data-i18n="admin_ai_pending">AI Pending:</b> <span id="admin_ai_pending">-</span></p>
+<p><b data-i18n="admin_duplicates">Duplicates:</b> <span id="admin_duplicates">-</span></p>
 
 </div>
 
 <hr>
 
-<!-- ===================================================== -->
-<!-- COMMUNICATION                                         -->
-<!-- ===================================================== -->
-
-<h3>Communication</h3>
+<h3 data-i18n="admin_communication">Communication</h3>
 
 <div class="admin-card">
 
 <div class="buttons">
-<button class="btn small">Send Message</button>
-<button class="btn small secondary">Notifications</button>
+<button class="btn small" data-i18n="admin_send_message">Send Message</button>
+<button class="btn small secondary" data-i18n="admin_notifications">Notifications</button>
 </div>
 
 </div>
 
 <hr>
 
-<!-- ===================================================== -->
-<!-- LOGS                                                  -->
-<!-- ===================================================== -->
-
-<h3>Admin Log</h3>
+<h3 data-i18n="admin_log">Admin Log</h3>
 
 <div class="log" id="admin-log">
 Loading...
@@ -157,23 +146,19 @@ Loading...
 
 <hr>
 
-<!-- ===================================================== -->
-<!-- SYSTEM CONTROLS (TOPADMIN ONLY)                       -->
-<!-- ===================================================== -->
-
 <div id="topadmin_block" style="display:none;">
 
-<h3>System Controls</h3>
+<h3 data-i18n="admin_system_controls">System Controls</h3>
 
 <div class="admin-card">
 
 <div class="buttons">
 
-<button class="btn small" onclick="toggleTest()">Test Mode</button>
+<button class="btn small" onclick="toggleTest()" data-i18n="admin_test_mode">Test Mode</button>
 
-<button class="btn small secondary" onclick="setSoft()">Soft Maint</button>
-<button class="btn small secondary" onclick="setFull()">Full Maint</button>
-<button class="btn small" onclick="disableMaint()">Disable</button>
+<button class="btn small secondary" onclick="setSoft()" data-i18n="admin_soft_maint">Soft Maint</button>
+<button class="btn small secondary" onclick="setFull()" data-i18n="admin_full_maint">Full Maint</button>
+<button class="btn small" onclick="disableMaint()" data-i18n="admin_disable">Disable</button>
 
 </div>
 
@@ -186,8 +171,23 @@ Loading...
 </div>
 </div>
 
+<footer style="text-align:center; padding:15px; color:#666;">
+  <div data-i18n="footer_text">MindMesh — structure instead of chaos</div>
+  <div style="margin-top:6px;">
+    <a href="mailto:mindmeshbasic@gmail.com">mindmeshbasic@gmail.com</a>
+  </div>
+</footer>
+
 <script src="/static/js/system_workdesk.js"></script>
 <script src="/static/js/admin_panel.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof applyTranslations === "function") {
+    applyTranslations();
+  }
+});
+</script>
 
 </body>
 </html>

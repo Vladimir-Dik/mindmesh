@@ -538,6 +538,82 @@ def prepare_and_create_idea(data: dict):
 def simple_failure_logs_url(pat):
     return f"https://api.airtable.com/v0/{pat['base_id']}/{os.getenv('AIRTABLE_SIMPLE_FAILURE_TABLE_ID')}"
 
+# ============================================================
+# FEEDBACK
+# ============================================================
+
+def feedback_url(pat):
+    return f"https://api.airtable.com/v0/{pat['base_id']}/{os.getenv('AIRTABLE_FEEDBACK_TABLE_ID')}"
+
+# ============================================================
+# FEEDBACK  message
+# ============================================================
+
+def create_feedback_record(data: dict):
+
+    pat = load_env()
+    url = feedback_url(pat)
+    headers = airtable_headers(pat)
+
+    fields = {
+        "fldmrXTsjH2P0RrAd": datetime.datetime.utcnow().isoformat(),  # Date
+        "fldQWIPuNzQaPzZ3Q": data.get("name", ""),                   # Name
+        "fldnpx1rtg3XjEYx6": data.get("email", ""),                  # Email
+        "fldFJa7ZFFGallWxH": data.get("subject", ""),                # Subject
+        "fld7bhc2zngIgj1B2": data.get("message", ""),                # Message
+        "fld23LeOQj9UD5Bls": data.get("page", ""),                   # Page
+
+        "fldH2ZVXQPq07ATdU": "New",                                 # Status (singleSelect)
+        "fld2ojLUOw36x5o4m": "UI",                                  # Source
+
+        "fldF6h3K31ntZAPEd": data.get("local_id"),                  # LocalID
+        "fldQzH8clVXKj3RW2": data.get("error_info", ""),            # ErrorInfo
+
+        "fldLXhVAWAyFmpUn2": "",                                   # Notes
+        "fldtr3v4oe8jk8eij": "",                                   # AnsweredBy
+        "fldPiiU6NgrHZb6gt": None                                  # AnsweredAt
+    }
+
+    payload = {"fields": fields}
+
+    r = requests.post(url, headers=headers, json=payload)
+
+    if not r.ok:
+        raise requests.RequestException(r.text, response=r)
+
+    return r.json()
+
+# ============================================================
+# FEEDBACK STATUS UPDATE
+# ============================================================
+
+def update_feedback_status(record_id: str, status: str, answered_by: str = None):
+
+    pat = load_env()
+    url = f"{feedback_url(pat)}/{record_id}"
+    headers = airtable_headers(pat)
+
+    fields = {
+        "fldH2ZVXQPq07ATdU": status
+    }
+
+    if status == "Answered":
+        fields["fldtr3v4oe8jk8eij"] = answered_by or "Admin"
+        fields["fldPiiU6NgrHZb6gt"] = datetime.datetime.utcnow().isoformat()
+
+    payload = {"fields": fields}
+
+    r = requests.patch(url, headers=headers, json=payload)
+
+    if not r.ok:
+        raise Exception(r.text)
+
+    return True
+
+
+# ============================================================
+# FAILURE LOGGING
+# ============================================================
 
 def create_simple_failure_log(data: dict):
 
@@ -650,4 +726,148 @@ def save_simple_buffer_record(data: dict):
         "ok": True,
         "local_id": local_id,
         "path": path
+    }
+
+# ============================================================
+# FEEDBACK BUFFER STORAGE
+# ============================================================
+
+FEEDBACK_BUFFER_DIR = os.path.join(os.path.dirname(__file__), "buffer_feedback")
+
+
+def ensure_feedback_buffer_dir():
+    os.makedirs(FEEDBACK_BUFFER_DIR, exist_ok=True)
+
+
+def save_feedback_buffer_record(data: dict):
+
+    ensure_feedback_buffer_dir()
+
+    local_id = data.get("local_id") or f"FB-BUF-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')}"
+    created_at = data.get("created_at") or datetime.datetime.utcnow().isoformat()
+
+    record = {
+        "local_id": local_id,
+        "created_at": created_at,
+        "status": "pending",
+
+        "name": data.get("name", ""),
+        "email": data.get("email", ""),
+        "subject": data.get("subject", ""),
+        "message": data.get("message", ""),
+        "page": data.get("page", ""),
+
+        "error_text": data.get("error_text", ""),
+
+        "schema_version": "0.1"
+    }
+
+    filename = f"{local_id}.json"
+    path = os.path.join(FEEDBACK_BUFFER_DIR, filename)
+
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(record, f, ensure_ascii=False, indent=2)
+
+    return {
+        "ok": True,
+        "local_id": local_id,
+        "path": path
     }    
+
+    
+# ============================================================
+# FEEDBACK READ / UPDATE / REPLY
+# ============================================================
+
+def list_feedback_records():
+    pat = load_env()
+    url = feedback_url(pat)
+    headers = airtable_headers(pat)
+
+    all_records = []
+    offset = None
+
+    while True:
+        params = {
+            "sort[0][field]": "fldmrXTsjH2P0RrAd",   # Date
+            "sort[0][direction]": "desc"
+        }
+
+        if offset:
+            params["offset"] = offset
+
+        r = requests.get(url, headers=headers, params=params, timeout=20)
+
+        if not r.ok:
+            raise requests.RequestException(r.text, response=r)
+
+        data = r.json()
+        records = data.get("records", [])
+        all_records.extend(records)
+
+        offset = data.get("offset")
+        if not offset:
+            break
+
+    return all_records
+
+
+def get_feedback_record(record_id: str):
+    pat = load_env()
+    url = f"{feedback_url(pat)}/{record_id}"
+    headers = airtable_headers(pat)
+
+    r = requests.get(url, headers=headers, timeout=20)
+
+    if not r.ok:
+        raise requests.RequestException(r.text, response=r)
+
+    return r.json()
+
+
+def update_feedback_status(record_id: str, status: str, answered_by: str = None):
+
+    pat = load_env()
+    url = f"{feedback_url(pat)}/{record_id}"
+    headers = airtable_headers(pat)
+
+    fields = {
+        "fldH2ZVXQPq07ATdU": status   # Status
+    }
+
+    if status == "Answered":
+        fields["fldtr3v4oe8jk8eij"] = answered_by or "Admin"                    # AnsweredBy
+        fields["fldPiiU6NgrHZb6gt"] = datetime.datetime.utcnow().isoformat()    # AnsweredAt
+
+    payload = {"fields": fields}
+
+    r = requests.patch(url, headers=headers, json=payload, timeout=20)
+
+    if not r.ok:
+        raise requests.RequestException(r.text, response=r)
+
+    return True
+
+
+def save_feedback_reply(record_id: str, answer_text: str, answered_by: str = None):
+
+    pat = load_env()
+    url = f"{feedback_url(pat)}/{record_id}"
+    headers = airtable_headers(pat)
+
+    fields = {
+        "fldpb9lEkDObdhFuV": answer_text,                                 # AnswerText
+        "fldwJLeIDcjqgF22U": "Sent",                                      # AnswerStatus
+        "fldH2ZVXQPq07ATdU": "Answered",                                  # Status
+        "fldtr3v4oe8jk8eij": answered_by or "Admin",                      # AnsweredBy
+        "fldPiiU6NgrHZb6gt": datetime.datetime.utcnow().isoformat()       # AnsweredAt
+    }
+
+    payload = {"fields": fields}
+
+    r = requests.patch(url, headers=headers, json=payload, timeout=20)
+
+    if not r.ok:
+        raise requests.RequestException(r.text, response=r)
+
+    return True

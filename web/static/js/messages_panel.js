@@ -1,75 +1,194 @@
-/*
+<!--
 ============================================================
 Project: MindMesh
-File: messages_panel.js
-Version: 1.0
-Date: 23.03.2026
+File: moderator.html
+Version: 1.1
+Date: 03.04.2026
 Purpose:
-Messages panel logic
+Moderator Panel
 ============================================================
-*/
+-->
 
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadMessagesSummary();
-  await loadMessagesList();
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>MindMesh Moderator</title>
+
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="/static/favicon.png">
+<script src="/static/js/i18n.js"></script>
+
+</head>
+
+<body>
+
+<div style="display:flex; gap:6px; margin:12px 0 0 12px;">
+  <button class="btn small subtle" onclick="setLanguage('ru')">RU</button>
+  <button class="btn small subtle" onclick="setLanguage('en')">EN</button>
+  <button class="btn small subtle" onclick="setLanguage('he')">HE</button>
+</div>
+
+<div class="container">
+<div class="card">
+
+<h1 data-i18n="moderator_title">🧩 MindMesh Moderator Center</h1>
+<p style="opacity:0.7;" data-i18n="moderator_subtitle">Moderation Panel</p>
+
+<hr>
+
+<h3 data-i18n="moderator_panels">Panels</h3>
+
+<div class="admin-card">
+
+<div style="display:flex; gap:10px; align-items:center;">
+
+<select id="panelSelector" class="btn small">
+<option value="" data-i18n="moderator_select_panel">Select panel...</option>
+<option value="/cabinet" data-i18n="moderator_panel_cabinet">User Cabinet</option>
+<option value="/simple" data-i18n="moderator_panel_simple">Simple Mode</option>
+<option value="/advanced" data-i18n="moderator_panel_advanced">Advanced Mode</option>
+</select>
+
+<button class="btn small" onclick="openPanel()" data-i18n="moderator_open">
+Open →
+</button>
+
+</div>
+
+</div>
+
+<hr>
+
+<h3 data-i18n="moderator_users_overview">Users Overview</h3>
+
+<div class="admin-card">
+
+<div class="ideas-line">
+
+<div class="ideas-left">
+<b data-i18n="moderator_total_users_label">Total Users:</b>
+<span id="moderator_total_users">loading...</span>
+</div>
+
+<div class="ideas-right">
+<button class="btn small" onclick="openUsersPanel()" data-i18n="moderator_manage_users">
+Manage Users →
+</button>
+</div>
+
+</div>
+
+</div>
+
+<hr>
+
+<h3 data-i18n="moderator_ideas_overview">Ideas Overview</h3>
+
+<div class="admin-card">
+
+<div id="ideas_loading" data-i18n="moderator_loading">
+Загрузка, ждите...
+</div>
+
+<div class="ideas-line">
+
+<div class="ideas-left">
+<b data-i18n="moderator_total_ideas_label">Total Ideas:</b>
+<span id="moderator_total_ideas">loading...</span>
+</div>
+
+<div class="ideas-right">
+<span data-i18n="moderator_today">Today</span>: <span id="moderator_ideas_today">-</span>
+&nbsp;&nbsp;
+<span data-i18n="moderator_week">Week</span>: <span id="moderator_ideas_week">-</span>
+&nbsp;&nbsp;
+<span data-i18n="moderator_month">Month</span>: <span id="moderator_ideas_month">-</span>
+</div>
+
+</div>
+
+<ul id="moderator_ideas_stats"></ul>
+
+</div>
+
+<hr>
+
+<h3 data-i18n="moderator_queue_title">Moderation Queue</h3>
+
+<div class="admin-card">
+
+<p><b data-i18n="moderator_review_queue">Review Queue:</b> <span id="moderator_review_queue">-</span></p>
+<p><b data-i18n="moderator_ai_pending">AI Pending:</b> <span id="moderator_ai_pending">-</span></p>
+<p><b data-i18n="moderator_duplicates">Duplicates:</b> <span id="moderator_duplicates">-</span></p>
+
+</div>
+
+<hr>
+
+<h3 data-i18n="moderator_communication">Communication</h3>
+
+<div class="admin-card">
+
+<div class="ideas-line">
+
+<div class="ideas-left">
+<b data-i18n="moderator_messages">Messages:</b>
+<span id="messages_count">loading...</span>
+</div>
+
+<div class="ideas-right">
+<span id="messages_indicator" style="color:#ff3b3b; display:none;">
+● New
+</span>
+</div>
+
+</div>
+
+<div class="buttons">
+
+<button class="btn small" onclick="openMessages()" data-i18n="moderator_open_messages">
+Open Messages →
+</button>
+
+<button class="btn small secondary" data-i18n="moderator_send_message">
+Send Message
+</button>
+
+</div>
+
+</div>
+
+<hr>
+
+<h3 data-i18n="moderator_log">Moderator Log</h3>
+
+<div class="log" id="moderator-log">
+Loading...
+</div>
+
+</div>
+</div>
+
+<footer style="text-align:center; padding:15px; color:#666;">
+  <div data-i18n="footer_text">MindMesh — structure instead of chaos</div>
+  <div style="margin-top:6px;">
+    <a href="mailto:mindmeshbasic@gmail.com">mindmeshbasic@gmail.com</a>
+  </div>
+</footer>
+
+<script src="/static/js/system_workdesk.js"></script>
+<script src="/static/js/moderator_panel.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof applyTranslations === "function") {
+    applyTranslations();
+  }
 });
+</script>
 
-async function loadMessagesSummary(){
-
-  try{
-
-    const r = await fetch("/api/messages/unread_count");
-    const data = await r.json();
-
-    const el = document.getElementById("messages_total");
-    if(el) el.innerText = data.count ?? 0;
-
-  }catch(e){
-
-    console.error("Messages summary error:", e);
-
-  }
-
-}
-
-async function loadMessagesList(){
-
-  try{
-
-    const r = await fetch("/api/messages/list");
-    const data = await r.json();
-
-    const container = document.getElementById("messages-list");
-    if(!container) return;
-
-    if(!data.items || data.items.length === 0){
-      container.innerHTML = "<div>No messages yet</div>";
-      return;
-    }
-
-    let html = "";
-
-    data.items.forEach(item => {
-      html += `
-        <div style="margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #333;">
-          <div><b>${item.title}</b></div>
-          <div style="opacity:0.8;">${item.preview}</div>
-          <div style="font-size:12px; opacity:0.6;">${item.time}</div>
-        </div>
-      `;
-    });
-
-    container.innerHTML = html;
-
-  }catch(e){
-
-    console.error("Messages list error:", e);
-
-  }
-
-}
-
-async function refreshMessages(){
-  await loadMessagesSummary();
-  await loadMessagesList();
-}
+</body>
+</html>

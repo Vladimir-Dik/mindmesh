@@ -2,8 +2,8 @@
 ============================================================
 Project: MindMesh
 File: messages.html
-Version: 1.0
-Date: 23.03.2026
+Version: 1.1
+Date: 03.04.2026
 Purpose:
 Messages Center
 ============================================================
@@ -19,32 +19,39 @@ Messages Center
 
 <link rel="stylesheet" href="/static/css/style.css">
 <link rel="icon" href="/static/favicon.png">
+<script src="/static/js/i18n.js"></script>
 
 </head>
 
 <body>
 
+<div style="display:flex; gap:6px; margin:12px 0 0 12px;">
+  <button class="btn small subtle" onclick="setLanguage('ru')">RU</button>
+  <button class="btn small subtle" onclick="setLanguage('en')">EN</button>
+  <button class="btn small subtle" onclick="setLanguage('he')">HE</button>
+</div>
+
 <div class="container">
 <div class="card">
 
-<h1>✉️ MindMesh Messages</h1>
-<p style="opacity:0.7;">Communication Center</p>
+<h1 data-i18n="messages_title">✉️ MindMesh Messages</h1>
+<p style="opacity:0.7;" data-i18n="messages_subtitle">Communication Center</p>
 
 <hr>
 
-<h3>Messages Overview</h3>
+<h3 data-i18n="messages_overview">Messages Overview</h3>
 
 <div class="admin-card">
 
 <div class="ideas-line">
 
 <div class="ideas-left">
-<b>Unread Messages:</b>
+<b data-i18n="messages_unread">Unread Messages:</b>
 <span id="messages_total">loading...</span>
 </div>
 
 <div class="ideas-right">
-<button class="btn small" onclick="refreshMessages()">
+<button class="btn small" onclick="refreshMessages()" data-i18n="messages_refresh">
 Refresh
 </button>
 </div>
@@ -55,7 +62,7 @@ Refresh
 
 <hr>
 
-<h3>Dialogs</h3>
+<h3 data-i18n="messages_dialogs">Dialogs</h3>
 
 <div class="log" id="messages-list">
 Loading...
@@ -63,22 +70,37 @@ Loading...
 
 <hr>
 
-<h3>Quick Actions</h3>
+<h3 data-i18n="messages_quick_actions">Quick Actions</h3>
 
 <div class="admin-card">
 
 <div class="buttons">
-<button class="btn small">New Message</button>
-<button class="btn small secondary">Templates</button>
-<button class="btn small secondary">Notifications</button>
+<button class="btn small" data-i18n="messages_new">New Message</button>
+<button class="btn small secondary" data-i18n="messages_templates">Templates</button>
+<button class="btn small secondary" data-i18n="messages_notifications">Notifications</button>
 </div>
 
 </div>
 
 </div>
 </div>
+
+<footer style="text-align:center; padding:15px; color:#666;">
+  <div data-i18n="footer_text">MindMesh — structure instead of chaos</div>
+  <div style="margin-top:6px;">
+    <a href="mailto:mindmeshbasic@gmail.com">mindmeshbasic@gmail.com</a>
+  </div>
+</footer>
 
 <script src="/static/js/messages_panel.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof applyTranslations === "function") {
+    applyTranslations();
+  }
+});
+</script>
 
 </body>
 </html>

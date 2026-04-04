@@ -607,3 +607,15 @@ gap:10px;
 align-items:center;
 justify-content:flex-end;
 }
+
+/* ==  справка   = */
+
+.feedback-status-ok {
+    color: #15803d;
+    font-weight: 600;
+}
+
+.feedback-status-error {
+    color: #b91c1c;
+    font-weight: 600;
+}

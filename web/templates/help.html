@@ -1,0 +1,37 @@
+{#
+  ============================================================
+  Project: MindMesh
+  File: help.html
+  Version: 1.0
+  Date: 02.04.2026
+  Purpose:
+  - Help page
+  ============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <h1 data-i18n="help_title"></h1>
+  <p style="opacity:0.8; margin-top:6px;" data-i18n="help_subtitle"></p>
+
+  <hr>
+
+  <h3 data-i18n="help_block_1_title"></h3>
+  <p data-i18n="help_block_1_text"></p>
+
+  <h3 data-i18n="help_block_2_title"></h3>
+  <p data-i18n="help_block_2_text"></p>
+
+  <h3 data-i18n="help_block_3_title"></h3>
+  <p data-i18n="help_block_3_text"></p>
+
+  <div class="buttons">
+    <a href="/simple" class="btn" data-i18n="help_btn_simple"></a>
+    <a href="/advanced" class="btn secondary" data-i18n="help_btn_advanced"></a>
+    <a href="/feedback" class="btn subtle" data-i18n="help_btn_feedback"></a>
+  </div>
+</div>
+
+{% endblock %}

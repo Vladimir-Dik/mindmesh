@@ -335,6 +335,7 @@ def login_submit(
                     )
                 access_level = "user_full"
 
+    # ---------- create session ----------                                          
     sid = str(uuid.uuid4())
 
     SESSIONS[sid] = {
@@ -370,11 +371,157 @@ def cabinet(request: Request):
 
     user = get_current_user(request)
 
+# защита: кабинет только для залогиненных                                                                               
     if not user:
         return RedirectResponse("/login", status_code=302)
 
     return templates.TemplateResponse(
         "kabinet.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state
+        }
+    )
+
+# ============================================================
+# FEEDBACK
+# ============================================================
+
+@app.get("/feedback", response_class=HTMLResponse)
+def feedback_page(request: Request):
+    user = get_current_user(request)
+    return templates.TemplateResponse(
+        "feedback.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state
+        }
+    )
+
+# ============================================================
+# FEEDBACK send
+# ============================================================
+
+@app.post("/api/feedback/send")
+async def feedback_send(request: Request):
+
+    data = await request.json()
+
+    subject = (data.get("subject") or "").strip()
+    message = (data.get("message") or "").strip()
+    page = (data.get("page") or "").strip()
+    email = (data.get("email") or "").strip()
+    name = (data.get("name") or "").strip()
+
+    if not message:
+        return JSONResponse(
+            {"status": "error", "message": "Message required"},
+            status_code=400
+        )
+
+    try:
+        result = core.create_feedback_record({
+            "name": name,
+            "email": email,
+            "subject": subject,
+            "message": message,
+            "page": page
+        })
+
+        return {
+            "status": "ok",
+            "id": result.get("id")
+        }
+
+    except Exception as e:
+
+        err_text = str(e)
+        err_lower = err_text.lower()
+
+        is_temp = (
+            "429" in err_text or
+            "timeout" in err_lower or
+            "connection" in err_lower or
+            "503" in err_text or
+            "502" in err_text or
+            "504" in err_text or
+            "500" in err_text
+        )
+
+        if is_temp:
+            try:
+                now_utc = datetime.datetime.utcnow().isoformat()
+
+                buffer_result = core.save_feedback_buffer_record({
+                    "created_at": now_utc,
+                    "name": name,
+                    "email": email,
+                    "subject": subject,
+                    "message": message,
+                    "page": page,
+                    "error_text": err_text
+                })
+
+                return {
+                    "status": "buffer_saved",
+                    "local_id": buffer_result.get("local_id"),
+                    "message": "Saved to buffer"
+                }
+
+            except Exception as buffer_error:
+                return JSONResponse(
+                    {
+                        "status": "hard_fail",
+                        "message": str(buffer_error)
+                    },
+                    status_code=500
+                )
+
+        return JSONResponse(
+            {"status": "error", "message": err_text},
+            status_code=500
+        )
+
+# ============================================================
+# FEEDBACK STATUS UPDATE
+# ============================================================
+
+@app.post("/api/feedback/status")
+async def feedback_update_status(request: Request):
+
+    data = await request.json()
+
+    record_id = data.get("id")
+    status = data.get("status")
+
+    user = get_current_user(request)
+
+    if not record_id or not status:
+        return JSONResponse({"error": "Invalid data"}, status_code=400)
+
+    try:
+        name = None
+        if user:
+            name = user["fields"].get("Name") or user["fields"].get("Email")
+
+        core.update_feedback_status(record_id, status, name)
+
+        return {"status": "ok"}
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+# ============================================================
+# HELP
+# ============================================================
+
+@app.get("/help", response_class=HTMLResponse)
+def help_page(request: Request):
+    user = get_current_user(request)
+    return templates.TemplateResponse(
+        "help.html",
         {
             "request": request,
             "user": user,
@@ -438,6 +585,9 @@ def simple_page(request: Request):
         {"request": request, "user": user}
     )
 
+# ============================================================
+# ADVANCED MODE (unchanged API)
+# ============================================================
 
 @app.get("/advanced", response_class=HTMLResponse)
 def advanced(request: Request):
@@ -583,8 +733,9 @@ def messages_page(request: Request):
     )
 
 # ============================================================
-# API для списка сообщений   заглушка временная
+# API MESSAGES LIST
 # ============================================================
+
 @app.get("/api/messages/list")
 def messages_list(request: Request):
 
@@ -592,20 +743,150 @@ def messages_list(request: Request):
     if not user:
         return JSONResponse({"error": "Unauthorized"}, status_code=403)
 
-    return {
-        "items": [
-            {
-                "title": "System notification",
-                "preview": "Messages module created and ready for development.",
-                "time": "now"
-            },
-            {
-                "title": "Moderator note",
-                "preview": "User clarification flow will be added next.",
-                "time": "today"
+    role = user["fields"].get("Role", "user")
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    try:
+        records = core.list_feedback_records()
+
+        items = []
+
+        for rec in records:
+            fields = rec.get("fields", {})
+
+            items.append({
+                "id": rec.get("id"),
+                "date": fields.get("fldmrXTsjH2P0RrAd") or fields.get("Date"),
+                "name": fields.get("fldQWIPuNzQaPzZ3Q") or fields.get("Name"),
+                "email": fields.get("fldnpx1rtg3XjEYx6") or fields.get("Email"),
+                "subject": fields.get("fldFJa7ZFFGallWxH") or fields.get("Subject"),
+                "message": fields.get("fld7bhc2zngIgj1B2") or fields.get("Message"),
+                "page": fields.get("fld23LeOQj9UD5Bls") or fields.get("Page"),
+                "status": fields.get("fldH2ZVXQPq07ATdU") or fields.get("Status") or "New",
+                "answered_by": fields.get("fldtr3v4oe8jk8eij") or fields.get("AnsweredBy"),
+                "answered_at": fields.get("fldPiiU6NgrHZb6gt") or fields.get("AnsweredAt"),
+                "answer_text": fields.get("fldpb9lEkDObdhFuV") or fields.get("AnswerText"),
+                "answer_status": fields.get("fldwJLeIDcjqgF22U") or fields.get("AnswerStatus")
+            })
+
+        unread_count = sum(1 for x in items if x.get("status") == "New")
+
+        return {
+            "status": "ok",
+            "total": len(items),
+            "unread": unread_count,
+            "items": items
+        }
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+# ============================================================
+# API MESSAGE ITEM
+# ============================================================
+
+@app.get("/api/messages/item/{record_id}")
+def message_item(record_id: str, request: Request):
+
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=403)
+
+    role = user["fields"].get("Role", "user")
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    try:
+        rec = core.get_feedback_record(record_id)
+        fields = rec.get("fields", {})
+
+        return {
+            "status": "ok",
+            "item": {
+                "id": rec.get("id"),
+                "date": fields.get("fldmrXTsjH2P0RrAd") or fields.get("Date"),
+                "name": fields.get("fldQWIPuNzQaPzZ3Q") or fields.get("Name"),
+                "email": fields.get("fldnpx1rtg3XjEYx6") or fields.get("Email"),
+                "subject": fields.get("fldFJa7ZFFGallWxH") or fields.get("Subject"),
+                "message": fields.get("fld7bhc2zngIgj1B2") or fields.get("Message"),
+                "page": fields.get("fld23LeOQj9UD5Bls") or fields.get("Page"),
+                "status_value": fields.get("fldH2ZVXQPq07ATdU") or fields.get("Status") or "New",
+                "notes": fields.get("fldLXhVAWAyFmpUn2") or fields.get("Notes"),
+                "answered_by": fields.get("fldtr3v4oe8jk8eij") or fields.get("AnsweredBy"),
+                "answered_at": fields.get("fldPiiU6NgrHZb6gt") or fields.get("AnsweredAt"),
+                "answer_text": fields.get("fldpb9lEkDObdhFuV") or fields.get("AnswerText"),
+                "answer_status": fields.get("fldwJLeIDcjqgF22U") or fields.get("AnswerStatus")
             }
-        ]
-    }
+        }
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+# ============================================================
+# API MESSAGE STATUS UPDATE
+# ============================================================
+
+@app.post("/api/messages/status")
+async def message_status_update(request: Request):
+
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=403)
+
+    role = user["fields"].get("Role", "user")
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    data = await request.json()
+
+    record_id = data.get("id")
+    status_value = data.get("status")
+
+    if not record_id or not status_value:
+        return JSONResponse({"error": "Invalid data"}, status_code=400)
+
+    try:
+        actor = user["fields"].get("Name") or user["fields"].get("Email") or "Admin"
+        core.update_feedback_status(record_id, status_value, actor)
+
+        return {"status": "ok"}
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+# ============================================================
+# API MESSAGE REPLY SAVE
+# ============================================================
+
+@app.post("/api/messages/reply")
+async def message_reply_save(request: Request):
+
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=403)
+
+    role = user["fields"].get("Role", "user")
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    data = await request.json()
+
+    record_id = data.get("id")
+    answer_text = (data.get("answer_text") or "").strip()
+
+    if not record_id or not answer_text:
+        return JSONResponse({"error": "Invalid data"}, status_code=400)
+
+    try:
+        actor = user["fields"].get("Name") or user["fields"].get("Email") or "Admin"
+        core.save_feedback_reply(record_id, answer_text, actor)
+
+        return {"status": "ok"}
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 # ============================================================
 # SIMPLE MODE ANALYZE  ✅ FIXED
@@ -630,10 +911,13 @@ async def simple_analyze(request: Request):
     
     # ==   print("AI MODE:", "AI" if "analysis_notes" in analysis and "ai_primary" in analysis.get("analysis_notes", []) else "FALLBACK")
 
+     # analysis can return {"error": "..."}                                         
     if isinstance(analysis, dict) and "error" in analysis:
         return JSONResponse({"error": analysis["error"]}, status_code=400)
 
+     # --- duplicate search (Airtable) ---                                        
     pat = core.load_env()
+     # what we compare: title is the best query (fallback to full)                                                                
     query = analysis.get("title") or analysis.get("full") or str(raw_text)
 
     dup_result = core.safe_find_best_duplicate(

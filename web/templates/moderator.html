@@ -2,8 +2,8 @@
 ============================================================
 Project: MindMesh
 File: moderator.html
-Version: 1.0
-Date: 22.03.2026
+Version: 1.1
+Date: 03.04.2026
 Purpose:
 Moderator Panel
 ============================================================
@@ -19,33 +19,40 @@ Moderator Panel
 
 <link rel="stylesheet" href="/static/css/style.css">
 <link rel="icon" href="/static/favicon.png">
+<script src="/static/js/i18n.js"></script>
 
 </head>
 
 <body>
 
+<div style="display:flex; gap:6px; margin:12px 0 0 12px;">
+  <button class="btn small subtle" onclick="setLanguage('ru')">RU</button>
+  <button class="btn small subtle" onclick="setLanguage('en')">EN</button>
+  <button class="btn small subtle" onclick="setLanguage('he')">HE</button>
+</div>
+
 <div class="container">
 <div class="card">
 
-<h1>🧩 MindMesh Moderator Center</h1>
-<p style="opacity:0.7;">Moderation Panel</p>
+<h1 data-i18n="moderator_title">🧩 MindMesh Moderator Center</h1>
+<p style="opacity:0.7;" data-i18n="moderator_subtitle">Moderation Panel</p>
 
 <hr>
 
-<h3>Panels</h3>
+<h3 data-i18n="moderator_panels">Panels</h3>
 
 <div class="admin-card">
 
 <div style="display:flex; gap:10px; align-items:center;">
 
 <select id="panelSelector" class="btn small">
-<option value="">Select panel...</option>
-<option value="/cabinet">User Cabinet</option>
-<option value="/simple">Simple Mode</option>
-<option value="/advanced">Advanced Mode</option>
+<option value="" data-i18n="moderator_select_panel">Select panel...</option>
+<option value="/cabinet" data-i18n="moderator_panel_cabinet">User Cabinet</option>
+<option value="/simple" data-i18n="moderator_panel_simple">Simple Mode</option>
+<option value="/advanced" data-i18n="moderator_panel_advanced">Advanced Mode</option>
 </select>
 
-<button class="btn small" onclick="openPanel()">
+<button class="btn small" onclick="openPanel()" data-i18n="moderator_open">
 Open →
 </button>
 
@@ -55,19 +62,19 @@ Open →
 
 <hr>
 
-<h3>Users Overview</h3>
+<h3 data-i18n="moderator_users_overview">Users Overview</h3>
 
 <div class="admin-card">
 
 <div class="ideas-line">
 
 <div class="ideas-left">
-<b>Total Users:</b>
+<b data-i18n="moderator_total_users_label">Total Users:</b>
 <span id="moderator_total_users">loading...</span>
 </div>
 
 <div class="ideas-right">
-<button class="btn small" onclick="openUsersPanel()">
+<button class="btn small" onclick="openUsersPanel()" data-i18n="moderator_manage_users">
 Manage Users →
 </button>
 </div>
@@ -78,25 +85,27 @@ Manage Users →
 
 <hr>
 
-<h3>Ideas Overview</h3>
+<h3 data-i18n="moderator_ideas_overview">Ideas Overview</h3>
 
 <div class="admin-card">
 
-<div id="ideas_loading">
+<div id="ideas_loading" data-i18n="moderator_loading">
 Загрузка, ждите...
 </div>
 
 <div class="ideas-line">
 
 <div class="ideas-left">
-<b>Total Ideas:</b>
+<b data-i18n="moderator_total_ideas_label">Total Ideas:</b>
 <span id="moderator_total_ideas">loading...</span>
 </div>
 
 <div class="ideas-right">
-Today: <span id="moderator_ideas_today">-</span>
-&nbsp;&nbsp; Week: <span id="moderator_ideas_week">-</span>
-&nbsp;&nbsp; Month: <span id="moderator_ideas_month">-</span>
+<span data-i18n="moderator_today">Today</span>: <span id="moderator_ideas_today">-</span>
+&nbsp;&nbsp;
+<span data-i18n="moderator_week">Week</span>: <span id="moderator_ideas_week">-</span>
+&nbsp;&nbsp;
+<span data-i18n="moderator_month">Month</span>: <span id="moderator_ideas_month">-</span>
 </div>
 
 </div>
@@ -107,27 +116,26 @@ Today: <span id="moderator_ideas_today">-</span>
 
 <hr>
 
-<h3>Очередь модерации</h3>
+<h3 data-i18n="moderator_queue_title">Moderation Queue</h3>
 
 <div class="admin-card">
 
-<p><b>Очередь отзывов:</b> <span id="moderator_review_queue">-</span></p>
-<p><b>ИИ в процессе разработки:</b> <span id="moderator_ai_pending">-</span></p>
-<p><b>Duplicates:</b> <span id="moderator_duplicates">-</span></p>
+<p><b data-i18n="moderator_review_queue">Review Queue:</b> <span id="moderator_review_queue">-</span></p>
+<p><b data-i18n="moderator_ai_pending">AI Pending:</b> <span id="moderator_ai_pending">-</span></p>
+<p><b data-i18n="moderator_duplicates">Duplicates:</b> <span id="moderator_duplicates">-</span></p>
 
 </div>
 
-
 <hr>
 
-<h3>Communication</h3>
+<h3 data-i18n="moderator_communication">Communication</h3>
 
 <div class="admin-card">
 
 <div class="ideas-line">
 
 <div class="ideas-left">
-<b>Messages:</b>
+<b data-i18n="moderator_messages">Messages:</b>
 <span id="messages_count">loading...</span>
 </div>
 
@@ -141,11 +149,11 @@ Today: <span id="moderator_ideas_today">-</span>
 
 <div class="buttons">
 
-<button class="btn small" onclick="openMessages()">
+<button class="btn small" onclick="openMessages()" data-i18n="moderator_open_messages">
 Open Messages →
 </button>
 
-<button class="btn small secondary">
+<button class="btn small secondary" data-i18n="moderator_send_message">
 Send Message
 </button>
 
@@ -155,7 +163,7 @@ Send Message
 
 <hr>
 
-<h3>Moderator Log</h3>
+<h3 data-i18n="moderator_log">Moderator Log</h3>
 
 <div class="log" id="moderator-log">
 Loading...
@@ -164,8 +172,23 @@ Loading...
 </div>
 </div>
 
+<footer style="text-align:center; padding:15px; color:#666;">
+  <div data-i18n="footer_text">MindMesh — structure instead of chaos</div>
+  <div style="margin-top:6px;">
+    <a href="mailto:mindmeshbasic@gmail.com">mindmeshbasic@gmail.com</a>
+  </div>
+</footer>
+
 <script src="/static/js/system_workdesk.js"></script>
 <script src="/static/js/moderator_panel.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof applyTranslations === "function") {
+    applyTranslations();
+  }
+});
+</script>
 
 </body>
 </html>
