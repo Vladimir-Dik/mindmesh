@@ -97,6 +97,23 @@
   "profile_future_title": "יכולות החשבון",
   "profile_quick_links_title": "קישורים מהירים",
   "profile_btn_main_data": "נתוני פרופיל",
+  "profile_country": "מדינה",
+  "profile_language": "שפה",
+  "profile_notes_title": "הערות",
+  "profile_postal_address": "כתובת למשלוח",
+  "profile_city": "עיר",
+  "profile_postal_code": "מיקוד",
+  "profile_street": "רחוב",
+  "profile_house_number": "מספר בית",
+  "profile_change_subscription": "שנה מנוי",
+  "profile_change_subscription_hint": "בחירת המנוי תהיה זמינה בהמשך.",
+  "profile_edit_allowed_message": "ניתן לעדכן את נתוני הפרופיל ולשמור את השינויים.",
+  "settings_profile_button": "הגדרות פרופיל",
+"profile_role_title": "תפקיד:",
+"profile_auth_mode_title": "מצב כניסה:",
+"profile_auth_mode_full": "מלא",
+"profile_auth_mode_light": "מוגבל",
+"profile_no_changes_message": "אין שינויים לשמירה.",  
 
   "cabinet_messages_title": "הודעות",
   "cabinet_messages_label": "הודעות:",
@@ -437,9 +454,23 @@
 "settings_future_hint": "חלקי ההגדרות הוכנו. הפעולות יתווספו בהמשך.",
 "settings_quick_links_title": "קישורים מהירים",
 "settings_back_to_cabinet": "חזרה לאזור האישי",
+"settings_send_email": "שלח אימייל",
 
 "my_ideas_title": "הרעיונות שלי",
 "my_ideas_subtitle": "רשימת הרעיונות שלך",
 "my_ideas_status": "סטטוס",
-"my_ideas_empty": "אין לך רעיונות עדיין"
+"my_ideas_empty": "אין לך רעיונות עדיין",
+
+"drafts_title": "טיוטות",
+"drafts_subtitle": "רשימת הטיוטות שלך",
+"drafts_status": "סטטוס",
+"drafts_empty": "אין לך טיוטות עדיין",
+"drafts_back": "חזרה לאזור האישי",
+
+"profile_subscription_title": "מנוי:",
+"profile_data_title": "נתוני פרופיל",
+"profile_first_name": "שם פרטי",
+"profile_last_name": "שם משפחה",
+"profile_email_edit": "כתובת אימייל",
+"profile_edit_limit": "שינויים שבוצעו"
 }

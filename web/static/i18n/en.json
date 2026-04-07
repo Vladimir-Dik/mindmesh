@@ -3,7 +3,7 @@
     "project": "MindMesh",
     "file": "en.json",
     "version": "2.3",
-    "date": "04.04.2026",
+    "date": "06.04.2026",
     "description": "English language pack — UI + Assistant translations"
   },
 
@@ -87,6 +87,23 @@
   "profile_future_title": "Account capabilities",
   "profile_quick_links_title": "Quick links",
   "profile_btn_main_data": "Profile data",
+  "profile_country": "Country",
+  "profile_language": "Language",
+  "profile_notes_title": "Notes",
+  "profile_postal_address": "Postal address",
+  "profile_city": "City",
+  "profile_postal_code": "Postal code",
+  "profile_street": "Street",
+  "profile_house_number": "House number",
+  "profile_change_subscription": "Change subscription",
+  "profile_change_subscription_hint": "Subscription selection will be available later.",
+  "profile_edit_allowed_message": "You can update your profile data and save changes.",
+  "settings_profile_button": "Profile settings",
+  "profile_role_title": "Role:",
+"profile_auth_mode_title": "Login mode:",
+"profile_auth_mode_full": "Full",
+"profile_auth_mode_light": "Limited",
+"profile_no_changes_message": "No changes to save.",
 
   "cabinet_messages_title": "Messages",
   "cabinet_messages_label": "Messages:",
@@ -449,8 +466,25 @@
 "settings_future_hint": "Settings sections are prepared. Actions will be added later.",
 "settings_quick_links_title": "Quick links",
 "settings_back_to_cabinet": "Back to cabinet",
+"settings_send_email": "Send Email",
 "my_ideas_title": "My ideas",
 "my_ideas_subtitle": "List of your ideas",
 "my_ideas_status": "Status",
-"my_ideas_empty": "You have no ideas yet"
+"my_ideas_empty": "You have no ideas yet",
+
+"drafts_title": "Drafts",
+"drafts_subtitle": "List of your drafts",
+"drafts_status": "Status",
+"drafts_empty": "You don't have any drafts yet",
+"drafts_back": "Back to cabinet",
+
+"profile_subscription_title": "Subscription:",
+"profile_data_title": "Profile data",
+"profile_first_name": "First name",
+"profile_last_name": "Last name",
+"profile_email_edit": "Email address",
+"profile_edit_limit": "Edits used",
+
+"back_to_cabinet": "Back to cabinet",
+"send_message": "Send Message"
 }

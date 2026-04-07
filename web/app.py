@@ -407,6 +407,8 @@ def cabinet(request: Request):
 
     except Exception:
         pass
+    subscription_status = get_subscription_status(user)
+    subscription_label = subscription_label_from_code(subscription_status)
 
     return templates.TemplateResponse(
         "kabinet.html",
@@ -415,11 +417,121 @@ def cabinet(request: Request):
             "user": user,
             "system": system_state,
             "user_messages_total": user_messages_total,
-            "user_messages_answered": user_messages_answered
+            "user_messages_answered": user_messages_answered,
+            "subscription_label": subscription_label
         }
     )
 
 # ============================================================
+# PROFILE EDIT POLICY
+# ============================================================
+
+PROFILE_EDIT_LIMIT = 3
+
+def get_subscription_status(user):
+    values = user["fields"].get("SubscriptionStatus") or []
+    if not values:
+        return "guest"
+    return values[0]
+
+def subscription_label_from_code(code: str):
+    mapping = {
+        "guest": "guest",
+        "free": "free",
+        "paid": "paid",
+        "vip": "vip",
+        "friend": "friend"
+    }
+    return mapping.get(code, code)
+
+# ============================================================
+# PROFILE UPDATE
+# ============================================================
+
+@app.post("/api/profile/update")
+async def profile_update(request: Request):
+
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=403)
+
+    subscription_status = get_subscription_status(user)
+    profile_edit_count = int(user["fields"].get("ProfileEditCount") or 0)
+
+    user_id = user.get("id")
+    has_ideas = False
+
+    try:
+        records = core.list_ideas_records()
+
+        for rec in records:
+            fields = rec.get("fields", {})
+            authors = fields.get("Author", []) or []
+
+            if user_id in authors:
+                has_ideas = True
+                break
+
+    except Exception:
+        return JSONResponse({"error": "Ideas check failed"}, status_code=500)
+
+    if subscription_status in ["guest", "free"]:
+        return JSONResponse(
+            {"error": "Profile editing is not available for this subscription"},
+            status_code=403
+        )
+
+    if not has_ideas:
+        return JSONResponse(
+            {"error": "At least one idea is required"},
+            status_code=403
+        )
+
+    if profile_edit_count >= PROFILE_EDIT_LIMIT:
+        return JSONResponse(
+            {"error": "Profile edit limit reached"},
+            status_code=403
+        )
+
+    data = await request.json()
+
+    first_name = (data.get("first_name") or "").strip()
+    last_name = (data.get("last_name") or "").strip()
+    email = (data.get("email") or "").strip()
+    country = (data.get("country") or "").strip()
+    language = (data.get("language") or "").strip()
+    contacts = (data.get("contacts") or "").strip()
+    notes = (data.get("notes") or "").strip()
+    postal_address = (data.get("postal_address") or "").strip()
+    city = (data.get("city") or "").strip()
+    postal_code = (data.get("postal_code") or "").strip()
+    street = (data.get("street") or "").strip()
+    house_number = (data.get("house_number") or "").strip()
+
+    full_name = " ".join(x for x in [first_name, last_name] if x).strip()
+
+    try:
+        core.update_user_profile_data(
+            user_id=user["id"],
+            full_name=full_name,
+            email=email,
+            country=country,
+            language=language,
+            contacts=contacts,
+            notes=notes,
+            postal_address=postal_address,
+            city=city,
+            postal_code=postal_code,
+            street=street,
+            house_number=house_number,
+            new_edit_count=profile_edit_count + 1
+        )
+        return {"status": "ok"}
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+## ============================================================
 # PROFILE
 # ============================================================
 
@@ -431,14 +543,67 @@ def profile_page(request: Request):
     if not user:
         return RedirectResponse("/login", status_code=302)
 
+    subscription_status = get_subscription_status(user)
+    subscription_label = subscription_label_from_code(subscription_status)
+
+    profile_edit_count = int(user["fields"].get("ProfileEditCount") or 0)
+
+    user_id = user.get("id")
+    has_ideas = False
+
+    try:
+        records = core.list_ideas_records()
+
+        for rec in records:
+            fields = rec.get("fields", {})
+            authors = fields.get("Author", []) or []
+
+            if user_id in authors:
+                has_ideas = True
+                break
+
+    except Exception:
+        has_ideas = False
+
+    can_edit_profile = False
+    profile_edit_reason = ""
+
+    if subscription_status == "guest":
+        profile_edit_reason = "Редактирование профиля недоступно для гостя."
+    elif subscription_status == "free":
+        profile_edit_reason = "Редактирование профиля доступно для платных подписчиков."
+    elif not has_ideas:
+        profile_edit_reason = "Редактирование профиля станет доступно после добавления хотя бы одной идеи."
+    elif profile_edit_count >= PROFILE_EDIT_LIMIT:
+        profile_edit_reason = "Лимит изменений профиля исчерпан."
+    else:
+        can_edit_profile = True
+
+    profile_first_name, profile_last_name = split_name(
+        user["fields"].get("Name") or ""
+    )
+
     return templates.TemplateResponse(
         "profile.html",
         {
             "request": request,
             "user": user,
-            "system": system_state
+            "system": system_state,
+
+            "subscription_status": subscription_status,
+            "subscription_label": subscription_label,
+
+            "profile_edit_count": profile_edit_count,
+            "profile_edit_limit": PROFILE_EDIT_LIMIT,
+            "can_edit_profile": can_edit_profile,
+            "profile_edit_reason": profile_edit_reason,
+
+            "profile_first_name": profile_first_name,
+            "profile_last_name": profile_last_name
         }
     )
+
+
 
 # ============================================================
 # settings
@@ -511,6 +676,56 @@ def user_messages_page(request: Request):
             "system": system_state,
             "items": items,
             "answered_count": answered_count
+        }
+    )
+
+# ============================================================
+# DRAFTS
+# ============================================================
+
+@app.get("/drafts", response_class=HTMLResponse)
+def drafts_page(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+
+    user_id = user.get("id")
+    items = []
+
+    try:
+        records = core.list_ideas_records()
+
+        for rec in records:
+            fields = rec.get("fields", {})
+            authors = fields.get("Author", []) or []
+            status_value = fields.get("Status") or ""
+
+            if user_id not in authors:
+                continue
+
+            if status_value != "Draft":
+                continue
+
+            items.append({
+                "id": rec.get("id"),
+                "idea_id": fields.get("IdeaID"),
+                "title": fields.get("Title"),
+                "status": status_value,
+                "date": fields.get("Date Added")
+            })
+
+    except Exception:
+        items = []
+
+    return templates.TemplateResponse(
+        "drafts.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state,
+            "items": items
         }
     )
 
@@ -682,6 +897,56 @@ def my_ideas_page(request: Request):
 
     return templates.TemplateResponse(
         "my_ideas.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state,
+            "items": items
+        }
+    )
+
+# ============================================================
+# ARCHIVE
+# ============================================================
+
+@app.get("/archive", response_class=HTMLResponse)
+def archive_page(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+
+    user_id = user.get("id")
+    items = []
+
+    try:
+        records = core.list_ideas_records()
+
+        for rec in records:
+            fields = rec.get("fields", {})
+            authors = fields.get("Author", []) or []
+            status_value = fields.get("Status") or ""
+
+            if user_id not in authors:
+                continue
+
+            if status_value != "Archived":
+                continue
+
+            items.append({
+                "id": rec.get("id"),
+                "idea_id": fields.get("IdeaID"),
+                "title": fields.get("Title"),
+                "status": status_value,
+                "date": fields.get("Date Added")
+            })
+
+    except Exception:
+        items = []
+
+    return templates.TemplateResponse(
+        "archive.html",
         {
             "request": request,
             "user": user,
@@ -1402,6 +1667,14 @@ def ideas_stats():
         "stats": stats
     }
 
+
+# ============================================================
+# ============================================================
+# user profile
+# ============================================================
+# ============================================================
+
+
 # ============================================================
 # UPDATE USER PROFILE
 # ============================================================
@@ -1425,6 +1698,43 @@ async def update_user(request: Request):
         return {"status": "ok"}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+
+
+# ============================================================
+# PROFILE HELPERS
+# ============================================================
+
+PROFILE_EDIT_LIMIT = 3
+
+
+def get_subscription_status(user):
+    values = user["fields"].get("SubscriptionStatus") or []
+    if not values:
+        return "guest"
+    return values[0]
+
+
+def subscription_label_from_code(code: str):
+    mapping = {
+        "guest": "guest",
+        "free": "free",
+        "paid": "paid",
+        "vip": "vip",
+        "friend": "friend"
+    }
+    return mapping.get(code, code)
+
+
+def split_name(full_name: str):
+    full_name = (full_name or "").strip()
+    if not full_name:
+        return "", ""
+
+    parts = full_name.split(" ", 1)
+    first_name = parts[0].strip() if len(parts) > 0 else ""
+    last_name = parts[1].strip() if len(parts) > 1 else ""
+
+    return first_name, last_name
 
 # ============================================================
 # AUTH INFO

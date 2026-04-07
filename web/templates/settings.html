@@ -2,8 +2,8 @@
   ============================================================
   Project: MindMesh
   File: settings.html
-  Version: 1.0
-  Date: 04.04.2026
+  Version: 1.1
+  Date: 06.04.2026
   Purpose:
   - User settings page
   - Separate module from cabinet
@@ -75,6 +75,13 @@
       <p style="opacity:0.75; margin-top:6px;" data-i18n="settings_email_notifications_hint">
         Раздел подготовлен. Настройки уведомлений будут добавлены позже.
       </p>
+
+      <div class="buttons" style="margin-top:10px;">
+        <a class="btn small secondary"
+           href="mailto:mindmeshbasic@gmail.com"
+           data-i18n="settings_send_email">
+        </a>
+      </div>
     </div>
 
     <div>
@@ -82,6 +89,10 @@
       <p style="opacity:0.75; margin-top:6px;" data-i18n="settings_system_messages_hint">
         Здесь позже появится настройка уведомлений от системы и администрации.
       </p>
+
+      <div class="buttons" style="margin-top:10px;">
+        <a class="btn small secondary" href="/my-messages" data-i18n="cabinet_open_messages"></a>
+      </div>
     </div>
 
   </div>
@@ -109,9 +120,17 @@
   <div class="buttons">
     <a class="btn small secondary" href="/cabinet" data-i18n="settings_back_to_cabinet"></a>
     <a class="btn small secondary" href="/profile" data-i18n="cabinet_btn_profile"></a>
-    <a class="btn small secondary" href="/my-messages" data-i18n="cabinet_open_messages"></a>
-    <a class="btn small secondary" href="/feedback" data-i18n="cabinet_feedback"></a>
-    <a class="btn small secondary" href="/help" data-i18n="cabinet_help"></a>
+    <a class="btn small secondary" href="/simple" data-i18n="nav_simple"></a>
+    <a class="btn small secondary" href="/advanced" data-i18n="nav_advanced"></a>
+    <a class="btn small secondary" href="/" data-i18n="nav_home"></a>
+  </div>
+
+  <hr>
+
+  <!-- BOTTOM LINKS -->
+  <div style="display:flex; gap:12px; font-size:0.95em; opacity:0.85;">
+    <a href="/feedback" data-i18n="cabinet_feedback"></a>
+    <a href="/help" data-i18n="cabinet_help"></a>
   </div>
 
 </div>

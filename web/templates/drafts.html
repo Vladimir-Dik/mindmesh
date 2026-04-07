@@ -1,0 +1,62 @@
+{#
+  ============================================================
+  Project: MindMesh
+  File: drafts.html
+  Version: 1.0
+  Date: 04.04.2026
+  Purpose:
+  - User drafts list
+  - Minimal load, no auto refresh
+  ============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+
+  <h1 data-i18n="drafts_title"></h1>
+  <p style="opacity:0.8;" data-i18n="drafts_subtitle"></p>
+
+  <hr>
+
+  {% if items and items|length > 0 %}
+
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+
+      {% for item in items %}
+        <div class="idea-item">
+
+          <div><b>{{ item.title or "—" }}</b></div>
+
+          <div style="font-size:0.85em; opacity:0.7;">
+            {{ item.idea_id or item.id }}
+          </div>
+
+          <div style="font-size:0.85em;">
+            <span data-i18n="drafts_status"></span>:
+            {{ item.status or "—" }}
+          </div>
+
+          <div style="font-size:0.85em; opacity:0.7;">
+            {{ item.date or "" }}
+          </div>
+
+        </div>
+      {% endfor %}
+
+    </div>
+
+  {% else %}
+
+    <p style="margin-top:20px;" data-i18n="drafts_empty"></p>
+
+  {% endif %}
+
+  <div class="buttons" style="margin-top:20px;">
+    <a class="btn small secondary" href="/cabinet" data-i18n="drafts_back"></a>
+  </div>
+
+</div>
+
+{% endblock %}

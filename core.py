@@ -916,3 +916,50 @@ def save_feedback_reply(record_id: str, answer_text: str, answered_by: str = Non
         raise requests.RequestException(r.text, response=r)
 
     return True
+
+# ============================================================
+# ============================================================
+# user profile
+# ============================================================
+# ============================================================
+    
+def update_user_profile_data(
+    user_id: str,
+    full_name: str,
+    email: str,
+    country: str,
+    language: str,
+    contacts: str,
+    notes: str,
+    postal_address: str,
+    city: str,
+    postal_code: str,
+    street: str,
+    house_number: str,
+    new_edit_count: int
+):
+    pat = load_env()
+    url = f"{users_url(pat)}/{user_id}"
+    headers = airtable_headers(pat)
+
+    payload = {
+        "fields": {
+            "Name": full_name,
+            "Email": email,
+            "Country": country,
+            "Language": language,
+            "Contacts": contacts,
+            "Notes": notes,
+            "PostalAddress": postal_address,
+            "City": city,
+            "PostalCode": postal_code,
+            "Street": street,
+            "HouseNumber": house_number,
+            "ProfileEditCount": new_edit_count
+        }
+    }
+
+    r = requests.patch(url, headers=headers, json=payload, timeout=20)
+    r.raise_for_status()
+
+    return True
