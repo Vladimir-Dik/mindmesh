@@ -1,8 +1,14 @@
 # ============================================================
 # Project: MindMesh
 # File: app.py
-# Version: 3.5 (Stable Searchwave Redirect Fix)
-# Date: 19.02.2026
+# Version: 4.0
+# Date: 09.04.2026
+# Purpose:
+# - Main web app
+# - User auth
+# - Profile v2
+# - Reviewer workspace
+# - Feedback and fallback
 # ============================================================
 
 from fastapi import FastAPI, Request, Form
@@ -423,6 +429,28 @@ def cabinet(request: Request):
     )
 
 # ============================================================
+# WORKDESK
+# ============================================================
+
+@app.get("/workdesk", response_class=HTMLResponse)
+def workdesk_page(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return RedirectResponse("/login?next=/workdesk", status_code=302)
+
+    return templates.TemplateResponse(
+        "workdesk.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state
+        }
+    )
+
+
+# ============================================================
 # PROFILE EDIT POLICY
 # ============================================================
 
@@ -483,7 +511,7 @@ async def profile_update(request: Request):
 
     if not has_ideas:
         return JSONResponse(
-            {"error": "At least one idea is required"},
+            {"error": "At least one saved idea is required"},
             status_code=403
         )
 
@@ -502,11 +530,24 @@ async def profile_update(request: Request):
     language = (data.get("language") or "").strip()
     contacts = (data.get("contacts") or "").strip()
     notes = (data.get("notes") or "").strip()
+
     postal_address = (data.get("postal_address") or "").strip()
     city = (data.get("city") or "").strip()
     postal_code = (data.get("postal_code") or "").strip()
     street = (data.get("street") or "").strip()
     house_number = (data.get("house_number") or "").strip()
+
+    phone_user = (data.get("phone_user") or "").strip()
+    avatar_url = (data.get("avatar_url") or "").strip()
+    bio = (data.get("bio") or "").strip()
+    about = (data.get("about") or "").strip()
+    education = (data.get("education") or "").strip()
+    interests = (data.get("interests") or "").strip()
+    expertise = (data.get("expertise") or "").strip()
+    reviewer_level = (data.get("reviewer_level") or "").strip()
+    reviewer_specialization = (data.get("reviewer_specialization") or "").strip()
+    preferred_language = (data.get("preferred_language") or "").strip()
+    notification_settings = (data.get("notification_settings") or "").strip()
 
     full_name = " ".join(x for x in [first_name, last_name] if x).strip()
 
@@ -514,6 +555,7 @@ async def profile_update(request: Request):
         core.update_user_profile_data(
             user_id=user["id"],
             full_name=full_name,
+            last_name=last_name,
             email=email,
             country=country,
             language=language,
@@ -524,11 +566,23 @@ async def profile_update(request: Request):
             postal_code=postal_code,
             street=street,
             house_number=house_number,
+            phone_user=phone_user,
+            avatar_url=avatar_url,
+            bio=bio,
+            about=about,
+            education=education,
+            interests=interests,
+            expertise=expertise,
+            reviewer_level=reviewer_level,
+            reviewer_specialization=reviewer_specialization,
+            preferred_language=preferred_language,
+            notification_settings=notification_settings,
             new_edit_count=profile_edit_count + 1
         )
         return {"status": "ok"}
 
     except Exception as e:
+        print("PROFILE UPDATE ERROR:", str(e))
         return JSONResponse({"error": str(e)}, status_code=500)
 
 ## ============================================================
@@ -1669,10 +1723,30 @@ def ideas_stats():
 
 
 # ============================================================
+# MODERATION HUB
 # ============================================================
-# user profile
-# ============================================================
-# ============================================================
+
+@app.get("/moderation", response_class=HTMLResponse)
+def moderation_page(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return RedirectResponse("/login?next=/moderation", status_code=302)
+
+    role = user["fields"].get("Role", "user")
+
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return RedirectResponse("/", status_code=302)
+
+    return templates.TemplateResponse(
+        "moderation.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state
+        }
+    )
 
 
 # ============================================================
@@ -1764,6 +1838,83 @@ def auth_me(request: Request):
     }
     
 
+# ============================================================
+# REVIEWER
+# ============================================================
+
+@app.get("/reviewer", response_class=HTMLResponse)
+def reviewer_page(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return RedirectResponse("/login?next=/reviewer", status_code=302)
+
+    role = user["fields"].get("Role", "user")
+
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return RedirectResponse("/", status_code=302)
+
+    return templates.TemplateResponse(
+        "reviewer.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state
+        }
+    )
+
+# ============================================================
+# REVIEWER API - QUEUE
+# ============================================================
+
+@app.get("/api/reviewer/queue")
+def reviewer_queue(request: Request):
+
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=403)
+
+    role = user["fields"].get("Role", "user")
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    try:
+        records = core.list_ideas_records()
+
+        items = []
+
+        for rec in records:
+            f = rec.get("fields", {})
+
+            # === ФИЛЬТР ДЛЯ REVIEWER ===
+            # идеи, найденные ИИ и ещё не проверенные
+
+            ai_status = f.get("AIReviewStatus")
+            detected = f.get("DetectedByAI") or f.get("DiscoveredByAI")
+            done = f.get("Done")
+
+            if not detected:
+                continue
+
+            if ai_status in ["Done", "Approved"]:
+                continue
+
+            if done:
+                continue
+
+            items.append({
+                "id": rec.get("id"),
+                "fields": f
+            })
+
+        return {
+            "status": "ok",
+            "records": items
+        }
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 # ============================================================
 # HIDDEN ENTRY — SEARCHWAVE

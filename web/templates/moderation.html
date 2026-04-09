@@ -1,0 +1,149 @@
+{#
+  ============================================================
+  Project: MindMesh
+  File: moderation.html
+  Version: 0.2
+  Date: 08.04.2026
+  Purpose:
+  - Moderation hub
+  - Entry page before moderator/admin panels
+  - Uses existing translation keys where available
+  ============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card moderation-card">
+
+  <div class="moderation-head">
+    <div>
+      <h1 data-i18n="nav_reviewer">Стол проверяющего</h1>
+      <p class="nav_reviewer" data-i18n="nav_reviewer">
+        Панель модерации
+      </p>
+    </div>
+
+    <div class="moderation-user-box">
+      <div class="moderation-user-line">
+        <span data-i18n="user">Вы</span>
+        <strong>{{ user.fields.Name or user.fields.Email }}</strong>
+      </div>
+      <div class="moderation-user-line">
+        <span data-i18n="profile_role_title">Роль:</span>
+        <strong>{{ user.fields.Role or "moderator" }}</strong>
+      </div>
+      <div class="moderation-user-line">
+        <span data-i18n="profile_auth_mode_title">Режим входа:</span>
+        <strong>
+          {% if user.access_level == "user_full" %}
+            <span data-i18n="profile_auth_mode_full">Полный</span>
+          {% else %}
+            <span data-i18n="profile_auth_mode_light">Ограниченный</span>
+          {% endif %}
+        </strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="moderation-grid">
+
+    <a class="moderation-tile primary"
+       href="/moderator"
+       onclick="return safeNavigate(event, '/moderator')">
+      <div class="moderation-icon">🧩</div>
+      <div class="moderation-tile-title" data-i18n="moderator_title">Панель модератора</div>
+      <div class="moderation-tile-text" data-i18n="moderator_subtitle">
+        Панель модерации
+      </div>
+    </a>
+
+    <a class="moderation-tile"
+       href="/messages"
+       onclick="return safeNavigate(event, '/messages')">
+      <div class="moderation-icon">✉️</div>
+      <div class="moderation-tile-title" data-i18n="messages_title">Сообщения</div>
+      <div class="moderation-tile-text">
+        Просмотр сообщений и ответы пользователям.
+      </div>
+    </a>
+
+    <a class="moderation-tile"
+       href="/workdesk"
+       onclick="return safeNavigate(event, '/workdesk')">
+      <div class="moderation-icon">🧩</div>
+      <div class="moderation-tile-title" data-i18n="nav_workdesk">Рабочий стол</div>
+      <div class="moderation-tile-text">
+        Возврат в основной рабочий раздел пользователя.
+      </div>
+    </a>
+
+    <a class="moderation-tile"
+       href="/profile"
+       onclick="return safeNavigate(event, '/profile')">
+      <div class="moderation-icon">👤</div>
+      <div class="moderation-tile-title" data-i18n="profile_title">Профиль</div>
+      <div class="moderation-tile-text">
+        Личные данные и параметры профиля.
+      </div>
+    </a>
+
+    <a class="moderation-tile"
+       href="/my-messages"
+       onclick="return safeNavigate(event, '/my-messages')">
+      <div class="moderation-icon">📨</div>
+      <div class="moderation-tile-title" data-i18n="cabinet_messages_title">Сообщения</div>
+      <div class="moderation-tile-text">
+        Ваши личные обращения и ответы системы.
+      </div>
+    </a>
+
+    {% if user.fields.Role in ["admin", "topadmin", "superadmin"] %}
+    <a class="moderation-tile admin"
+       href="/admin"
+       onclick="return safeNavigate(event, '/admin')">
+      <div class="moderation-icon">⚙️</div>
+      <div class="moderation-tile-title" data-i18n="admin_title">Панель администратора</div>
+      <div class="moderation-tile-text" data-i18n="admin_subtitle">
+        Панель операций
+      </div>
+    </a>
+    {% endif %}
+
+    {% if user.fields.Role in ["topadmin", "superadmin"] %}
+    <a class="moderation-tile admin"
+       href="/topadmin"
+       onclick="return safeNavigate(event, '/topadmin')">
+      <div class="moderation-icon">🛠</div>
+      <div class="moderation-tile-title" data-i18n="topadmin_title">TopAdmin</div>
+      <div class="moderation-tile-text" data-i18n="topadmin_subtitle">
+        Расширенная панель администратора
+      </div>
+    </a>
+    {% endif %}
+
+    {% if user.fields.Role in ["superadmin"] %}
+    <a class="moderation-tile admin"
+       href="/searchwave?key=7391"
+       onclick="return safeNavigate(event, '/searchwave?key=7391')">
+      <div class="moderation-icon">🔐</div>
+      <div class="moderation-tile-title">Searchwave</div>
+      <div class="moderation-tile-text">
+        Скрытый служебный вход суперадмина.
+      </div>
+    </a>
+    {% endif %}
+
+  </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof applyTranslations === "function") {
+    applyTranslations();
+  }
+});
+</script>
+
+{% endblock %}

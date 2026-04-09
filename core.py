@@ -1,14 +1,14 @@
 # ============================================================
 # MindMesh
 # File: core.py
-# Version: 1.7
-# Date: 19.02.2026
+# Version: 2.0
+# Date: 09.04.2026
 # Purpose:
 # - Users
 # - Ideas
-# - Correct Airtable link handling
-# - Password update support (bcrypt)
-# - Users list
+# - Feedback
+# - Buffer fallback
+# - Profile v2 support
 # ============================================================
 
 import os
@@ -485,7 +485,7 @@ def is_temporary_airtable_error(exc: Exception) -> bool:
         if response is None:
             return True
 
-        return response.status_code in [429, 500, 502, 503, 504]
+        return response.status_code in [422, 429, 500, 502, 503, 504]
 
     return False
 
@@ -557,7 +557,7 @@ def prepare_and_create_idea(data: dict):
     r = requests.post(url, headers=headers, json=payload)
 
     if not r.ok:
-        print("Airtable error:", r.text)
+ #        print("Airtable error:", r.text)
         r.raise_for_status()
 
     created = r.json()
@@ -703,9 +703,9 @@ def create_simple_failure_log(data: dict):
 
     r = requests.post(url, headers=headers, json=payload)
 
-    if not r.ok:
-        print("FailureLog write error:", r.text)
-        print(dup_result)
+ #    if not r.ok:
+ #        print("FailureLog write error:", r.text)
+  #       print(dup_result)
 
     return r.ok
     
@@ -926,6 +926,7 @@ def save_feedback_reply(record_id: str, answer_text: str, answered_by: str = Non
 def update_user_profile_data(
     user_id: str,
     full_name: str,
+    last_name: str,
     email: str,
     country: str,
     language: str,
@@ -936,30 +937,101 @@ def update_user_profile_data(
     postal_code: str,
     street: str,
     house_number: str,
+    phone_user: str,
+    avatar_url: str,
+    bio: str,
+    about: str,
+    education: str,
+    interests: str,
+    expertise: str,
+    reviewer_level: str,
+    reviewer_specialization: str,
+    preferred_language: str,
+    notification_settings: str,
     new_edit_count: int
 ):
     pat = load_env()
     url = f"{users_url(pat)}/{user_id}"
     headers = airtable_headers(pat)
 
-    payload = {
-        "fields": {
-            "Name": full_name,
-            "Email": email,
-            "Country": country,
-            "Language": language,
-            "Contacts": contacts,
-            "Notes": notes,
-            "PostalAddress": postal_address,
-            "City": city,
-            "PostalCode": postal_code,
-            "Street": street,
-            "HouseNumber": house_number,
-            "ProfileEditCount": new_edit_count
-        }
-    }
+    existing_user = get_user_by_id(user_id)
+    existing_fields = existing_user.get("fields", {}) if existing_user else {}
+
+    role_value = existing_fields.get("Role") or "user"
+
+    subscription_values = existing_fields.get("SubscriptionStatus") or []
+    subscription_value = subscription_values[0] if subscription_values else "guest"
+
+    verification_level = existing_fields.get("VerificationLevel") or "none"
+
+    def normalize_value(value):
+        if value is None:
+            return ""
+        return str(value).strip().strip('"').strip("'").strip()
+
+    reviewer_value_for_status = normalize_value(reviewer_level)
+    if not reviewer_value_for_status:
+        reviewer_value_for_status = existing_fields.get("ReviewerLevel") or "none"
+
+    account_status = (
+        f"role:{role_value} | "
+        f"sub:{subscription_value} | "
+        f"verified:{verification_level} | "
+        f"reviewer:{reviewer_value_for_status or 'none'}"
+    )
+
+    fields = {}
+
+    def add_field(key, value):
+        if value is None:
+            return
+        if isinstance(value, str):
+            value = normalize_value(value)
+            if not value:
+                return
+        fields[key] = value
+
+    # BASIC
+    add_field("Name", full_name)
+    add_field("LastName", last_name)
+    add_field("Email", email)
+    add_field("Country", country)
+    add_field("Language", language)
+
+    # TEXT / PROFILE
+    add_field("Contacts", contacts)
+    add_field("Notes", notes)
+
+    add_field("PostalAddress", postal_address)
+    add_field("City", city)
+    add_field("PostalCode", postal_code)
+    add_field("Street", street)
+    add_field("HouseNumber", house_number)
+
+    add_field("PhoneUser", phone_user)
+    add_field("AvatarURL", avatar_url)
+    add_field("Bio", bio)
+    add_field("About", about)
+    add_field("Education", education)
+    add_field("Interests", interests)
+    add_field("Expertise", expertise)
+
+    add_field("ReviewerLevel", reviewer_level)
+    add_field("ReviewerSpecialization", reviewer_specialization)
+    add_field("PreferredLanguage", preferred_language)
+    add_field("NotificationSettings", notification_settings)
+
+    add_field("AccountStatus", account_status)
+    fields["ProfileEditCount"] = new_edit_count
+
+    payload = {"fields": fields}
+
+#     print("PROFILE UPDATE PAYLOAD:", payload)
 
     r = requests.patch(url, headers=headers, json=payload, timeout=20)
-    r.raise_for_status()
+
+    if not r.ok:
+ #        print("Airtable profile update error:", r.text)
+        raise Exception(f"{r.status_code} Airtable error: {r.text}")
 
     return True

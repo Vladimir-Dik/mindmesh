@@ -2,11 +2,11 @@
   ============================================================
   Project: MindMesh
   File: base.html
-  Version: 1.7
+  Version: 1.8
   Date: 18.02.2026
   Purpose:
   - Global layout template
-  - Navigation and authentication header
+  - workdesk v1
   - Language switch
   - Global Soft Maintenance banner support
   ============================================================
@@ -69,11 +69,41 @@
   </div>
 
   <!-- NAV -->
-  <nav>
-    <a href="/" data-i18n="nav_home"></a>
-    <a href="/simple" data-i18n="nav_simple"></a>
-    <a href="/advanced" data-i18n="nav_advanced"></a>
-  </nav>
+<nav class="main-nav">
+
+  <a href="/"
+     onclick="return safeNavigate(event, '/')"
+     data-i18n="nav_home"></a>
+
+  <a href="/simple"
+     onclick="return safeNavigate(event, '/simple')"
+     data-i18n="nav_simple"></a>
+
+  <a href="/advanced"
+     onclick="return safeNavigate(event, '/advanced')"
+     data-i18n="nav_advanced"></a>
+
+  {% if user %}
+    <a href="/workdesk"
+       onclick="return safeNavigate(event, '/workdesk')"
+       data-i18n="nav_workdesk">Рабочий стол</a>
+  {% else %}
+    <a href="/login?next=/workdesk"
+       onclick="return safeNavigate(event, '/login?next=/workdesk')"
+       data-i18n="nav_workdesk">Рабочий стол</a>
+  {% endif %}
+
+  {% if user and user.fields.Role in ["moderator", "admin", "topadmin", "superadmin"] %}
+   <a href="/reviewer"
+      onclick="return safeNavigate(event, '/reviewer')"
+      data-i18n="nav_reviewer">Стол проверяющего</a>
+ {% else %}
+   <a href="/login?next=/reviewer"
+      onclick="return safeNavigate(event, '/login?next=/reviewer')"
+      data-i18n="nav_reviewer">Стол проверяющего</a>
+ {% endif %}
+
+</nav>
 
   <!-- RIGHT SIDE -->
   <div class="right">

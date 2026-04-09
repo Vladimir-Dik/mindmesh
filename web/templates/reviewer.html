@@ -1,0 +1,149 @@
+{#
+============================================================
+Project: MindMesh
+File: reviewer.html
+Version: 2.2
+Date: 08.04.2026
+Purpose:
+- AI Review Workspace
+- Queue of ideas detected by AI
+- Reviewer actions (approve / duplicate / reject)
+============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card workdesk-card">
+
+  <!-- HEADER -->
+  <div class="workdesk-head">
+
+    <div>
+      <h1 data-i18n="reviewer_title"></h1>
+      <div class="workdesk-subtitle" data-i18n="reviewer_subtitle"></div>
+    </div>
+
+    <div class="workdesk-user-box">
+      <div class="workdesk-user-line">
+        <span>{{ user.fields.Name or user.fields.Email }}</span>
+      </div>
+      <div class="workdesk-user-line">
+        <span data-i18n="profile_role_title"></span>
+        <span>{{ user.fields.Role }}</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- STATS -->
+  <div class="admin-stat-line">
+    <span class="stat-label" data-i18n="moderator_review_queue"></span>
+    <span class="stat-number" id="total-count">0</span>
+  </div>
+
+  <hr>
+
+  <!-- GRID -->
+  <div class="reviewer-columns">
+
+    <!-- IN PROGRESS -->
+    <div>
+      <h3>🟡 В работе (<span id="in-progress-count">0</span>)</h3>
+      <div id="in-progress-list" class="reviewer-list"></div>
+    </div>
+
+    <!-- QUEUE -->
+    <div>
+      <h3>🔵 На проверке (<span id="queue-count">0</span>)</h3>
+      <div id="queue-list" class="reviewer-list"></div>
+    </div>
+
+    <!-- DONE -->
+    <div>
+      <h3>🟢 Завершено (<span id="done-count">0</span>)</h3>
+      <div id="done-list" class="reviewer-list"></div>
+    </div>
+
+  </div>
+
+  <hr>
+
+  <!-- BOTTOM NAV -->
+  <div class="workdesk-grid">
+
+    <a href="#" class="workdesk-tile">
+      <div class="workdesk-icon">⚙️</div>
+      <div class="workdesk-tile-title">Настройки проверяющего</div>
+      <div class="workdesk-tile-text">Профиль, интересы, специализация</div>
+    </a>
+
+    <a href="/archive" class="workdesk-tile">
+      <div class="workdesk-icon">📦</div>
+      <div class="workdesk-tile-title">Архив проверяющего</div>
+      <div class="workdesk-tile-text">Просмотр проверенных идей</div>
+    </a>
+
+    <a href="/feedback" class="workdesk-tile">
+      <div class="workdesk-icon">🛠</div>
+      <div class="workdesk-tile-title">Восстановление</div>
+      <div class="workdesk-tile-text">Fallback и аварийный режим</div>
+    </a>
+
+  </div>
+
+</div>
+
+<script>
+
+function renderCard(item) {
+  return `
+    <div class="review-card">
+      <div class="review-title">${item.title || "-"}</div>
+      <div class="review-desc">${item.short_description || ""}</div>
+
+      <div class="review-meta">
+        <span>${t("reviewer_similarity")}: ${item.similarity || 0}</span>
+        <span>${t("reviewer_status")}: ${item.status || "-"}</span>
+      </div>
+
+      <div class="review-actions">
+        <button onclick="approve('${item.id}')">${t("reviewer_btn_approve")}</button>
+        <button onclick="duplicate('${item.id}')">${t("reviewer_btn_duplicate")}</button>
+        <button onclick="reject('${item.id}')">${t("reviewer_btn_reject")}</button>
+      </div>
+    </div>
+  `;
+}
+
+async function loadReviewer() {
+
+  const res = await fetch("/api/reviewer/queue");
+  const data = await res.json();
+
+  const queue = data.queue || [];
+  const inProgress = data.in_progress || [];
+  const done = data.done || [];
+
+  document.getElementById("total-count").textContent =
+    queue.length + inProgress.length + done.length;
+
+  document.getElementById("queue-count").textContent = queue.length;
+  document.getElementById("in-progress-count").textContent = inProgress.length;
+  document.getElementById("done-count").textContent = done.length;
+
+  document.getElementById("queue-list").innerHTML =
+    queue.map(renderCard).join("");
+
+  document.getElementById("in-progress-list").innerHTML =
+    inProgress.map(renderCard).join("");
+
+  document.getElementById("done-list").innerHTML =
+    done.map(renderCard).join("");
+}
+
+loadReviewer();
+
+</script>
+
+{% endblock %}

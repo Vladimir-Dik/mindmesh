@@ -44,7 +44,10 @@
 
     <div class="buttons">
       <button type="submit" class="btn" data-i18n="feedback_btn_send"></button>
-      <a href="/cabinet" class="btn secondary" data-i18n="feedback_btn_back"></a>
+      <a
+        href="{{ request.query_params.get('next') or '/cabinet' }}"
+        class="btn secondary"
+        data-i18n="feedback_btn_back"></a>
     </div>
 
     <p id="feedbackStatus" style="margin-top:12px; opacity:0.8;"></p>

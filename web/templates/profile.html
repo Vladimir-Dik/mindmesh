@@ -2,298 +2,403 @@
   ============================================================
   Project: MindMesh
   File: profile.html
-  Version: 1.4
-  Date: 07.04.2026
+  Version: 2.2
+  Date: 09.04.2026
   Purpose:
-  - User profile page
-  - Informational + editable profile form
-  - Access-aware profile editing
-  - Save button enabled only if there are changes
+  - User profile page v2.2
+  - Text-based select values + validation + readable dates
+  - Uses current MindMesh Users schema
   ============================================================
 #}
 
 {% extends "base.html" %}
 {% block content %}
 
-<div class="card">
+<div class="card workdesk-card">
 
-  <h1 data-i18n="profile_title">Профиль</h1>
-  <p style="opacity:0.8; margin-top:6px;" data-i18n="profile_subtitle">
-    Управление данными профиля
-  </p>
-
-  <hr>
-
-  <div style="display:flex; flex-direction:column; gap:14px; margin-top:14px;">
-
+  <div class="workdesk-head">
     <div>
-      <label data-i18n="profile_first_name">Имя</label>
-      <input id="profile_first_name"
-             type="text"
-             value="{{ profile_first_name or '' }}"
-             style="width:100%; max-width:420px;"
-             {% if not can_edit_profile %}disabled{% endif %}>
+      <h1 data-i18n="profile_title">Профиль</h1>
+      <p class="workdesk-subtitle" data-i18n="profile_subtitle">
+        Управление данными профиля
+      </p>
     </div>
 
-    <div>
-      <label data-i18n="profile_last_name">Фамилия</label>
-      <input id="profile_last_name"
-             type="text"
-             value="{{ profile_last_name or '' }}"
-             style="width:100%; max-width:420px;"
-             {% if not can_edit_profile %}disabled{% endif %}>
-    </div>
+    <div class="workdesk-user-box">
+      <div class="workdesk-user-line">
+        <span data-i18n="profile_role_title">Роль:</span>
+        <strong>{{ user.fields.Role or "user" }}</strong>
+      </div>
 
-    <div>
-      <label data-i18n="profile_email_edit">Почтовый адрес</label>
-      <input id="profile_email"
-             type="email"
-             value="{{ user.fields.Email or '' }}"
-             style="width:100%; max-width:420px;"
-             {% if not can_edit_profile %}disabled{% endif %}>
-    </div>
+      <div class="workdesk-user-line">
+        <span data-i18n="profile_subscription_title">Подписка:</span>
+        <strong>{{ subscription_label or "guest" }}</strong>
+      </div>
 
-    <div>
-      <label data-i18n="profile_country">Страна</label>
-      <input id="profile_country"
-             type="text"
-             value="{{ user.fields.Country or '' }}"
-             style="width:100%; max-width:420px;"
-             {% if not can_edit_profile %}disabled{% endif %}>
-    </div>
+      <div class="workdesk-user-line">
+        <span data-i18n="profile_account_status_title">Статус аккаунта:</span>
+        <strong>{{ user.fields.AccountStatus or "—" }}</strong>
+      </div>
 
-    <div>
-      <label data-i18n="profile_language">Язык</label>
-      <input id="profile_language"
-             type="text"
-             value="{{ user.fields.Language or '' }}"
-             style="width:100%; max-width:420px;"
-             {% if not can_edit_profile %}disabled{% endif %}>
-    </div>
+      <div class="workdesk-user-line">
+        <span data-i18n="profile_verification_title">Верификация:</span>
+        <strong>
+          {% if user.fields.IsVerified %}
+            {{ user.fields.VerificationLevel or "verified" }}
+          {% else %}
+            <span data-i18n="profile_not_verified">Не подтвержден</span>
+          {% endif %}
+        </strong>
+      </div>
 
-    <div>
-      <label data-i18n="profile_contacts_title">Контактные данные</label>
-      <textarea id="profile_contacts"
-                rows="3"
-                style="width:100%; max-width:420px;"
-                {% if not can_edit_profile %}disabled{% endif %}>{{ user.fields.Contacts or '' }}</textarea>
+      <div class="workdesk-user-line">
+        <span data-i18n="profile_reviewer_title">Проверяющий:</span>
+        <strong>{{ user.fields.ReviewerLevel or "none" }}</strong>
+      </div>
     </div>
-
-    <div>
-      <label data-i18n="profile_notes_title">Заметки</label>
-      <textarea id="profile_notes"
-                rows="3"
-                style="width:100%; max-width:420px;"
-                {% if not can_edit_profile %}disabled{% endif %}>{{ user.fields.Notes or '' }}</textarea>
-    </div>
-
-    <div>
-      <label data-i18n="profile_postal_address">Почтовый адрес</label>
-      <input id="profile_postal_address"
-             type="text"
-             value="{{ user.fields.PostalAddress or '' }}"
-             style="width:100%; max-width:420px;"
-             {% if not can_edit_profile %}disabled{% endif %}>
-    </div>
-
-    <div>
-      <label data-i18n="profile_city">Город</label>
-      <input id="profile_city"
-             type="text"
-             value="{{ user.fields.City or '' }}"
-             style="width:100%; max-width:420px;"
-             {% if not can_edit_profile %}disabled{% endif %}>
-    </div>
-
-    <div>
-      <label data-i18n="profile_postal_code">Индекс</label>
-      <input id="profile_postal_code"
-             type="text"
-             value="{{ user.fields.PostalCode or '' }}"
-             style="width:100%; max-width:420px;"
-             {% if not can_edit_profile %}disabled{% endif %}>
-    </div>
-
-    <div>
-      <label data-i18n="profile_street">Улица</label>
-      <input id="profile_street"
-             type="text"
-             value="{{ user.fields.Street or '' }}"
-             style="width:100%; max-width:420px;"
-             {% if not can_edit_profile %}disabled{% endif %}>
-    </div>
-
-    <div>
-      <label data-i18n="profile_house_number">Номер дома</label>
-      <input id="profile_house_number"
-             type="text"
-             value="{{ user.fields.HouseNumber or '' }}"
-             style="width:100%; max-width:420px;"
-             {% if not can_edit_profile %}disabled{% endif %}>
-    </div>
-
   </div>
 
-  <hr>
+  <form id="profileForm">
 
-  <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px;">
+    <h2 data-i18n="profile_main_title">Основное</h2>
 
-    <p>
-      <b data-i18n="profile_role_title">Роль:</b>
-      {{ user.fields.Role or "user" }}
-    </p>
+    <label for="profileFirstName">
+      <span data-i18n="profile_first_name">Имя</span> *
+    </label>
+    <input id="profileFirstName" type="text" value="{{ profile_first_name or '' }}">
 
-    <p>
-      <b data-i18n="profile_auth_mode_title">Режим входа:</b>
-      {% if user.access_level == "user_full" %}
-        <span data-i18n="profile_auth_mode_full">Полный</span>
-      {% else %}
-        <span data-i18n="profile_auth_mode_light">Ограниченный</span>
-      {% endif %}
-    </p>
+    <label for="profileLastName">
+      <span data-i18n="profile_last_name">Фамилия</span> *
+    </label>
+    <input id="profileLastName" type="text" value="{{ user.fields.LastName or profile_last_name or '' }}">
 
-    <p>
-      <b data-i18n="profile_subscription_title">Подписка:</b>
-      <span>{{ subscription_label or "—" }}</span>
-    </p>
+    <label for="profileEmailEdit">
+      <span data-i18n="profile_email_edit">Почтовый адрес</span> *
+    </label>
+    <input id="profileEmailEdit" type="email" value="{{ user.fields.Email or '' }}">
 
-    <div class="buttons" style="margin-top:4px;">
-      <a class="btn small secondary" href="#"
-         onclick="return false;"
-         data-i18n="profile_change_subscription">
-         Изменить подписку
-      </a>
+    <label for="profileCountry">
+      <span data-i18n="profile_country">Страна</span> *
+    </label>
+    <input id="profileCountry" type="text" value="{{ user.fields.Country or '' }}">
+
+    <label for="profileLanguage">
+      <span data-i18n="profile_language">Язык</span> *
+    </label>
+    <select id="profileLanguage">
+      <option value="">--</option>
+      <option value="Russian" {% if user.fields.Language == "Russian" %}selected{% endif %}>Русский</option>
+      <option value="English" {% if user.fields.Language == "English" %}selected{% endif %}>English</option>
+      <option value="Hebrew" {% if user.fields.Language == "Hebrew" %}selected{% endif %}>עברית</option>
+    </select>
+
+    <label for="profilePreferredLanguage" data-i18n="profile_preferred_language_title">Предпочитаемый язык</label>
+    <select id="profilePreferredLanguage">
+      <option value="">--</option>
+      <option value="Russian" {% if user.fields.PreferredLanguage == "Russian" %}selected{% endif %}>Русский</option>
+      <option value="English" {% if user.fields.PreferredLanguage == "English" %}selected{% endif %}>English</option>
+      <option value="Hebrew" {% if user.fields.PreferredLanguage == "Hebrew" %}selected{% endif %}>עברית</option>
+      <option value="Auto" {% if user.fields.PreferredLanguage == "Auto" %}selected{% endif %}>Auto</option>
+    </select>
+
+    <label for="profilePhone" data-i18n="profile_phone_title">Телефон</label>
+    <input id="profilePhone" type="text" value="{{ user.fields.PhoneUser or '' }}">
+
+    <label for="profileAvatar" data-i18n="profile_avatar_title">Ссылка на аватар</label>
+    <input id="profileAvatar" type="url" value="{{ user.fields.AvatarURL or '' }}">
+
+    <label for="profileBio" data-i18n="profile_bio_title">Кратко о себе</label>
+    <textarea id="profileBio" rows="3">{{ user.fields.Bio or '' }}</textarea>
+
+    <label for="profileAbout" data-i18n="profile_about_title">О себе</label>
+    <textarea id="profileAbout" rows="6">{{ user.fields.About or '' }}</textarea>
+
+    <label for="profileEducation" data-i18n="profile_education_title">Образование</label>
+    <textarea id="profileEducation" rows="4">{{ user.fields.Education or '' }}</textarea>
+
+    <label for="profileInterests" data-i18n="profile_interests_title">Интересы</label>
+    <textarea id="profileInterests" rows="4">{{ user.fields.Interests or '' }}</textarea>
+
+    <label for="profileExpertise" data-i18n="profile_expertise_title">Компетенции</label>
+    <textarea id="profileExpertise" rows="4">{{ user.fields.Expertise or '' }}</textarea>
+
+    <label for="profileContacts" data-i18n="profile_contacts_text_title">Контакты</label>
+    <textarea id="profileContacts" rows="4">{{ user.fields.Contacts or '' }}</textarea>
+
+    <label for="profileNotes" data-i18n="profile_notes_title">Заметки</label>
+    <textarea id="profileNotes" rows="4">{{ user.fields.Notes or '' }}</textarea>
+
+    <h2 data-i18n="profile_contacts_title">Контактные данные</h2>
+
+    <label for="profilePostalAddress" data-i18n="profile_postal_address">Почтовый адрес</label>
+    <input id="profilePostalAddress" type="text" value="{{ user.fields.PostalAddress or '' }}">
+
+    <label for="profileCity" data-i18n="profile_city">Город</label>
+    <input id="profileCity" type="text" value="{{ user.fields.City or '' }}">
+
+    <label for="profilePostalCode" data-i18n="profile_postal_code">Индекс</label>
+    <input id="profilePostalCode" type="text" value="{{ user.fields.PostalCode or '' }}">
+
+    <label for="profileStreet" data-i18n="profile_street">Улица</label>
+    <input id="profileStreet" type="text" value="{{ user.fields.Street or '' }}">
+
+    <label for="profileHouseNumber" data-i18n="profile_house_number">Номер дома</label>
+    <input id="profileHouseNumber" type="text" value="{{ user.fields.HouseNumber or '' }}">
+
+    <h2 data-i18n="profile_reviewer_block_title">Проверяющий</h2>
+
+    <label for="profileReviewerLevel" data-i18n="profile_reviewer_level_title">Уровень проверяющего</label>
+    <select id="profileReviewerLevel">
+      <option value="">--</option>
+      <option value="none" {% if user.fields.ReviewerLevel == "none" %}selected{% endif %}>none</option>
+      <option value="junior" {% if user.fields.ReviewerLevel == "junior" %}selected{% endif %}>junior</option>
+      <option value="middle" {% if user.fields.ReviewerLevel == "middle" %}selected{% endif %}>middle</option>
+      <option value="senior" {% if user.fields.ReviewerLevel == "senior" %}selected{% endif %}>senior</option>
+      <option value="expert" {% if user.fields.ReviewerLevel == "expert" %}selected{% endif %}>expert</option>
+    </select>
+
+    <label for="profileReviewerSpecialization">
+      <span data-i18n="profile_reviewer_specialization_title">Специализация проверяющего</span>
+      <span id="reviewerSpecRequired" style="display:none;"> *</span>
+    </label>
+    <textarea id="profileReviewerSpecialization" rows="4">{{ user.fields.ReviewerSpecialization or '' }}</textarea>
+
+    <div class="simple-preview-grid">
+      <div class="simple-preview-row">
+        <div class="simple-preview-label" data-i18n="profile_reviewer_score_title">Оценка проверяющего</div>
+        <div class="simple-preview-value">{{ user.fields.ReviewerScore or 0 }}</div>
+      </div>
+
+      <div class="simple-preview-row">
+        <div class="simple-preview-label" data-i18n="profile_reviews_completed_title">Завершено проверок</div>
+        <div class="simple-preview-value">{{ user.fields.ReviewsCompleted or 0 }}</div>
+      </div>
+
+      <div class="simple-preview-row">
+        <div class="simple-preview-label" data-i18n="profile_reviews_approved_title">Принято</div>
+        <div class="simple-preview-value">{{ user.fields.ReviewsApproved or 0 }}</div>
+      </div>
+
+      <div class="simple-preview-row">
+        <div class="simple-preview-label" data-i18n="profile_reviews_rejected_title">Отклонено</div>
+        <div class="simple-preview-value">{{ user.fields.ReviewsRejected or 0 }}</div>
+      </div>
     </div>
 
-    <p style="opacity:0.75; margin-top:4px;" data-i18n="profile_change_subscription_hint">
-      Выбор подписки будет доступен позже.
-    </p>
+    <h2 data-i18n="profile_verification_block_title">Верификация</h2>
+
+    <div class="simple-preview-grid">
+      <div class="simple-preview-row">
+        <div class="simple-preview-label" data-i18n="profile_is_verified_title">Подтвержден</div>
+        <div class="simple-preview-value">
+          {% if user.fields.IsVerified %}
+            <span data-i18n="profile_yes">Да</span>
+          {% else %}
+            <span data-i18n="profile_no">Нет</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="simple-preview-row">
+        <div class="simple-preview-label" data-i18n="profile_verification_level_title">Уровень верификации</div>
+        <div class="simple-preview-value">{{ user.fields.VerificationLevel or "none" }}</div>
+      </div>
+
+      <div class="simple-preview-row">
+        <div class="simple-preview-label" data-i18n="profile_account_status_title">Статус аккаунта</div>
+        <div class="simple-preview-value">{{ user.fields.AccountStatus or "—" }}</div>
+      </div>
+    </div>
+
+    <h2 data-i18n="profile_system_block_title">Система</h2>
+
+    <div class="simple-preview-grid">
+      <div class="simple-preview-row">
+        <div class="simple-preview-label" data-i18n="profile_edit_limit">Использовано изменений</div>
+        <div class="simple-preview-value">{{ profile_edit_count or 0 }} / {{ profile_edit_limit or 0 }}</div>
+      </div>
+
+      <div class="simple-preview-row">
+        <div class="simple-preview-label" data-i18n="profile_created_at_title">Дата создания</div>
+        <div class="simple-preview-value js-date">{{ user.fields.CreatedAt or "" }}</div>
+      </div>
+
+      <div class="simple-preview-row">
+        <div class="simple-preview-label" data-i18n="profile_last_visit_title">Последний визит</div>
+        <div class="simple-preview-value js-date">{{ user.fields.LastVisitAt or "" }}</div>
+      </div>
+
+      <div class="simple-preview-row">
+        <div class="simple-preview-label" data-i18n="profile_visit_count_title">Количество визитов</div>
+        <div class="simple-preview-value">{{ user.fields.VisitCount or 0 }}</div>
+      </div>
+
+      <div class="simple-preview-row">
+        <div class="simple-preview-label" data-i18n="profile_ideas_created_count_title">Создано идей</div>
+        <div class="simple-preview-value">{{ user.fields.IdeasCreatedCount or 0 }}</div>
+      </div>
+    </div>
 
     {% if can_edit_profile %}
-      <div class="buttons" style="margin-top:6px;">
-        <button id="profile_save_btn"
-                class="btn"
-                onclick="saveProfileData()"
-                disabled
-                data-i18n="profile_save">Сохранить</button>
-      </div>
+      <p class="feedback-status-ok" data-i18n="profile_edit_allowed_message">
+        Вы можете изменить данные профиля и сохранить обновления.
+      </p>
+    {% else %}
+      <p class="feedback-status-error">
+        {{ profile_edit_reason }}
+      </p>
     {% endif %}
 
-    <p id="profile_status_message" style="margin-top:8px; opacity:0.78;">
+    <div class="buttons" style="margin-top:20px;">
       {% if can_edit_profile %}
-        <span data-i18n="profile_no_changes_message">
-          Нет изменений для сохранения.
-        </span>
-      {% else %}
-        {{ profile_edit_reason }}
+        <button type="button" class="btn" id="profileSaveBtn" data-i18n="profile_save">Сохранить</button>
       {% endif %}
-    </p>
+      <a class="btn secondary" href="/workdesk" data-i18n="drafts_back">Назад в кабинет</a>
+    </div>
 
-  </div>
-
-  <hr>
-
-  <div class="buttons">
-    <a class="btn small secondary" href="/settings" data-i18n="settings_profile_button">Настройки профиля</a>
-    <a class="btn small secondary" href="/my-messages" data-i18n="cabinet_open_messages">Открыть сообщения →</a>
-    <a class="btn small secondary" href="/cabinet" data-i18n="profile_back_to_cabinet">Назад в кабинет</a>
-  </div>
-
+    <p id="profileSaveStatus" style="margin-top:12px; opacity:0.85;"></p>
+  </form>
 </div>
 
 <script>
-const profileInputs = [
-  "profile_first_name",
-  "profile_last_name",
-  "profile_email",
-  "profile_country",
-  "profile_language",
-  "profile_contacts",
-  "profile_notes",
-  "profile_postal_address",
-  "profile_city",
-  "profile_postal_code",
-  "profile_street",
-  "profile_house_number"
-];
+(function () {
+  const btn = document.getElementById("profileSaveBtn");
+  const statusEl = document.getElementById("profileSaveStatus");
+  const reviewerLevelEl = document.getElementById("profileReviewerLevel");
+  const reviewerSpecRequired = document.getElementById("reviewerSpecRequired");
 
-let initialProfileData = {};
-
-function getProfileData() {
-  const data = {};
-  profileInputs.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) data[id] = el.value.trim();
-  });
-  return data;
-}
-
-function hasProfileChanges() {
-  const current = getProfileData();
-  return JSON.stringify(current) !== JSON.stringify(initialProfileData);
-}
-
-function updateProfileSaveState() {
-  const btn = document.getElementById("profile_save_btn");
-  const msg = document.getElementById("profile_status_message");
-  if (!btn || !msg) return;
-
-  if (hasProfileChanges()) {
-    btn.disabled = false;
-    msg.innerText = "{{ 'Вы можете изменить данные профиля и сохранить обновления.' }}";
-  } else {
-    btn.disabled = true;
-    msg.innerText = "{{ 'Нет изменений для сохранения.' }}";
-  }
-}
-
-async function saveProfileData() {
-  if (!hasProfileChanges()) return;
-
-  const payload = {
-    first_name: document.getElementById("profile_first_name").value.trim(),
-    last_name: document.getElementById("profile_last_name").value.trim(),
-    email: document.getElementById("profile_email").value.trim(),
-    country: document.getElementById("profile_country").value.trim(),
-    language: document.getElementById("profile_language").value.trim(),
-    contacts: document.getElementById("profile_contacts").value.trim(),
-    notes: document.getElementById("profile_notes").value.trim(),
-    postal_address: document.getElementById("profile_postal_address").value.trim(),
-    city: document.getElementById("profile_city").value.trim(),
-    postal_code: document.getElementById("profile_postal_code").value.trim(),
-    street: document.getElementById("profile_street").value.trim(),
-    house_number: document.getElementById("profile_house_number").value.trim()
-  };
-
-  const res = await fetch("/api/profile/update", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(payload)
-  });
-
-  const data = await res.json();
-
-  if (res.ok && data.status === "ok") {
-    location.reload();
-    return;
+  function byId(id) {
+    return document.getElementById(id);
   }
 
-  alert(data.error || "Profile save error");
-}
+  function tr(key, fallback) {
+    if (typeof t === "function") {
+      const v = t(key);
+      return v && v !== key ? v : fallback;
+    }
+    return fallback;
+  }
 
-document.addEventListener("DOMContentLoaded", () => {
-  initialProfileData = getProfileData();
+  function formatIsoDateText(text) {
+    if (!text) return "—";
+    const d = new Date(text);
+    if (isNaN(d.getTime())) return text;
 
-  profileInputs.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener("input", updateProfileSaveState);
-      el.addEventListener("change", updateProfileSaveState);
+    return d.toLocaleString(undefined, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
+  function applyReadableDates() {
+    document.querySelectorAll(".js-date").forEach(el => {
+      const raw = (el.textContent || "").trim();
+      el.textContent = formatIsoDateText(raw);
+    });
+  }
+
+  function updateReviewerRequiredMarker() {
+    if (!reviewerLevelEl || !reviewerSpecRequired) return;
+    const value = (reviewerLevelEl.value || "").trim();
+    reviewerSpecRequired.style.display = (value && value !== "none") ? "inline" : "none";
+  }
+
+  function validateProfile(payload) {
+    const errors = [];
+
+    if (!payload.first_name) {
+      errors.push(tr("profile_error_first_name_required", "Укажите имя."));
+    }
+    if (!payload.last_name) {
+      errors.push(tr("profile_error_last_name_required", "Укажите фамилию."));
+    }
+    if (!payload.email) {
+      errors.push(tr("profile_error_email_required", "Укажите email."));
+    }
+    if (!payload.country) {
+      errors.push(tr("profile_error_country_required", "Укажите страну."));
+    }
+    if (!payload.language) {
+      errors.push(tr("profile_error_language_required", "Выберите язык."));
+    }
+
+    if (payload.reviewer_level && payload.reviewer_level !== "none" && !payload.reviewer_specialization) {
+      errors.push(tr("profile_error_reviewer_specialization_required", "Укажите специализацию проверяющего."));
+    }
+
+    return errors;
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    applyReadableDates();
+    updateReviewerRequiredMarker();
+  });
+
+  if (reviewerLevelEl) {
+    reviewerLevelEl.addEventListener("change", updateReviewerRequiredMarker);
+  }
+
+  if (!btn) return;
+
+  btn.addEventListener("click", async function () {
+    statusEl.textContent = "";
+
+    const payload = {
+      first_name: byId("profileFirstName")?.value.trim() || "",
+      last_name: byId("profileLastName")?.value.trim() || "",
+      email: byId("profileEmailEdit")?.value.trim() || "",
+      country: byId("profileCountry")?.value.trim() || "",
+      language: byId("profileLanguage")?.value.trim() || "",
+      contacts: byId("profileContacts")?.value.trim() || "",
+      notes: byId("profileNotes")?.value.trim() || "",
+      postal_address: byId("profilePostalAddress")?.value.trim() || "",
+      city: byId("profileCity")?.value.trim() || "",
+      postal_code: byId("profilePostalCode")?.value.trim() || "",
+      street: byId("profileStreet")?.value.trim() || "",
+      house_number: byId("profileHouseNumber")?.value.trim() || "",
+      phone_user: byId("profilePhone")?.value.trim() || "",
+      avatar_url: byId("profileAvatar")?.value.trim() || "",
+      bio: byId("profileBio")?.value.trim() || "",
+      about: byId("profileAbout")?.value.trim() || "",
+      education: byId("profileEducation")?.value.trim() || "",
+      interests: byId("profileInterests")?.value.trim() || "",
+      expertise: byId("profileExpertise")?.value.trim() || "",
+      reviewer_level: byId("profileReviewerLevel")?.value.trim() || "",
+      reviewer_specialization: byId("profileReviewerSpecialization")?.value.trim() || "",
+      preferred_language: byId("profilePreferredLanguage")?.value.trim() || ""
+    };
+
+    const errors = validateProfile(payload);
+    if (errors.length > 0) {
+      statusEl.textContent = errors.join(" ");
+      return;
+    }
+
+    try {
+      const r = await fetch("/api/profile/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const j = await r.json().catch(() => ({}));
+
+      if (!r.ok) {
+        statusEl.textContent = j.error || tr("simple2_error_save", "Ошибка сохранения");
+        return;
+      }
+
+      statusEl.textContent = tr("profile_saved_ok", "Изменения сохранены.");
+      window.location.reload();
+
+    } catch (e) {
+      statusEl.textContent = tr("simple2_error_save", "Ошибка сохранения");
     }
   });
-
-  updateProfileSaveState();
-});
+})();
 </script>
 
 {% endblock %}

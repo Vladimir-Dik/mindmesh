@@ -1,0 +1,177 @@
+{#
+  ============================================================
+  Project: MindMesh
+  File: workdesk.html
+  Version: 0.2
+  Date: 08.04.2026
+  Purpose:
+  - User workdesk
+  - Central navigation page
+  - Uses existing translation keys only
+  ============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card workdesk-card">
+
+  <div class="workdesk-head">
+    <div>
+      <h1 data-i18n="nav_workdesk">Рабочий стол</h1>
+      <p class="workdesk-subtitle" data-i18n="cabinet_subtitle">
+        Управление идеями и профилем
+      </p>
+    </div>
+
+    <div class="workdesk-user-box">
+      <div class="workdesk-user-line">
+        <span data-i18n="user">Вы</span>
+        <strong>{{ user.fields.Name or user.fields.Email }}</strong>
+      </div>
+      <div class="workdesk-user-line">
+        <span data-i18n="profile_role_title">Роль:</span>
+        <strong>{{ user.fields.Role or "user" }}</strong>
+      </div>
+      <div class="workdesk-user-line">
+        <span data-i18n="profile_auth_mode_title">Режим входа:</span>
+        <strong>
+          {% if user.access_level == "user_full" %}
+            <span data-i18n="profile_auth_mode_full">Полный</span>
+          {% else %}
+            <span data-i18n="profile_auth_mode_light">Ограниченный</span>
+          {% endif %}
+        </strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="workdesk-grid">
+
+    <a class="workdesk-tile primary"
+       href="/simple"
+       onclick="return safeNavigate(event, '/simple')">
+      <div class="workdesk-icon">🌱</div>
+      <div class="workdesk-tile-title" data-i18n="simple_mode">Простой режим</div>
+      <div class="workdesk-tile-text">
+        Быстрый ввод идеи и предварительный анализ.
+      </div>
+    </a>
+
+    <a class="workdesk-tile primary"
+       href="/advanced"
+       onclick="return safeNavigate(event, '/advanced')">
+      <div class="workdesk-icon">🧠</div>
+      <div class="workdesk-tile-title" data-i18n="advanced_mode">Продвинутый режим</div>
+      <div class="workdesk-tile-text">
+        Поэтапная работа с идеей через диалог.
+      </div>
+    </a>
+
+    <a class="workdesk-tile"
+       href="/my-ideas"
+       onclick="return safeNavigate(event, '/my-ideas')">
+      <div class="workdesk-icon">💡</div>
+      <div class="workdesk-tile-title" data-i18n="my_ideas_title">Мои идеи</div>
+      <div class="workdesk-tile-text">
+        Просмотр сохранённых идей и их статусов.
+      </div>
+    </a>
+
+    <a class="workdesk-tile"
+       href="/drafts"
+       onclick="return safeNavigate(event, '/drafts')">
+      <div class="workdesk-icon">📝</div>
+      <div class="workdesk-tile-title" data-i18n="drafts_title">Черновики</div>
+      <div class="workdesk-tile-text">
+        Незавершённые записи и материалы в работе.
+      </div>
+    </a>
+
+    <a class="workdesk-tile"
+       href="/archive"
+       onclick="return safeNavigate(event, '/archive')">
+      <div class="workdesk-icon">🗂</div>
+      <div class="workdesk-tile-title" data-i18n="cabinet_archive">Архив</div>
+      <div class="workdesk-tile-text">
+        Архивные идеи и сохранённые записи.
+      </div>
+    </a>
+
+    <a class="workdesk-tile"
+       href="/my-messages"
+       onclick="return safeNavigate(event, '/my-messages')">
+      <div class="workdesk-icon">✉️</div>
+      <div class="workdesk-tile-title" data-i18n="cabinet_messages_title">Сообщения</div>
+      <div class="workdesk-tile-text">
+        Ваши обращения и ответы системы.
+      </div>
+    </a>
+
+    <a class="workdesk-tile"
+       href="/profile"
+       onclick="return safeNavigate(event, '/profile')">
+      <div class="workdesk-icon">👤</div>
+      <div class="workdesk-tile-title" data-i18n="profile_title">Профиль</div>
+      <div class="workdesk-tile-text">
+        Личные данные и параметры профиля.
+      </div>
+    </a>
+
+    <a class="workdesk-tile"
+       href="/settings"
+       onclick="return safeNavigate(event, '/settings')">
+      <div class="workdesk-icon">⚙️</div>
+      <div class="workdesk-tile-title" data-i18n="settings_title">Настройки</div>
+      <div class="workdesk-tile-text">
+        Язык интерфейса, безопасность и уведомления.
+      </div>
+    </a>
+
+    <a class="workdesk-tile"
+       href="/help"
+       onclick="return safeNavigate(event, '/help')">
+      <div class="workdesk-icon">❓</div>
+      <div class="workdesk-tile-title" data-i18n="help_title">Справка</div>
+      <div class="workdesk-tile-text">
+        Краткая помощь по работе с MindMesh.
+      </div>
+    </a>
+
+    {% if user.fields.Role in ["moderator", "admin", "topadmin", "superadmin"] %}
+    <a class="workdesk-tile moderation"
+       href="/moderation"
+       onclick="return safeNavigate(event, '/moderation')">
+      <div class="workdesk-icon">🛡</div>
+      <div class="workdesk-tile-title" data-i18n="nav_moderation">Модерация</div>
+      <div class="workdesk-tile-text">
+        Переход в служебный раздел модерации.
+      </div>
+    </a>
+    {% if user.fields.Role == "reviewer" %}
+    <a class="workdesk-tile moderation"
+       href="/reviewer"
+       onclick="return safeNavigate(event, '/reviewer')">
+      <div class="workdesk-icon">🔎</div>
+      <div class="workdesk-tile-title" data-i18n="nav_reviewer">Проверка</div>
+      <div class="workdesk-tile-text">
+        Рабочий стол проверяющего.
+      </div>
+    </a>
+    {% endif %}	
+	
+    {% endif %}
+
+  </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof applyTranslations === "function") {
+    applyTranslations();
+  }
+});
+</script>
+
+{% endblock %}
