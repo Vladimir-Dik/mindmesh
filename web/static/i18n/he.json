@@ -530,6 +530,89 @@
 "profile_edit_limit": "שינויים שבוצעו",
 
 "nav_workdesk": "סביבת עבודה",
-"nav_moderation": "ניהול"
+"nav_moderation": "ניהול",
+
+"user_mgmt_title": "ניהול משתמשים",
+"user_mgmt_subtitle": "עמוד ניהול משתמשים, תפקידים, סטטוסים, פרטיות והרשאות",
+"user_mgmt_back_admin": "חזרה לפאנל הניהול",
+"user_mgmt_refresh": "רענון",
+
+"user_mgmt_stats_title": "סטטיסטיקת משתמשים",
+"user_mgmt_total_users": "סה״כ משתמשים",
+"user_mgmt_authorized_users": "מחוברים",
+"user_mgmt_verified_users": "מאומתים",
+"user_mgmt_admins": "מנהלים",
+"user_mgmt_moderators": "מודרטורים",
+"user_mgmt_reviewers": "בודקים",
+"user_mgmt_banned_users": "חסומים",
+"user_mgmt_unanswered_messages": "הודעות ללא מענה",
+
+"user_mgmt_filters_title": "מסננים מהירים",
+"user_mgmt_filter_all": "הכול",
+"user_mgmt_filter_authorized": "מחוברים",
+"user_mgmt_filter_verified": "מאומתים",
+"user_mgmt_filter_admin": "מנהלים",
+"user_mgmt_filter_moderator": "מודרטורים",
+"user_mgmt_filter_reviewer": "בודקים",
+"user_mgmt_filter_vip": "VIP / friend",
+"user_mgmt_filter_banned": "חסומים",
+"user_mgmt_filter_unanswered": "עם הודעות ללא מענה",
+
+"user_mgmt_search_label": "חיפוש",
+"user_mgmt_search_placeholder": "שם, אימייל, ID...",
+"user_mgmt_role_filter": "תפקיד",
+"user_mgmt_status_filter": "סטטוס חשבון",
+"user_mgmt_verified_filter": "אימות",
+"user_mgmt_any": "כלשהו",
+"user_mgmt_yes": "כן",
+"user_mgmt_no": "לא",
+
+"user_mgmt_list_title": "רשימת משתמשים",
+"user_mgmt_loading_list": "טוען רשימת משתמשים...",
+"user_mgmt_open_messages": "הודעות",
+"user_mgmt_open_ideas": "רעיונות",
+
+"user_mgmt_summary_title": "סקירה",
+"user_mgmt_user_id": "User ID:",
+"user_mgmt_role": "תפקיד:",
+"user_mgmt_created": "נוצר:",
+"user_mgmt_last_visit": "ביקור אחרון:",
+"user_mgmt_visit_count": "כניסות:",
+"user_mgmt_ideas_count": "רעיונות:",
+"user_mgmt_verified": "מאומת:",
+"user_mgmt_account_status": "סטטוס חשבון:",
+"user_mgmt_subscription": "מנוי:",
+"user_mgmt_language": "שפה:",
+
+"user_mgmt_main_status_title": "סטטוסים עיקריים",
+"user_mgmt_verification_level": "רמת אימות",
+"user_mgmt_subscription_hint": "ניתן להזין כמה ערכים כמחרוזת מופרדת בפסיקים.",
+"user_mgmt_save_main": "שמור סטטוסים עיקריים",
+
+"user_mgmt_access_title": "הרשאות וגישה",
+"user_mgmt_access_hint": "AccessControl הוא שדה מורכב. תפקיד וסטטוסים עיקריים משתנים למעלה, והרשאות נוספות משתנות כאן.",
+"user_mgmt_save_access": "שמור הרשאות גישה",
+
+"user_mgmt_privacy_title": "פרטיות",
+"user_mgmt_save_privacy": "שמור פרטיות",
+
+"user_mgmt_actions_title": "פעולות מנהל",
+"user_mgmt_reset_password": "איפוס סיסמה",
+"user_mgmt_assign_admin": "העבר למנהל / מודרטור",
+"user_mgmt_toggle_ban": "חסימה / הסרת חסימה",
+"user_mgmt_toggle_privilege": "הענק / הסר הרשאה",
+"user_mgmt_delete_user": "מחק משתמש",
+"user_mgmt_actions_hint": "זמינות הפעולות תלויה בדרגת המשתמש הנוכחי.",
+
+"user_mgmt_activity_title": "פעילות",
+"user_mgmt_reviews_completed": "בדיקות שהושלמו:",
+"user_mgmt_reviews_approved": "אושרו:",
+"user_mgmt_reviews_rejected": "נדחו:",
+"user_mgmt_reviewer_score": "ציון בודק:",
+"user_mgmt_profile_edits": "עריכות פרופיל:",
+"user_mgmt_unanswered_feedback": "Feedback ללא מענה:",
+
+"user_mgmt_admin_log_title": "יומן משתמש",
+"user_mgmt_no_log": "אין נתונים"
 
 }

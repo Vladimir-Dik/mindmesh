@@ -76,22 +76,22 @@ def find_user_by_email(email: str):
             timeout=20
         )
 
-        # Временные ошибки Airtable / сети
         if r.status_code == 429 or r.status_code in [500, 502, 503, 504]:
-            raise AirtableTemporaryUnavailable(
-                f"Airtable temporary unavailable: HTTP {r.status_code}"
-            )
+            from postgres_db import find_user_by_email_pg
+            return find_user_by_email_pg(email)
 
         r.raise_for_status()
 
         records = r.json().get("records", [])
         return records[0] if records else None
 
-    except requests.exceptions.Timeout as e:
-        raise AirtableTemporaryUnavailable("Airtable timeout") from e
+    except requests.exceptions.Timeout:
+        from postgres_db import find_user_by_email_pg
+        return find_user_by_email_pg(email)
 
-    except requests.exceptions.ConnectionError as e:
-        raise AirtableTemporaryUnavailable("Airtable connection error") from e
+    except requests.exceptions.ConnectionError:
+        from postgres_db import find_user_by_email_pg
+        return find_user_by_email_pg(email)
 
     except requests.exceptions.HTTPError as e:
         status = None
@@ -99,14 +99,14 @@ def find_user_by_email(email: str):
             status = e.response.status_code
 
         if status == 429 or status in [500, 502, 503, 504]:
-            raise AirtableTemporaryUnavailable(
-                f"Airtable temporary unavailable: HTTP {status}"
-            ) from e
+            from postgres_db import find_user_by_email_pg
+            return find_user_by_email_pg(email)
 
         raise
 
-    except requests.exceptions.RequestException as e:
-        raise AirtableTemporaryUnavailable("Airtable request failed") from e
+    except requests.exceptions.RequestException:
+        from postgres_db import find_user_by_email_pg
+        return find_user_by_email_pg(email)
 
 
 def get_user_by_id(user_id: str):
@@ -114,34 +114,71 @@ def get_user_by_id(user_id: str):
     url = f"{users_url(pat)}/{user_id}"
     headers = airtable_headers(pat)
 
-    r = requests.get(url, headers=headers, timeout=20)
-    if not r.ok:
-        return None
-    return r.json()
+    try:
+        r = requests.get(url, headers=headers, timeout=20)
+
+        if r.status_code == 429 or r.status_code in [500, 502, 503, 504]:
+            from postgres_db import get_user_by_id_pg
+            return get_user_by_id_pg(user_id)
+
+        if not r.ok:
+            if r.status_code == 404:
+                from postgres_db import get_user_by_id_pg
+                return get_user_by_id_pg(user_id)
+            return None
+
+        return r.json()
+
+    except requests.exceptions.Timeout:
+        from postgres_db import get_user_by_id_pg
+        return get_user_by_id_pg(user_id)
+
+    except requests.exceptions.ConnectionError:
+        from postgres_db import get_user_by_id_pg
+        return get_user_by_id_pg(user_id)
+
+    except requests.exceptions.RequestException:
+        from postgres_db import get_user_by_id_pg
+        return get_user_by_id_pg(user_id)
 
 
 def create_user(name: str, email: str, password: str | None = None):
-    pat = load_env()
-    url = users_url(pat)
-    headers = airtable_headers(pat)
+    from postgres_db import create_user_pg, sync_airtable_user_id_pg
 
-    fields = {
-        "Email": email,
-        "Name": name,
-        "Role": "user",
-        "CreatedAt": datetime.datetime.utcnow().isoformat()
-    }
+    # 1. Сначала пишем в PostgreSQL
+    pg_user_id = create_user_pg(name=name, email=email, password=password)
 
-    if password and len(password) >= 3:
-        hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-        fields["PasswordHash"] = hashed
+    # 2. Потом пытаемся продублировать в Airtable
+    try:
+        pat = load_env()
+        url = users_url(pat)
+        headers = airtable_headers(pat)
 
-    payload = {"fields": fields}
+        fields = {
+            "Email": email,
+            "Name": name,
+            "Role": "user",
+            "CreatedAt": datetime.datetime.utcnow().isoformat()
+        }
 
-    r = requests.post(url, headers=headers, json=payload)
-    r.raise_for_status()
+        if password and len(password) >= 3:
+            hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+            fields["PasswordHash"] = hashed
 
-    return r.json()["id"]
+        payload = {"fields": fields}
+
+        r = requests.post(url, headers=headers, json=payload, timeout=20)
+        r.raise_for_status()
+
+        airtable_id = r.json()["id"]
+
+        # сохраняем airtable id в PostgreSQL UserID
+        sync_airtable_user_id_pg(pg_user_id, airtable_id)
+
+    except Exception:
+        pass
+
+    return pg_user_id
     
     
 def get_all_users():
@@ -192,27 +229,33 @@ def update_user_name(user_id: str, name: str):
 # ============================================================
 
 def set_user_password(user_id: str, password: str):
-    """
-    Sets or updates user password (bcrypt hash).
-    """
+    from postgres_db import set_user_password_pg
 
     if not password or len(password) < 3:
         raise ValueError("Password too short")
 
-    pat = load_env()
-    url = f"{users_url(pat)}/{user_id}"
-    headers = airtable_headers(pat)
+    # 1. Сначала обновляем PostgreSQL
+    set_user_password_pg(user_id, password)
 
-    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    # 2. Потом пытаемся обновить Airtable
+    try:
+        pat = load_env()
+        url = f"{users_url(pat)}/{user_id}"
+        headers = airtable_headers(pat)
 
-    payload = {
-        "fields": {
-            "PasswordHash": hashed
+        hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+        payload = {
+            "fields": {
+                "PasswordHash": hashed
+            }
         }
-    }
 
-    r = requests.patch(url, headers=headers, json=payload)
-    r.raise_for_status()
+        r = requests.patch(url, headers=headers, json=payload, timeout=20)
+        r.raise_for_status()
+
+    except Exception:
+        pass
 
     return True
 
@@ -239,27 +282,36 @@ def list_ideas_records():
     url = ideas_url(pat)
     headers = airtable_headers(pat)
 
-    all_records = []
-    offset = None
+    try:
+        all_records = []
+        offset = None
 
-    while True:
-        params = {}
+        while True:
+            params = {}
+            if offset:
+                params["offset"] = offset
 
-        if offset:
-            params["offset"] = offset
+            r = requests.get(url, headers=headers, params=params, timeout=20)
 
-        r = requests.get(url, headers=headers, params=params, timeout=20)
-        r.raise_for_status()
+            if r.status_code == 429 or r.status_code in [500,502,503,504]:
+                raise AirtableTemporaryUnavailable("Airtable temp fail")
 
-        data = r.json()
-        records = data.get("records", [])
-        all_records.extend(records)
+            r.raise_for_status()
 
-        offset = data.get("offset")
-        if not offset:
-            break
+            data = r.json()
+            records = data.get("records", [])
+            all_records.extend(records)
 
-    return all_records    
+            offset = data.get("offset")
+            if not offset:
+                break
+
+        return all_records
+
+    except Exception:
+        # 🔥 fallback на PostgreSQL
+        from postgres_db import fetch_ideas
+        return fetch_ideas()
 
 # =======================нормализация текста=====================================
 

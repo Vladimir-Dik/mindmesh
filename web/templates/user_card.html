@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <h1>User Card</h1>
+  <p>Карточка пользователя (в разработке)</p>
+
+  <div style="margin-top:12px;">
+    <strong>record_id:</strong>
+    <span id="user_card_record_id"></span>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+document.getElementById("user_card_record_id").textContent = params.get("record_id");
+</script>
+
+{% endblock %}

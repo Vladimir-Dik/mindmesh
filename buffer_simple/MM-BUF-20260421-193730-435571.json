@@ -1,0 +1,28 @@
+{
+  "local_id": "MM-BUF-20260421-193730-435571",
+  "created_at": "2026-04-21T16:37:30.434315",
+  "status": "pending",
+  "mode": "simple",
+  "mode_version": "Simple 2.0",
+  "raw_text": "улучшение эфективности парового двигателя используя двухконтурные камеры подогрева и парообразования",
+  "title": "Двухконтурные камеры для повышения эффективности парового двигателя",
+  "short": "Повышение эффективности парового двигателя за счет двухконтурных камер подогрева и парообразования",
+  "full": "Улучшение эффективности парового двигателя с использованием двухконтурных камер подогрева и парообразования.",
+  "keywords": [
+    "паровой двигатель",
+    "двухконтурные камеры",
+    "подогрев",
+    "парообразование",
+    "эффективность"
+  ],
+  "author_name": "николай",
+  "author_email": "nikola@mail.ru",
+  "duplicate_id": null,
+  "similarity": 0,
+  "intake_mode": "simple",
+  "assistant_version": "Simple 2.0",
+  "error_code": "AIRTABLE_TEMP_UNAVAILABLE",
+  "error_text": "429 Client Error: Too Many Requests for url: https://api.airtable.com/v0/appfrpj5uboQYgYC9/tblZK7n5nn1xgqrIG",
+  "save_stage": "confirm",
+  "schema_version": "0.1"
+}

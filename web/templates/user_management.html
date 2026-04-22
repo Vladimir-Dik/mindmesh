@@ -1,0 +1,125 @@
+{#
+  ============================================================
+  Project: MindMesh
+  File: user_management.html
+  Version: 1.1
+  Date: 10.04.2026
+  Purpose:
+  - User management list page
+  - Search, filters, list and переход в user card
+  - Uses existing user_mgmt_* i18n keys
+  ============================================================
+#}
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+
+  <!-- HEADER -->
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+    <div>
+      <h1 data-i18n="user_mgmt_title">Управление пользователями</h1>
+      <p style="opacity:0.8; margin-top:6px;" data-i18n="user_mgmt_subtitle">
+        Страница управления пользователями, ролями, статусами, приватностью и доступом
+      </p>
+    </div>
+
+    <div class="buttons">
+      <a class="btn small secondary" href="/admin" data-i18n="user_mgmt_back_admin">Назад в админ-панель</a>
+      <button class="btn small" id="user_mgmt_refresh_btn" data-i18n="user_mgmt_refresh">Обновить</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- FILTERS -->
+  <div style="display:grid; grid-template-columns:1.5fr 1fr 1fr 1fr; gap:12px; margin-top:12px; align-items:end;">
+    <div>
+      <label for="um_search" style="display:block; margin-bottom:6px;" data-i18n="user_mgmt_search_label">Поиск</label>
+      <input
+        id="um_search"
+        type="text"
+        class="input"
+        placeholder="Имя, email, ID..."
+        data-i18n-placeholder="user_mgmt_search_placeholder"
+      >
+    </div>
+
+    <div>
+      <label for="um_role_filter" style="display:block; margin-bottom:6px;" data-i18n="user_mgmt_role_filter">Роль</label>
+      <select id="um_role_filter" class="input">
+        <option value="" data-i18n="user_mgmt_any">Любая</option>
+        <option value="user">user</option>
+        <option value="reviewer">reviewer</option>
+        <option value="moderator">moderator</option>
+        <option value="admin">admin</option>
+        <option value="topadmin">topadmin</option>
+        <option value="superadmin">superadmin</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="um_status_filter" style="display:block; margin-bottom:6px;" data-i18n="user_mgmt_status_filter">Статус аккаунта</label>
+      <select id="um_status_filter" class="input">
+        <option value="" data-i18n="user_mgmt_any">Любая</option>
+        <option value="active">active</option>
+        <option value="pending">pending</option>
+        <option value="readonly">readonly</option>
+        <option value="banned">banned</option>
+        <option value="archived">archived</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="um_verified_filter" style="display:block; margin-bottom:6px;" data-i18n="user_mgmt_verified_filter">Верификация</label>
+      <select id="um_verified_filter" class="input">
+        <option value="" data-i18n="user_mgmt_any">Любая</option>
+        <option value="1" data-i18n="user_mgmt_yes">Да</option>
+        <option value="0" data-i18n="user_mgmt_no">Нет</option>
+      </select>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- QUICK FILTERS -->
+  <div class="buttons" style="margin-top:12px; flex-wrap:wrap;">
+    <button class="btn small secondary user-filter-btn active" data-filter="all" data-i18n="user_mgmt_filter_all">Все</button>
+    <button class="btn small secondary user-filter-btn" data-filter="authorized" data-i18n="user_mgmt_filter_authorized">Авторизованные</button>
+    <button class="btn small secondary user-filter-btn" data-filter="verified" data-i18n="user_mgmt_filter_verified">Верифицированные</button>
+    <button class="btn small secondary user-filter-btn" data-filter="admin" data-i18n="user_mgmt_filter_admin">Админы</button>
+    <button class="btn small secondary user-filter-btn" data-filter="moderator" data-i18n="user_mgmt_filter_moderator">Модераторы</button>
+    <button class="btn small secondary user-filter-btn" data-filter="reviewer" data-i18n="user_mgmt_filter_reviewer">Проверяющие</button>
+    <button class="btn small secondary user-filter-btn" data-filter="vip" data-i18n="user_mgmt_filter_vip">VIP / friend</button>
+    <button class="btn small secondary user-filter-btn" data-filter="banned" data-i18n="user_mgmt_filter_banned">Заблокированные</button>
+    <button class="btn small secondary user-filter-btn" data-filter="unanswered" data-i18n="user_mgmt_filter_unanswered">С неотвеченными сообщениями</button>
+  </div>
+
+  <hr>
+
+  <!-- LIST -->
+  <div class="admin-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px;">
+      <h3 style="margin:0;" data-i18n="user_mgmt_list_title">Список пользователей</h3>
+      <span id="um_list_count" style="opacity:0.75;">0</span>
+    </div>
+
+    <div id="um_users_list" class="log" style="max-height:700px; overflow:auto;">
+      <div class="log-item" data-i18n="user_mgmt_loading_list">Загрузка списка пользователей...</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/static/js/user_management.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof applyTranslations === "function") {
+    applyTranslations();
+  }
+});
+</script>
+
+{% endblock %}

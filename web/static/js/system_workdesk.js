@@ -2,8 +2,8 @@
 ============================================================
 Project: MindMesh
 File: system_workdesk.js
-Version: 1.2
-Date: 2026-03-12
+Version: 1.3
+Date: 2026-04-21
 Purpose:
 SuperAdmin / System Workdesk control script.
 
@@ -15,6 +15,7 @@ Functions:
 - Toggle system modes
 - Apply system configuration
 - Display users statistics
+- статус базы
 ============================================================
 */
 
@@ -121,10 +122,62 @@ async function loadSystemStatus() {
   // Пока отдельного API статуса базы нет:
   // если системное состояние загрузилось, показываем OK
   if (db) {
-    db.textContent = "OK";
+ 
     db.className = "status-ok";
   }
 }
+// загрузка статуса баз
+
+async function loadDatabaseHealth() {
+
+  try {
+
+    const res = await fetch("/api/system/health");
+    const data = await res.json();
+
+    const airtable = document.getElementById("airtableStatus");
+    const pgLocal = document.getElementById("postgresLocalStatus");
+    const pgExt = document.getElementById("postgresExternalStatus");
+
+    // Airtable
+    if (airtable) {
+      if (data.airtable) {
+        airtable.innerText = "WORKING";
+        airtable.className = "status-ok";
+      } else {
+        airtable.innerText = "OFFLINE";
+        airtable.className = "status-error";
+      }
+    }
+
+    // PostgreSQL local
+    if (pgLocal) {
+      if (data.postgres_local) {
+        pgLocal.innerText = "WORKING";
+        pgLocal.className = "status-ok";
+      } else {
+        pgLocal.innerText = "OFFLINE";
+        pgLocal.className = "status-error";
+      }
+    }
+
+    // PostgreSQL external (No-IP)
+    if (pgExt) {
+      if (data.postgres_external) {
+        pgExt.innerText = "WORKING";
+        pgExt.className = "status-ok";
+      } else {
+        pgExt.innerText = "OFFLINE";
+        pgExt.className = "status-error";
+      }
+    }
+
+  } catch (e) {
+    console.error("Health check error:", e);
+  }
+}
+
+// -------------------------
 
 async function loadUsersCount() {
   try {
@@ -203,6 +256,7 @@ async function loadCurrentUser(){
 
 document.addEventListener("DOMContentLoaded", async () => {
   await loadSystemStatus();
+  await loadDatabaseHealth(); // ← ДОБАВИЛИ
   await loadUsers();
   await loadLog();
   await loadUsersCount();

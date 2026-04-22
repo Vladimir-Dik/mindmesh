@@ -1,14 +1,15 @@
 # ============================================================
 # Project: MindMesh
 # File: app.py
-# Version: 4.0
-# Date: 09.04.2026
+# Version: 4.2
+# Date: 20.04.2026
 # Purpose:
 # - Main web app
-# - User auth
+# - user-management
 # - Profile v2
 # - Reviewer workspace
 # - Feedback and fallback
+# - Soft maintenance message for Airtable / PostgreSQL temporary errors
 # ============================================================
 
 from fastapi import FastAPI, Request, Form
@@ -24,16 +25,67 @@ import uuid
 import bcrypt
 import json
 import datetime
+import postgres_db
 
 # =====================временный блок=======================================
 SUPERADMIN_EMAIL = "searchwave@gmail.com"
 SUPERADMIN_PASSWORD = "123456"  # временно, потом вынесем в .env
 
-
 # INIT APP
 # ============================================================
 
 app = FastAPI()
+
+# ============================================================
+# SYSTEM HEALTH CHECK (system_health_check)
+# ============================================================
+
+@app.get("/api/system/health")
+async def system_health():
+
+    import socket
+
+    # --- PostgreSQL LOCAL ---
+    pg_local = False
+    try:
+        conn = postgres_db.get_conn()
+        conn.close()
+        pg_local = True
+    except Exception:
+        pg_local = False
+
+    # --- PostgreSQL via No-IP ---
+    pg_external = False
+    try:
+        sock = socket.create_connection(("mindmesh.ddns.net", 5432), timeout=3)
+        sock.close()
+        pg_external = True
+    except Exception:
+        pg_external = False
+
+    # --- Airtable ---
+    airtable_ok = False
+    try:
+        import requests
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
+        headers = {"Authorization": f"Bearer {AIRTABLE_API_KEY}"}
+
+        r = requests.get(url, headers=headers, timeout=5)
+
+        if r.status_code < 500:
+            airtable_ok = True
+
+    except Exception:
+        airtable_ok = False
+
+    return {
+        "airtable": airtable_ok,
+        "postgres_local": pg_local,
+        "postgres_external": pg_external
+    }
+
+
+
 
 # ============================================================
 # IMPORT ADVANCED ROUTERS
@@ -296,15 +348,29 @@ def login_submit(
     try:
         user = core.find_user_by_email(email)
 
-    except core.AirtableTemporaryUnavailable:
+    except Exception as e:
+        # Soft DB fallback:
+        # For temporary Airtable / PostgreSQL failures
+        # we do not show technical details to the user.
+        if is_system_error(e):
+            return templates.TemplateResponse(
+                "login.html",
+                {
+                    "request": request,
+                    "error": "Ведутся технические работы. Попробуйте позже.",
+                    "system": system_state
+                },
+                status_code=503
+            )
+
         return templates.TemplateResponse(
             "login.html",
             {
                 "request": request,
-                "error": "База пользователей временно недоступна. Попробуйте позже.",
+                "error": "Ошибка входа. Проверьте данные.",
                 "system": system_state
             },
-            status_code=503
+            status_code=500
         )
 
     if not user:
@@ -427,6 +493,341 @@ def cabinet(request: Request):
             "subscription_label": subscription_label
         }
     )
+
+# ============================================================
+# user HELPERS
+# ============================================================
+
+def update_user_fields_airtable(record_id: str, fields: dict):
+    import requests
+
+    pat = core.load_env()
+    url = f"{core.users_url(pat)}/{record_id}"
+    headers = core.airtable_headers(pat)
+
+    payload = {
+        "fields": fields
+    }
+
+    r = requests.patch(url, headers=headers, json=payload)
+    r.raise_for_status()
+    return r.json()
+
+# ============================================================
+# user_management
+# ============================================================
+
+@app.get("/user_management", response_class=HTMLResponse)
+async def user_management_page(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return RedirectResponse("/login?next=/user_management", status_code=302)
+
+    role = (user.get("fields", {}) or {}).get("Role", "user")
+
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return RedirectResponse(url="/cabinet", status_code=303)
+
+    return templates.TemplateResponse(
+        "user_management.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state
+        }
+    )
+
+# ============================================================
+# USER MANAGEMENT API
+# ============================================================
+
+@app.get("/api/user-management/overview")
+def user_management_overview(request: Request):
+
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=403)
+
+    role = user["fields"].get("Role", "user")
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    try:
+        users = core.get_all_users()
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+    items = []
+
+    total_users = 0
+    authorized_users = 0
+    verified_users = 0
+    admin_users = 0
+    moderator_users = 0
+    reviewer_users = 0
+    banned_users = 0
+
+    for rec in users:
+        fields = rec.get("fields", {})
+
+        role_value = fields.get("Role", "user")
+        is_verified = bool(fields.get("IsVerified"))
+        account_status = (fields.get("AccountStatus") or "active")
+        visit_count = int(fields.get("VisitCount") or 0)
+        last_visit = fields.get("LastVisitAt")
+        subscription_status = fields.get("SubscriptionStatus") or []
+
+        unanswered_feedback = 0
+        try:
+            feedback_records = core.list_feedback_records()
+            user_email = (fields.get("Email") or "").strip().lower()
+
+            for fb in feedback_records:
+                fb_fields = fb.get("fields", {})
+                fb_email = (
+                    fb_fields.get("fldnpx1rtg3XjEYx6")
+                    or fb_fields.get("Email")
+                    or ""
+                ).strip().lower()
+
+                fb_status = (
+                    fb_fields.get("fldH2ZVXQPq07ATdU")
+                    or fb_fields.get("Status")
+                    or "New"
+                )
+
+                if fb_email == user_email and fb_status != "Answered":
+                    unanswered_feedback += 1
+        except Exception:
+            unanswered_feedback = 0
+
+        total_users += 1
+
+        if visit_count > 0 or last_visit:
+            authorized_users += 1
+
+        if is_verified:
+            verified_users += 1
+
+        if role_value in ["admin", "topadmin", "superadmin"]:
+            admin_users += 1
+
+        if role_value == "moderator":
+            moderator_users += 1
+
+        if role_value == "reviewer":
+            reviewer_users += 1
+
+        if account_status == "banned":
+            banned_users += 1
+
+        items.append({
+            "record_id": rec.get("id"),
+            "user_id": fields.get("UserID"),
+            "name": fields.get("Name", ""),
+            "last_name": fields.get("LastName", ""),
+            "email": fields.get("Email", ""),
+            "role": role_value,
+            "created_at": fields.get("CreatedAt"),
+            "last_visit_at": last_visit,
+            "visit_count": visit_count,
+            "ideas_created_count": int(fields.get("IdeasCreatedCount") or 0),
+            "language": fields.get("Language", ""),
+            "preferred_language": fields.get("PreferredLanguage", ""),
+            "is_verified": is_verified,
+            "verification_level": fields.get("VerificationLevel", ""),
+            "account_status": account_status,
+            "subscription_status": subscription_status,
+            "reviewer_score": int(fields.get("ReviewerScore") or 0),
+            "reviews_completed": int(fields.get("ReviewsCompleted") or 0),
+            "reviews_approved": int(fields.get("ReviewsApproved") or 0),
+            "reviews_rejected": int(fields.get("ReviewsRejected") or 0),
+            "profile_edit_count": int(fields.get("ProfileEditCount") or 0),
+            "access_control": fields.get("AccessControl", ""),
+            "privacy_control": fields.get("PrivacyControl", ""),
+            "unanswered_feedback": unanswered_feedback,
+            "user_log": []
+        })
+
+    unanswered_users = sum(1 for x in items if int(x.get("unanswered_feedback") or 0) > 0)
+
+    return {
+        "status": "ok",
+        "stats": {
+            "total_users": total_users,
+            "authorized_users": authorized_users,
+            "verified_users": verified_users,
+            "admin_users": admin_users,
+            "moderator_users": moderator_users,
+            "reviewer_users": reviewer_users,
+            "banned_users": banned_users,
+            "unanswered_users": unanswered_users
+        },
+        "users": items
+    }
+
+# ============================================================
+# user_card
+# ============================================================
+
+@app.get("/user_card", response_class=HTMLResponse)
+async def user_card_page(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return RedirectResponse("/login?next=/user_card", status_code=302)
+
+    role = (user.get("fields", {}) or {}).get("Role", "user")
+
+    # доступ только служебным ролям
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return RedirectResponse(url="/cabinet", status_code=303)
+
+    return templates.TemplateResponse(
+        "user_card.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state
+        }
+    )
+
+# ============================================================
+# USER save  status API
+# ============================================================
+
+@app.post("/api/user-management/update-main")
+async def user_management_update_main(request: Request):
+
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=403)
+
+    actor_role = user["fields"].get("Role", "user")
+    if actor_role not in ["admin", "topadmin", "superadmin"]:
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    data = await request.json()
+
+    record_id = data.get("record_id")
+    role_value = (data.get("role") or "user").strip()
+    account_status = (data.get("account_status") or "active").strip()
+    is_verified = bool(data.get("is_verified"))
+    verification_level = (data.get("verification_level") or "").strip()
+    subscription_status = data.get("subscription_status") or []
+
+    if not record_id:
+        return JSONResponse({"error": "record_id required"}, status_code=400)
+
+    try:
+        update_user_fields_airtable(record_id, {
+            "Role": role_value,
+            "AccountStatus": account_status,
+            "IsVerified": is_verified,
+            "VerificationLevel": verification_level,
+            "SubscriptionStatus": subscription_status
+        })
+
+        return {"status": "ok"}
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+# ============================================================
+# goto user_card
+# ============================================================
+@app.get("/user_card", response_class=HTMLResponse)
+async def user_card_page(request: Request):
+
+    user = get_current_user(request)
+
+    if not user:
+        return RedirectResponse("/login?next=/user_card", status_code=302)
+
+    role = (user.get("fields", {}) or {}).get("Role", "user")
+
+    # доступ только служебным ролям
+    if role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return RedirectResponse(url="/cabinet", status_code=303)
+
+    return templates.TemplateResponse(
+        "user_card.html",
+        {
+            "request": request,
+            "user": user,
+            "system": system_state
+        }
+    )
+
+# ============================================================
+# API сохранения AccessControl
+# ============================================================
+
+@app.post("/api/user-management/update-access")
+async def user_management_update_access(request: Request):
+
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=403)
+
+    actor_role = user["fields"].get("Role", "user")
+    if actor_role not in ["admin", "topadmin", "superadmin"]:
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    data = await request.json()
+
+    record_id = data.get("record_id")
+    access_control = (data.get("access_control") or "").strip()
+
+    if not record_id:
+        return JSONResponse({"error": "record_id required"}, status_code=400)
+
+    try:
+        update_user_fields_airtable(record_id, {
+            "AccessControl": access_control
+        })
+
+        return {"status": "ok"}
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+# ============================================================
+# API сохранения PrivacyControl
+# ============================================================
+
+@app.post("/api/user-management/update-privacy")
+async def user_management_update_privacy(request: Request):
+
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=403)
+
+    actor_role = user["fields"].get("Role", "user")
+    if actor_role not in ["moderator", "admin", "topadmin", "superadmin"]:
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    data = await request.json()
+
+    record_id = data.get("record_id")
+    privacy_control = (data.get("privacy_control") or "").strip()
+
+    if not record_id:
+        return JSONResponse({"error": "record_id required"}, status_code=400)
+
+    try:
+        update_user_fields_airtable(record_id, {
+            "PrivacyControl": privacy_control
+        })
+
+        return {"status": "ok"}
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 # ============================================================
 # WORKDESK
@@ -1151,6 +1552,8 @@ def topadmin_panel(request: Request):
     return FileResponse(
         os.path.join("web", "search", "topadmin.html")
     )
+    # user_management
+    
 
 # ============================================================
 # ADMIN PANEL
@@ -1386,7 +1789,7 @@ async def message_reply_save(request: Request):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 # ============================================================
-# SIMPLE MODE ANALYZE  ✅ FIXED
+# SIMPLE MODE ANALYZE  ✅ PostgreSQL duplicate check
 # ============================================================
 
 @app.post("/api/simple/analyze")
@@ -1398,33 +1801,23 @@ async def simple_analyze(request: Request):
         return JSONResponse({"error": "No text provided"}, status_code=400)
 
     # --- intake analysis ---
-    # ==   print("=== SIMPLE ANALYZE START ===")
-    # ==   print("RAW INPUT:", raw_text)
-    
     analysis = analyze_intake(raw_text)
-    
-    # ==   print("=== SIMPLE ANALYZE RESULT ===")
-    # ==   print(analysis)
-    
-    # ==   print("AI MODE:", "AI" if "analysis_notes" in analysis and "ai_primary" in analysis.get("analysis_notes", []) else "FALLBACK")
 
-     # analysis can return {"error": "..."}                                         
     if isinstance(analysis, dict) and "error" in analysis:
         return JSONResponse({"error": analysis["error"]}, status_code=400)
 
-     # --- duplicate search (Airtable) ---                                        
-    pat = core.load_env()
-     # what we compare: title is the best query (fallback to full)                                                                
+    # --- duplicate search (PostgreSQL) ---
     query = analysis.get("title") or analysis.get("full") or str(raw_text)
 
-    dup_result = core.safe_find_best_duplicate(
-        pat,
+    dup_result = postgres_db.safe_find_best_duplicate_pg(
         query,
         analysis.get("keywords", [])
     )
 
-    # --- degraded mode: Airtable duplicate check unavailable ---
-    if dup_result.get("degraded"):
+    # --- degraded mode: duplicate check unavailable ---
+    if not dup_result.get("ok"):
+        print("DUPLICATE ERROR:", dup_result.get("error"))
+
         return {
             "analysis": analysis,
             "duplicate_id": None,
@@ -1488,13 +1881,14 @@ async def simple_confirm(request: Request):
 
     # --- email required ---
     if not email:
+        print("SIMPLE_CONFIRM: need_email")    # === временно
         return JSONResponse(
             {"status": "need_email"},
             status_code=401
         )
 
     try:
-        result = core.prepare_and_create_idea({
+        result = postgres_db.create_idea_pg({
             "title": analysis.get("title", ""),
             "short": analysis.get("short", ""),
             "full": analysis.get("full", ""),
@@ -1670,56 +2064,66 @@ def ideas_stats():
     import requests
     import datetime
 
-    pat = load_env()
-    url = ideas_url(pat)
-    headers = airtable_headers(pat)
+    try:
+        pat = load_env()
+        url = ideas_url(pat)
+        headers = airtable_headers(pat)
 
-    r = requests.get(url, headers=headers)
-    r.raise_for_status()
+        r = requests.get(url, headers=headers, timeout=20)
+        r.raise_for_status()
 
-    records = r.json().get("records", [])
+        records = r.json().get("records", [])
 
-    stats = {}
-    total = len(records)
+        stats = {}
+        total = len(records)
 
-    today = datetime.date.today()
-    week_start = today - datetime.timedelta(days=7)
-    month_start = today - datetime.timedelta(days=30)
+        today = datetime.date.today()
+        week_start = today - datetime.timedelta(days=7)
+        month_start = today - datetime.timedelta(days=30)
 
-    ideas_today = 0
-    ideas_week = 0
-    ideas_month = 0
+        ideas_today = 0
+        ideas_week = 0
+        ideas_month = 0
 
-    for rec in records:
+        for rec in records:
+            fields = rec.get("fields", {})
+            status = fields.get("Status", "Unknown")
 
-        fields = rec.get("fields", {})
-        status = fields.get("Status", "Unknown")
+            stats[status] = stats.get(status, 0) + 1
 
-        stats[status] = stats.get(status, 0) + 1
+            date = fields.get("Date Added")
+            if date:
+                d = datetime.datetime.fromisoformat(
+                    date.replace("Z", "")
+                ).date()
 
-        date = fields.get("Date Added")
+                if d == today:
+                    ideas_today += 1
 
-        if date:
-            d = datetime.datetime.fromisoformat(
-                date.replace("Z", "")
-            ).date()
+                if d >= week_start:
+                    ideas_week += 1
 
-            if d == today:
-                ideas_today += 1
+                if d >= month_start:
+                    ideas_month += 1
 
-            if d >= week_start:
-                ideas_week += 1
+        return {
+            "total": total,
+            "today": ideas_today,
+            "week": ideas_week,
+            "month": ideas_month,
+            "stats": stats,
+            "degraded": False
+        }
 
-            if d >= month_start:
-                ideas_month += 1
-
-    return {
-        "total": total,
-        "today": ideas_today,
-        "week": ideas_week,
-        "month": ideas_month,
-        "stats": stats
-    }
+    except Exception:
+        return {
+            "total": 0,
+            "today": 0,
+            "week": 0,
+            "month": 0,
+            "stats": {},
+            "degraded": True
+        }
 
 
 # ============================================================
@@ -1778,7 +2182,7 @@ async def update_user(request: Request):
 # PROFILE HELPERS
 # ============================================================
 
-PROFILE_EDIT_LIMIT = 3
+PROFILE_EDIT_LIMIT = 4
 
 
 def get_subscription_status(user):
@@ -1945,3 +2349,21 @@ def hidden_entry(request: Request, key: str = ""):
     return FileResponse(
         os.path.join("web", "search", "searchwave.html")
     )
+
+# ============================================================
+#system_error
+# ============================================================
+
+    
+def is_system_error(e: Exception) -> bool:
+    msg = str(e).lower()
+
+    return any(x in msg for x in [
+        "airtable",
+        "postgres",
+        "connection",
+        "timeout",
+        "refused",
+        "429",
+        "too many requests"
+    ])    

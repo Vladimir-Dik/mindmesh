@@ -88,12 +88,25 @@ async function loadTopAdminLog(){
 
 }
 
-function openUsersPanel(){
+function openUsersPanel() {
+  window.location.href = "/user_management";
+}
+
+
+function openPanel() {
+  const panel = document.getElementById("panelSelector").value;
+  if (panel) {
+    window.location.href = panel;
+  }
+}
+
+/*function openUsersPanel(){
   window.open("/admin/users", "_blank");
 }
+
 
 function openPanel(){
   const select = document.getElementById("panelSelector");
   if(!select || !select.value) return;
   window.open(select.value, "_blank");
-}
+}*/
