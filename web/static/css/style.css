@@ -103,21 +103,48 @@ header .lang {
     gap: 6px;
 }
 
+header .lang {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
 header .lang button {
-    min-width: 40px;
+    min-width: 44px;
+    height: 32px;
     text-align: center;
 
-    background: transparent;
-    border: 1px solid #9ca3af;
-    color: #f9fafb;
-    padding: 4px 8px;
-    border-radius: 4px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #111827;
+    padding: 4px 10px;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 0.85em;
+    font-weight: 700;
+    line-height: 1;
 }
 
 header .lang button:hover {
-    background: #374151;
+    background: #e5e7eb;
+}
+
+header .lang button:active {
+    background: #d1d5db;
+}
+
+header .lang button:focus {
+    outline: 2px solid #60a5fa;
+    outline-offset: 1px;
+}
+
+@media (max-width: 768px) {
+    header .lang button {
+        min-width: 46px;
+        height: 34px;
+        font-size: 0.9em;
+        padding: 4px 10px;
+    }
 }
 
 /* ================= MAIN ================= */
