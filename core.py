@@ -1,8 +1,8 @@
 # ============================================================
 # MindMesh
 # File: core.py
-# Version: 2.0
-# Date: 09.04.2026
+# Version: 2.1
+# Date: 22.04.2026
 # Purpose:
 # - Users
 # - Ideas
