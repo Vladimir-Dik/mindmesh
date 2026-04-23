@@ -30,10 +30,13 @@ header {
     background: #1f2933;
     color: #f9fafb;
     padding: 12px 20px;
+    box-sizing: border-box;
+    width: 100%;
 
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
 header a {
@@ -64,8 +67,9 @@ header .logo a {
 header nav {
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 14px;
     flex-wrap: wrap;
+	min-width: 0;
 }
 
 header nav a {
@@ -100,7 +104,8 @@ header .right {
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 12px;
+    flex-shrink: 0;
 }
 
 /* AUTH */
@@ -122,41 +127,29 @@ header .auth a {
 header .lang {
     display: flex;
     gap: 6px;
-}
-
-header .lang {
-    display: flex;
-    gap: 6px;
     align-items: center;
+    flex-shrink: 0;
 }
 
 header .lang button {
-    min-width: 44px;
-    height: 32px;
+    flex-shrink: 0;
+    min-width: 40px;
+    height: 30px;
     text-align: center;
 
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #111827;
-    padding: 4px 10px;
+    background: #374151;
+    border: 1px solid #94a3b8;
+    color: #ffffff;
+    padding: 4px 8px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 0.85em;
+    font-size: 0.8em;
     font-weight: 700;
     line-height: 1;
 }
 
 header .lang button:hover {
-    background: #e5e7eb;
-}
-
-header .lang button:active {
-    background: #d1d5db;
-}
-
-header .lang button:focus {
-    outline: 2px solid #60a5fa;
-    outline-offset: 1px;
+    background: #4b5563;
 }
 
 @media (max-width: 768px) {
@@ -1550,5 +1543,33 @@ header nav.main-nav {
 @media (max-width: 900px) {
     .reviewer-columns {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ================= для мобильного ================= */
+
+@media (max-width: 900px) {
+    header {
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    header .logo {
+        order: 1;
+    }
+
+    header .right {
+        order: 2;
+        margin-left: auto;
+    }
+
+    header nav.main-nav {
+        order: 3;
+        width: 100%;
+        margin-top: 4px;
+    }
+
+    header nav.main-nav a {
+        font-size: 0.9em;
     }
 }
