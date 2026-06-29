@@ -1,64 +1,170 @@
 <!--
-MindMesh
+============================================================
+Project: MindMesh
 File: advanced.html
-Version: 3.1
-Date: 12.02.2026
-Purpose: Advanced Mode — Strategic Assistant Interface (UI v3, full i18n)
+Version: 4.0
+Date: 24.04.2026
+============================================================
 -->
 
 {% extends "base.html" %}
 {% block content %}
 
-<div class="card advanced-card">
+<link rel="stylesheet" href="/static/css/advanced.css">
 
-  <div class="advanced-header">
-    <div>
-      <h2 data-i18n="advanced_title"></h2>
-      <div class="advanced-subtitle" data-i18n="advanced_subtitle"></div>
+<div class="advanced-shell">
+
+  <!-- ====================================================== -->
+  <!-- HERO                                                   -->
+  <!-- ====================================================== -->
+  <section class="advanced-hero">
+
+    <div class="advanced-hero__left">
+
+      <div class="advanced-brand">
+        <img src="/static/images/logo.png" class="advanced-brand__logo-img">
+        <div>
+          <h1 class="advanced-page-title" data-i18n="advanced_title">
+            Advanced Mode
+          </h1>
+          <p class="advanced-page-subtitle" data-i18n="advanced_subtitle">
+            AI workspace for structured idea development
+          </p>
+        </div>
+      </div>
+
+      <div class="advanced-session-status">
+        <span class="status-chip status-chip--violet">Active</span>
+        <span class="status-chip status-chip--blue" data-i18n="status_idle">Idle</span>
+        <span class="status-chip status-chip--green" data-i18n="status_ready">Ready</span>
+      </div>
+     </div>
+
+    <div class="advanced-hero__right">
+
+      <div class="advanced-actions">
+        <button class="btn subtle" id="advancedBackBtn" data-i18n="common_back">Back</button>
+        <button class="btn subtle" id="advancedNewSessionBtn" data-i18n="advanced_new_session_btn">New Session</button>
+        <button class="btn subtle" id="advancedSaveDraftBtn" data-i18n="action_save_draft">Save Draft</button>
+        <button class="btn primary" id="advancedSaveIdeaBtn" data-i18n="action_save_idea">Save Idea</button>
+      </div>
+
     </div>
 
-    <div class="mode-indicator" data-i18n="advanced_status_active"></div>
-  </div>
+  </section>
 
-  <div id="chat" class="chatbox large"></div>
+  <!-- ====================================================== -->
+  <!-- MAIN BLOCKS (2 колонки)                                -->
+  <!-- ====================================================== -->
+  <section class="advanced-main">
 
-  <div id="inputArea" class="inputArea">
-    <textarea 
-      id="msg" 
-      class="chatTextarea"
-      rows="4"
-      data-i18n-placeholder="advanced_input_placeholder">
-    </textarea>
+    <!-- ===================== -->
+    <!-- INFO PANEL            -->
+    <!-- ===================== -->
+    <div class="card advanced-info-panel">
 
-    <div class="input-buttons">
-      <button 
-        class="btn primary" 
-        onclick="sendMsg()" 
-        data-i18n="advanced_send_btn">
-      </button>
+      <h2 data-i18n="panel_idea_draft">Idea Info</h2>
 
-      <button 
-        class="btn subtle" 
-        onclick="clearChat()" 
-        data-i18n="advanced_clear_btn">
-      </button>
+      <p data-i18n="advanced_intro_text">
+        Fill key fields or paste raw material. AI will structure and analyze your idea.
+      </p>
 
-      <button 
-        class="btn subtle" 
-        onclick="newSession()" 
-        data-i18n="advanced_new_session_btn">
-      </button>
+      <form id="advancedDraftForm" class="advanced-form">
+
+        <input id="advancedTitle" class="advanced-input" placeholder="Title">
+        <textarea id="advancedFullDescription" class="advanced-textarea" placeholder="Full Description"></textarea>
+        <input id="advancedKeywords" class="advanced-input" placeholder="Keywords">
+
+        <div class="advanced-form__actions">
+          <button type="button" class="btn primary" id="advancedRunAnalysisBtn">
+            Run Analysis
+          </button>
+        </div>
+
+      </form>
+
     </div>
-  </div>
+
+    <!-- ===================== -->
+    <!-- AI PANEL              -->
+    <!-- ===================== -->
+    <div class="card advanced-ai-panel">
+
+      <h2 data-i18n="panel_ai_workspace">AI Workspace</h2>
+
+      <div id="advancedChat" class="advanced-chatbox"></div>
+
+      <div class="advanced-composer">
+        <textarea id="advancedMsg" class="advanced-textarea"></textarea>
+        <button class="btn primary" id="advancedSendBtn">Send</button>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ====================================================== -->
+  <!-- RESULT PANEL                                           -->
+  <!-- ====================================================== -->
+  <section class="advanced-results card">
+
+    <h2 data-i18n="panel_results_review">Results</h2>
+
+    <div class="advanced-results-grid">
+
+      <div class="advanced-result-card">
+        <div>Uniqueness</div>
+        <div id="advancedUniquenessValue">—</div>
+      </div>
+
+      <div class="advanced-result-card">
+        <div>Risk</div>
+        <div id="advancedRiskValue">—</div>
+      </div>
+
+      <div class="advanced-result-card wide">
+        <div>AI Notes</div>
+        <div id="advancedNotesAI"></div>
+      </div>
+
+    </div>
+
+    <div class="advanced-review-actions">
+      <button class="btn subtle" id="advancedCheckSimilarityBtn">Check Similarity</button>
+      <button class="btn subtle" id="advancedSendToReviewBtn">Send to Review</button>
+      <button class="btn primary" id="advancedContinueBtn">Continue</button>
+    </div>
+
+  </section>
+
+  <!-- ====================================================== -->
+  <!-- FOOTER                                                 -->
+  <!-- ====================================================== -->
+  <footer class="advanced-footer">
+
+    <div class="advanced-footer__content">
+
+      <div class="advanced-footer__left">
+        <img src="/static/images/logo.png" class="advanced-footer__logo">
+
+        <div>
+          <div>MindMesh</div>
+          <div class="advanced-footer__version">
+            Version 1.0 • Advanced Mode 4.0
+          </div>
+        </div>
+      </div>
+
+      <div class="advanced-footer__right">
+        <span class="advanced-footer__status">Active</span>
+      </div>
+
+    </div>
+
+  </footer>
 
 </div>
 
 <script src="/static/js/advanced.js"></script>
-
-<script>
-  if (typeof applyTranslations === "function") {
-    applyTranslations();
-  }
-</script>
 
 {% endblock %}

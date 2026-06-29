@@ -1,14 +1,13 @@
 # ============================================================
 # MindMesh
 # File: postgres_db.py
-# Version: 1.3
-# Date: 22.06.2026
+# Version: 1.2
+# Date: 21.04.2026
 # Purpose:
 # - PostgreSQL primary storage for MindMesh user flow
 # - Users
 # - Ideas
 # - Duplicate matching
-# - Canonical cross-language comparison layer
 # - Profile updates
 # ============================================================
 
@@ -351,159 +350,6 @@ def normalize_compare_text(text: str) -> str:
     text = re.sub(r'\s+', ' ', text)
     return text
 
-# ============================================================
-# Name: Canonical Compare Layer (канонический слой сравнения)
-# Version: v0.1
-# Date: 2026-06-22
-# Purpose:
-# - improve duplicate matching across RU / EN / HE
-# - map multilingual terms to stable concept tokens
-# ============================================================
-
-CANONICAL_COMPARE_MAP = {
-    "energy_tower": [
-        "энергетическая башня",
-        "солнечная башня",
-        "аэродинамическая башня",
-        "energy tower",
-        "solar tower",
-        "solar updraft tower",
-        "airflow tower",
-        "מגדל אנרגיה",
-        "מגדל סולארי"
-    ],
-    "updraft_airflow": [
-        "восходящий поток",
-        "восходящие потоки",
-        "вертикальный воздушный поток",
-        "термический поток",
-        "updraft",
-        "upward airflow",
-        "vertical airflow",
-        "thermal airflow",
-        "rising air",
-        "זרימת אוויר עולה"
-    ],
-    "thermal_gradient": [
-        "разница температур",
-        "температурный градиент",
-        "нагретый воздух",
-        "тепловой поток",
-        "thermal gradient",
-        "temperature difference",
-        "heated air",
-        "thermal flow",
-        "הפרש טמפרטורות"
-    ],
-    "solar_collector": [
-        "солнечный коллектор",
-        "прозрачный коллектор",
-        "тепличная зона",
-        "solar collector",
-        "transparent collector",
-        "greenhouse collector",
-        "חממה",
-        "קולט שמש"
-    ],
-    "turbine_generation": [
-        "турбина",
-        "турбины",
-        "выработка электроэнергии",
-        "генерация электроэнергии",
-        "turbine",
-        "turbines",
-        "electricity generation",
-        "power generation",
-        "ייצור חשמל",
-        "טורבינה"
-    ],
-    "industrial_waste_heat": [
-        "промышленное тепло",
-        "утилизация промышленного тепла",
-        "избыточное промышленное тепло",
-        "industrial heat",
-        "waste heat",
-        "industrial waste heat",
-        "עודפי חום תעשייתי"
-    ],
-    "geothermal_heating": [
-        "геотермальный нагрев",
-        "геотермальный подогрев",
-        "geothermal heating",
-        "geothermal heat",
-        "חימום גיאותרמי"
-    ],
-    "air_shaft": [
-        "воздушная шахта",
-        "вертикальная шахта",
-        "шахта",
-        "тоннель",
-        "air shaft",
-        "vertical shaft",
-        "mine shaft",
-        "tunnel",
-        "פיר אוויר",
-        "מנהרה"
-    ],
-    "renewable_energy": [
-        "возобновляемая энергетика",
-        "зеленая энергетика",
-        "зелёная энергетика",
-        "экологичность",
-        "renewable energy",
-        "green energy",
-        "clean energy",
-        "אנרגיה מתחדשת"
-    ],
-    "passive_generation": [
-        "пассивная генерация",
-        "пассивный режим",
-        "малое количество движущихся частей",
-        "passive generation",
-        "passive operation",
-        "few moving parts",
-        "ייצור פסיבי"
-    ],
-    "water_desalination": [
-        "опреснение воды",
-        "сбор атмосферной влаги",
-        "desalination",
-        "atmospheric moisture collection",
-        "water desalination",
-        "התפלת מים",
-        "איסוף לחות"
-    ],
-    "ai_flow_control": [
-        "ии управление потоками",
-        "интеллектуальные заслонки",
-        "распределенные датчики",
-        "ai control",
-        "ai flow control",
-        "smart dampers",
-        "distributed sensors",
-        "בקרת ai"
-    ]
-}
-
-
-def extract_canonical_compare_terms(text: str) -> set[str]:
-    normalized = normalize_compare_text(text or "")
-    result = set()
-
-    if not normalized:
-        return result
-
-    for token, variants in CANONICAL_COMPARE_MAP.items():
-        for variant in variants:
-            variant_norm = normalize_compare_text(variant)
-
-            if variant_norm and variant_norm in normalized:
-                result.add(token)
-                break
-
-    return result
-
-
 
 def soften_russian_word(word: str) -> str:
     w = word.lower().strip().replace('ё', 'е')
@@ -525,11 +371,6 @@ def extract_compare_keywords(text: str) -> set[str]:
         if len(w) < 3 or w in bad:
             continue
         result.add(w)
-
-    # Add stable multilingual concept tokens
-    # (канонические токены для межъязыкового сравнения)
-    result.update(extract_canonical_compare_terms(text))
-
     return result
 
 
@@ -573,10 +414,6 @@ def find_best_duplicate_pg(title_or_text: str, keywords: list[str]):
     query_kw.update(extract_compare_keywords(query_raw))
     query_kw.update(extract_compare_keywords(" ".join(keywords or [])))
 
-    query_canon = set()
-    query_canon.update(extract_canonical_compare_terms(query_raw))
-    query_canon.update(extract_canonical_compare_terms(" ".join(keywords or [])))
-
     best = None
     best_score = 0.0
     best_debug = {}
@@ -589,22 +426,11 @@ def find_best_duplicate_pg(title_or_text: str, keywords: list[str]):
         full_raw = fields.get("Full Description") or ""
         db_keywords_raw = fields.get("Keywords") or ""
 
-        notes_ai_raw = fields.get("NotesAI") or ""
-        tags_ai_raw = fields.get("TagsAI") or ""
-        raw_input_raw = fields.get("Raw Input") or ""
-        vector_raw = fields.get("VectorEmbedding") or ""
-        embedding_model_raw = fields.get("EmbeddingModel") or ""
-
         db_text_raw = "\n".join([
             title_raw,
             short_raw,
             full_raw[:2500],
-            db_keywords_raw,
-            notes_ai_raw,
-            tags_ai_raw,
-            raw_input_raw[:2500],
-            vector_raw,
-            embedding_model_raw
+            db_keywords_raw
         ])
 
         db_title_norm = normalize_compare_text(title_raw)
@@ -617,20 +443,12 @@ def find_best_duplicate_pg(title_or_text: str, keywords: list[str]):
         db_kw.update(extract_compare_keywords(short_raw))
         db_kw.update(extract_compare_keywords(full_raw[:2500]))
         db_kw.update(extract_compare_keywords(db_keywords_raw))
-        db_kw.update(extract_compare_keywords(notes_ai_raw))
-        db_kw.update(extract_compare_keywords(tags_ai_raw))
-        db_kw.update(extract_compare_keywords(raw_input_raw[:2500]))
-        db_kw.update(extract_compare_keywords(vector_raw))
-
-        db_canon = set()
-        db_canon.update(extract_canonical_compare_terms(db_text_raw))
 
         title_score = similarity(query_norm[:300], db_title_norm) if db_title_norm else 0.0
         short_score = similarity(query_norm[:600], db_short_norm) if db_short_norm else 0.0
         full_score = similarity(query_norm[:2500], db_full_norm) if db_full_norm else 0.0
 
         kw_score = keyword_overlap_score(query_kw, db_kw)
-        canon_score = keyword_overlap_score(query_canon, db_canon)
 
         containment_score = 0.0
         if query_norm and db_all_norm:
@@ -649,9 +467,8 @@ def find_best_duplicate_pg(title_or_text: str, keywords: list[str]):
             core_overlap = min(1.0, len(important_common) / 8)
 
         score = max(
-            title_score * 0.30 + short_score * 0.18 + full_score * 0.14 + kw_score * 0.18 + canon_score * 0.12 + containment_score * 0.08,
-            kw_score * 0.45 + core_overlap * 0.35 + canon_score * 0.20,
-            canon_score * 0.70 + core_overlap * 0.30,
+            title_score * 0.35 + short_score * 0.20 + full_score * 0.15 + kw_score * 0.20 + containment_score * 0.10,
+            kw_score * 0.55 + core_overlap * 0.45,
             containment_score,
             title_score
         )
@@ -659,12 +476,6 @@ def find_best_duplicate_pg(title_or_text: str, keywords: list[str]):
         # Жёсткое усиление для одной темы
         if kw_score >= 0.35 and core_overlap >= 0.45:
             score = max(score, 0.72)
-
-        if canon_score >= 0.35 and core_overlap >= 0.35:
-            score = max(score, 0.72)
-
-        if canon_score >= 0.50:
-            score = max(score, 0.80)
 
         if kw_score >= 0.50:
             score = max(score, 0.78)
@@ -683,9 +494,6 @@ def find_best_duplicate_pg(title_or_text: str, keywords: list[str]):
                 "short_score": round(short_score, 3),
                 "full_score": round(full_score, 3),
                 "kw_score": round(kw_score, 3),
-                "canon_score": round(canon_score, 3),
-                "query_canon": sorted(list(query_canon)),
-                "db_canon": sorted(list(db_canon)),
                 "containment_score": round(containment_score, 3),
                 "core_overlap": round(core_overlap, 3),
                 "final_score": round(score, 3)
@@ -699,102 +507,6 @@ def find_best_duplicate_pg(title_or_text: str, keywords: list[str]):
         best["debug"]["duplicate_match"] = best_debug
 
     return best, best_score
-    
-    
-# ============================================================
-# Name: Find Duplicate Candidates PG (поиск группы кандидатов)
-# Version: v0.1
-# Date: 2026-06-22
-# ============================================================
-
-def find_duplicate_candidates_pg(
-    title_or_text: str,
-    keywords: list[str],
-    limit: int = 10
-):
-
-    records = list_ideas_records_pg()
-
-    query_raw = title_or_text or ""
-
-    query_kw = set()
-    query_kw.update(extract_compare_keywords(query_raw))
-    query_kw.update(
-        extract_compare_keywords(
-            " ".join(keywords or [])
-        )
-    )
-
-    query_canon = set()
-    query_canon.update(
-        extract_canonical_compare_terms(query_raw)
-    )
-
-    candidates = []
-
-    for rec in records:
-
-        fields = rec.get("fields", {})
-
-        db_text = "\n".join([
-            fields.get("Title") or "",
-            fields.get("Short Description") or "",
-            fields.get("Full Description") or "",
-            fields.get("Keywords") or "",
-            fields.get("NotesAI") or "",
-            fields.get("TagsAI") or "",
-            fields.get("Raw Input") or ""
-        ])
-
-        db_kw = extract_compare_keywords(db_text)
-        db_canon = extract_canonical_compare_terms(db_text)
-
-        kw_score = keyword_overlap_score(
-            query_kw,
-            db_kw
-        )
-
-        canon_score = keyword_overlap_score(
-            query_canon,
-            db_canon
-        )
-
-        score = max(
-            kw_score * 0.65 + canon_score * 0.35,
-            canon_score
-        )
-
-        if score < 0.35:
-            continue
-
-        similarity_score = int(score * 100)
-
-        if similarity_score >= 85:
-            level = "exact"
-        elif similarity_score >= 70:
-            level = "strong"
-        elif similarity_score >= 50:
-            level = "possible"
-        else:
-            level = "weak"
-
-        candidates.append({
-            "id": rec.get("id"),
-            "idea_id": fields.get("IdeaID"),
-            "title": fields.get("Title"),
-            "status": fields.get("Status"),
-            "score": similarity_score,
-            "level": level
-        })
-
-    candidates.sort(
-        key=lambda x: x["score"],
-        reverse=True
-    )
-
-    return candidates[:limit]
-    
-    
 
 
 def safe_find_best_duplicate_pg(title_or_text: str, keywords: list[str]):
@@ -879,9 +591,6 @@ def create_idea_pg(data: dict):
 
         'VectorEmbedding': data.get('vector_embedding', ''),
         'EmbeddingModel': data.get('embedding_model', ''),
-        'CanonicalTitleEN': data.get('canonical_title_en'),
-        'CanonicalSummaryEN': data.get('canonical_summary_en'),
-        'CanonicalKeywordsEN': data.get('canonical_keywords_en'),
 
         # Collector / moderation fields
         'checked_by_user_id': data.get('checked_by_user_id'),

@@ -1,8 +1,8 @@
 # ============================================================
 # Project: MindMesh
 # File: app.py
-# Version: 4.2
-# Date: 20.04.2026
+# Version: 4.3
+# Date: 12.05.2026
 # Purpose:
 # - Main web app
 # - user-management
@@ -18,6 +18,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi import Request, UploadFile, File, Form
+from fastapi.responses import JSONResponse
+from web import collector_agent
 
 import sys
 import os
@@ -26,6 +29,9 @@ import bcrypt
 import json
 import datetime
 import postgres_db
+import psycopg2
+import psycopg2.extras
+
 
 # =====================временный блок=======================================
 SUPERADMIN_EMAIL = "searchwave@gmail.com"
@@ -84,7 +90,38 @@ async def system_health():
         "postgres_external": pg_external
     }
 
+# ============================================================
+# Name: Session Heartbeat (пульс сессии)
+# ============================================================
 
+@app.get("/api/heartbeat")
+def heartbeat(request: Request):
+
+    user = get_current_user(request)
+
+    db_ok = False
+    db_error = None
+
+    try:
+        db_ok = postgres_db.pg_ping()
+    except Exception as e:
+        db_ok = False
+        db_error = str(e)
+
+    return {
+        "status": "ok" if db_ok else "degraded",
+        "session": {
+            "authenticated": bool(user),
+            "user_id": user.get("id") if user else None,
+            "role": user.get("fields", {}).get("Role") if user else "guest",
+            "email": user.get("fields", {}).get("Email") if user else None
+        },
+        "database": {
+            "postgres_ok": db_ok,
+            "error": db_error
+        },
+        "server_time": datetime.datetime.utcnow().isoformat()
+    }
 
 
 # ============================================================
@@ -1533,6 +1570,116 @@ def list_users(request: Request):
     return {"users": simplified}
 
 # ============================================================
+# AI Collector Agent
+# ============================================================    
+    
+@app.get("/collector")
+def collector_page():
+    return FileResponse("web/templates/collector_agent.html")   
+    
+# ============================================================
+# AI Collector Agent duplicates
+# ============================================================ 
+
+@app.post("/api/collector/check-duplicates")
+async def collector_check_duplicates(request: Request):
+
+    user = get_current_user(request)
+
+    session_info = {
+        "authenticated": bool(user),
+        "user_id": user.get("id") if user else None,
+        "role": user.get("fields", {}).get("Role") if user else "guest",
+        "email": user.get("fields", {}).get("Email") if user else None
+    }
+
+    data = await request.json()
+    idea = data.get("idea") or {}
+
+    title = idea.get("title") or ""
+    short = idea.get("short_description") or ""
+    full = idea.get("full_description") or ""
+    keywords_raw = idea.get("keywords") or ""
+
+    if isinstance(keywords_raw, str):
+        keywords = [x.strip() for x in keywords_raw.split(",") if x.strip()]
+    else:
+        keywords = keywords_raw or []
+
+    query_text = "\n".join([
+        title,
+        short,
+        ", ".join(keywords),
+        full[:1200]
+    ])
+
+    try:
+        result = postgres_db.safe_find_best_duplicate_pg(query_text, keywords)
+
+        candidates = postgres_db.find_duplicate_candidates_pg(
+            query_text,
+            keywords,
+            limit=10
+        )
+
+        if not result.get("ok"):
+            return {
+                "status": "ok",
+                "session": session_info,
+                "duplicate_found": False,
+                "check_degraded": True,
+                "message": result.get("error")
+            }
+
+        best = result.get("best")
+        score = result.get("score") or 0
+
+        if not best:
+            return {
+                "status": "ok",
+                "session": session_info,
+                "duplicate_found": False,
+                "check_degraded": False,
+                "message": "No duplicates found",
+                "candidates": candidates,
+                "candidates_count": len(candidates),
+                 "debug": result
+            }
+
+        fields = best.get("fields", {})
+        similarity_score = int(score * 100)
+
+        return {
+            "status": "ok",
+            "session": session_info,
+            "duplicate_found": True,
+            "check_degraded": False,
+            "similarity_score": similarity_score,
+            "duplicate_level": "exact" if similarity_score >= 85 else "possible",
+            "save_allowed": False if similarity_score >= 85 else True,
+            "candidates": candidates,
+            "candidates_count": len(candidates),
+            
+            "debug": best.get("debug") if best else None,
+            
+            
+            "idea": {
+                "id": best.get("id"),
+                "idea_id": fields.get("IdeaID"),
+                "title": fields.get("Title"),
+                "short": fields.get("Short Description"),
+                "category": fields.get("Category"),
+                "status": fields.get("Status"),
+                "author": fields.get("Author"),
+                "created_at": fields.get("CreatedAt")
+            }
+        }
+
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+# ============================================================
 # TOPADMIN PANEL
 # ============================================================
 
@@ -2367,3 +2514,505 @@ def is_system_error(e: Exception) -> bool:
         "429",
         "too many requests"
     ])    
+
+
+# ============================================================
+#collector_agent endpoint
+# ============================================================
+# Endpoint: /api/collector/run
+# Version: v0.3
+# Date: 2026-05-07
+# Name: Collector Agent Run (запуск агента-сборщика)
+# ============================================================
+
+@app.post("/api/collector/run")
+async def collector_run(
+    agent_session_id: str = Form(""),
+    source_url: str = Form(""),
+    source_type: str = Form("website"),
+    instructions: str = Form(""),
+    mode: str = Form("collector_agent"),
+    mode_version: str = Form("Collector Agent v0.3"),
+    source_file: UploadFile | None = File(None)
+):
+    source_url = (source_url or "").strip()
+
+    payload = {
+        "agent_session_id": agent_session_id,
+        "source_url": source_url,
+        "source_type": source_type,
+        "instructions": instructions,
+        "mode": mode,
+        "mode_version": mode_version
+    }
+
+    try:
+        if source_file is not None and source_file.filename:
+            raw = await source_file.read()
+
+            if not raw:
+                return JSONResponse(
+                    {"status": "error", "message": "Uploaded file is empty"},
+                    status_code=400
+                )
+
+            result = collector_agent.build_collector_result_from_file(
+                payload=payload,
+                filename=source_file.filename,
+                raw=raw,
+                content_type=source_file.content_type or ""
+            )
+
+            return result
+
+        if not source_url:
+            return JSONResponse(
+                {"status": "error", "message": "Source URL or file is required"},
+                status_code=400
+            )
+
+        if not source_url.startswith(("http://", "https://")):
+            return JSONResponse(
+                {"status": "error", "message": "Only http/https URLs are allowed"},
+                status_code=400
+            )
+
+        result = collector_agent.build_collector_result(payload)
+        return result
+
+    except Exception as e:
+        return JSONResponse(
+            {
+                "status": "error",
+                "message": str(e)
+            },
+            status_code=500
+        )
+ 
+# ============================================================
+# Name: Collector Save Draft (сохранение черновика сборщика)
+# ============================================================
+
+@app.post("/api/collector/save-draft")
+async def collector_save_draft(request: Request):
+
+    data = await request.json()
+
+    try:
+
+        buffer_result = core.save_collector_buffer(data)
+
+        if not buffer_result.get("ok"):
+
+            return JSONResponse(
+                {
+                    "status": "error",
+                    "message": buffer_result.get("error")
+                },
+                status_code=500
+            )
+
+        return {
+            "status": "ok",
+            "saved_as": "buffer_collector",
+            "buffer_file": buffer_result.get("filename"),
+            "idea_id": buffer_result.get("filename")
+        }
+
+    except Exception as e:
+
+        return JSONResponse(
+            {
+                "status": "error",
+                "message": str(e)
+            },
+            status_code=500
+        )
+
+# ============================================================
+# Collector Agent Save Ready
+# ============================================================
+# Endpoint: /api/collector/save-ready
+# Version: v0.4
+# Date: 2026-05-13
+# Name: Collector Save Ready (сохранение готовой идеи сборщика)
+# ============================================================
+
+@app.post("/api/collector/save-ready")
+async def collector_save_ready(request: Request):
+
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=403)
+
+    data = await request.json()
+
+    idea = data.get("idea") or {}
+    raw_agent_result = data.get("raw_agent_result") or {}
+    duplicate_data = data.get("duplicate_data") or {}
+    duplicate_decision = data.get("duplicate_decision")
+
+    if not duplicate_data:
+        return JSONResponse(
+            {
+                "status": "error",
+                "message": "Duplicate check required before save"
+            },
+            status_code=400
+        )
+
+    duplicate_found = bool(duplicate_data.get("duplicate_found"))
+    duplicate_level = duplicate_data.get("duplicate_level")
+    duplicate_idea = duplicate_data.get("idea") or {}
+    duplicate_id = duplicate_idea.get("id")
+    duplicate_title = duplicate_idea.get("title")
+    similarity_score = duplicate_data.get("similarity_score") or 0
+
+    # --------------------------------------------------------
+    # DECISION REQUIRED FOR FOUND DUPLICATE
+    # --------------------------------------------------------
+
+    if duplicate_found and not duplicate_decision:
+        return JSONResponse(
+            {
+                "status": "error",
+                "message": "Duplicate decision required before save"
+            },
+            status_code=400
+        )
+
+    # --------------------------------------------------------
+    # EXACT DUPLICATE BLOCK
+    # only independent save is blocked.
+    # linked_duplicate and send_to_review are allowed.
+    # --------------------------------------------------------
+
+    if (
+        duplicate_found
+        and duplicate_level == "exact"
+        and duplicate_decision not in ["linked_duplicate", "send_to_review"]
+    ):
+        return JSONResponse(
+            {
+                "status": "error",
+                "message": "Exact duplicate found. Saving as new idea is blocked.",
+                "duplicate_id": duplicate_id,
+                "duplicate_title": duplicate_title,
+                "similarity_score": similarity_score
+            },
+            status_code=409
+        )
+
+    user_fields = user.get("fields", {})
+    user_id = user.get("id")
+    user_email = user_fields.get("Email") or ""
+    user_name = user_fields.get("Name") or user_email or "Admin"
+    user_role = user_fields.get("Role") or "admin"
+
+    if not user_email:
+        return JSONResponse(
+            {"status": "error", "message": "User email required"},
+            status_code=400
+        )
+
+    try:
+        keywords_raw = idea.get("keywords") or ""
+
+        if isinstance(keywords_raw, str):
+            keywords_list = [
+                x.strip()
+                for x in keywords_raw.split(",")
+                if x.strip()
+            ]
+        else:
+            keywords_list = keywords_raw
+
+        # ----------------------------------------------------
+        # RELATION DECISION
+        # ----------------------------------------------------
+
+        related_to_id = None
+        relation_type = None
+        moderation_note = "Collector Agent submission. Requires moderation."
+
+        if duplicate_found and duplicate_decision == "linked_duplicate":
+            related_to_id = duplicate_id
+            relation_type = "duplicate"
+            moderation_note = (
+                "Collector Agent submission. "
+                "Saved as linked duplicate. "
+                f"Duplicate match: {duplicate_title}. "
+                f"Similarity: {similarity_score}%."
+            )
+
+        elif duplicate_found and duplicate_decision == "send_to_review":
+            related_to_id = duplicate_id
+            relation_type = "needs_review"
+            moderation_note = (
+                "Collector Agent submission. "
+                "Duplicate found; sent to moderator review. "
+                f"Possible match: {duplicate_title}. "
+                f"Similarity: {similarity_score}%."
+            )
+
+        elif duplicate_found:
+            related_to_id = duplicate_id
+            relation_type = "possible_duplicate"
+            moderation_note = (
+                "Collector Agent submission. "
+                "Possible duplicate. Requires moderator verification. "
+                f"Possible match: {duplicate_title}. "
+                f"Similarity: {similarity_score}%."
+            )
+
+        # ----------------------------------------------------
+        # CREATE IDEA DATA
+        # ----------------------------------------------------
+
+        create_data = {
+            "title": idea.get("title") or "Collector idea",
+            "short": idea.get("short_description") or "",
+            "full": idea.get("full_description") or "",
+            "keywords_list": keywords_list,
+
+            "author_email": user_email,
+            "author_name": user_name,
+
+            "category": idea.get("category"),
+            "region": idea.get("region"),
+            "language": idea.get("language"),
+
+            "source": "CollectorAgent",
+            "existing_analogues": idea.get("existing_analogues"),
+            "patentability": idea.get("patentability"),
+
+            "notes_ai": idea.get("notes_ai"),
+            "ai_tags": idea.get("ai_tags"),
+
+            "raw_input": idea.get("full_description") or "",
+
+            "detected_by_ai": True,
+            "discovered_by_ai": True,
+
+            "ai_review_status": "NeedsModeration",
+            "status_override": "Review",
+            "intake_mode": "collector_agent",
+            "assistant_version": "Collector Agent v0.7",
+
+            "related_to_id": related_to_id,
+            "similarity_score": similarity_score,
+            "relation_type": relation_type,
+
+            "requires_moderation": True,
+            "visibility_status": "internal",
+            "confidentiality_level": "Internal",
+
+            "checked_by_user_id": user_id,
+            "checked_by_role": user_role,
+            "checked_by_name": user_name,
+            "checked_by_email": user_email,
+            "checked_at": datetime.datetime.utcnow().isoformat(),
+
+            "collector_session_id": data.get("agent_session_id"),
+            "collector_source_filename": idea.get("source"),
+            "collector_source_url": data.get("source_url"),
+            "collector_source_type": "file_or_url",
+            "collector_raw_agent_result": raw_agent_result,
+
+            "moderation_notes": moderation_note
+        }
+
+        created = postgres_db.create_idea_pg(create_data)
+
+        return {
+           "status": "ok",
+
+           "idea_id": created.get("idea_id"),
+           "record_id": created.get("record_id"),
+           "saved_as": "ready",
+
+           "status_name": "Review",
+           "review_queue": "moderator",
+
+           "duplicate_found": duplicate_found,
+           "duplicate_decision": duplicate_decision,
+
+           "duplicate_id": duplicate_id,
+           "duplicate_title": duplicate_title,
+           "similarity_score": similarity_score,
+
+           "relation_type": relation_type,
+
+           "sent_to": "moderator",
+           "review_required": True,
+           "review_reason": moderation_note
+        }
+
+    except Exception as e:
+        return JSONResponse(
+            {"status": "error", "message": str(e)},
+            status_code=500
+        )
+ 
+# ============================================================
+#тестовый модуль удалить после настройки
+# ============================================================    
+
+def _pg_conn():
+    return psycopg2.connect(
+        dbname=os.getenv("PGDATABASE", "mindmesh"),
+        user=os.getenv("PGUSER", "mindmesh_app"),
+        password=os.getenv("PGPASSWORD", "mindmesh123"),
+        host=os.getenv("PGHOST", "mindmesh.ddns.net"),
+        port=os.getenv("PGPORT", "5432")
+    )
+
+
+@app.get("/proverka-airtab", response_class=HTMLResponse)
+def proverka_airtab_page(request: Request):
+    user = get_current_user(request)
+    return templates.TemplateResponse(
+        "proverka_airtab.html",
+        {"request": request, "user": user, "system": system_state}
+    )
+
+
+@app.get("/api/proverka-airtab/health")
+def proverka_airtab_health(request: Request):
+    try:
+        conn = _pg_conn()
+        cur = conn.cursor()
+        cur.execute("SELECT NOW()")
+        now_value = cur.fetchone()[0]
+        cur.execute('SELECT COUNT(*) FROM public."Users"')
+        users_count = cur.fetchone()[0]
+        cur.execute('SELECT COUNT(*) FROM public."IdeaHub"')
+        ideas_count = cur.fetchone()[0]
+        cur.close()
+        conn.close()
+        return {
+            "status": "ok",
+            "db_host": os.getenv("PGHOST"),
+            "db_port": os.getenv("PGPORT"),
+            "server_time": str(now_value),
+            "users_count": users_count,
+            "ideas_count": ideas_count,
+        }
+    except Exception as e:
+        return JSONResponse({
+            "status": "error",
+            "error_type": type(e).__name__,
+            "message": str(e)
+        }, status_code=500)
+
+
+@app.get("/api/proverka-airtab/read-users")
+def proverka_airtab_read_users(request: Request):
+    try:
+        conn = _pg_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute('''
+            SELECT id, "Name", "Email", "Role", "AccountStatus", "CreatedAt"
+            FROM public."Users"
+            ORDER BY id DESC
+            LIMIT 20
+        ''')
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return {"status": "ok", "items": rows}
+    except Exception as e:
+        return JSONResponse({
+            "status": "error",
+            "error_type": type(e).__name__,
+            "message": str(e)
+        }, status_code=500)
+
+
+@app.get("/api/proverka-airtab/read-ideas")
+def proverka_airtab_read_ideas(request: Request):
+    try:
+        conn = _pg_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute('''
+            SELECT id, "Title", "Short Description", "Status", "Your Email", "CreatedAt"
+            FROM public."IdeaHub"
+            ORDER BY id DESC
+            LIMIT 20
+        ''')
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return {"status": "ok", "items": rows}
+    except Exception as e:
+        return JSONResponse({
+            "status": "error",
+            "error_type": type(e).__name__,
+            "message": str(e)
+        }, status_code=500)
+
+
+@app.post("/api/proverka-airtab/write-user")
+async def proverka_airtab_write_user(request: Request):
+    payload = await request.json()
+    try:
+        conn = _pg_conn()
+        cur = conn.cursor()
+        cur.execute('''
+            INSERT INTO public."Users"
+            ("Name", "Email", "Role", "AccountStatus", "Country", "Language", "CreatedAt")
+            VALUES (%s, %s, %s, %s, %s, %s, NOW()::text)
+            RETURNING id
+        ''', (
+            payload.get("Name"),
+            payload.get("Email"),
+            payload.get("Role", "user"),
+            payload.get("AccountStatus", "active"),
+            payload.get("Country", ""),
+            payload.get("Language", "")
+        ))
+        new_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {"status": "ok", "inserted_id": new_id, "payload": payload}
+    except Exception as e:
+        return JSONResponse({
+            "status": "error",
+            "error_type": type(e).__name__,
+            "message": str(e),
+            "payload": payload
+        }, status_code=500)
+
+
+@app.post("/api/proverka-airtab/write-idea")
+async def proverka_airtab_write_idea(request: Request):
+    payload = await request.json()
+    try:
+        conn = _pg_conn()
+        cur = conn.cursor()
+        cur.execute('''
+            INSERT INTO public."IdeaHub"
+            ("Title", "Short Description", "Full Description", "Your Name", "Your Email", "Status", "CreatedAt")
+            VALUES (%s, %s, %s, %s, %s, %s, NOW()::text)
+            RETURNING id
+        ''', (
+            payload.get("Title"),
+            payload.get("Short Description"),
+            payload.get("Full Description"),
+            payload.get("Your Name"),
+            payload.get("Your Email"),
+            payload.get("Status", "New")
+        ))
+        new_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {"status": "ok", "inserted_id": new_id, "payload": payload}
+    except Exception as e:
+        return JSONResponse({
+            "status": "error",
+            "error_type": type(e).__name__,
+            "message": str(e),
+            "payload": payload
+        }, status_code=500)

@@ -1,0 +1,277 @@
+<!--
+Project: MindMesh
+File: collector_agent.html
+Version: v0.4
+Date: 2026-05-13
+Name: AI Collector Agent Workdesk (рабочий стол ИИ-агента сборщика)
+-->
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title data-i18n="collector_agent_title">AI Collector Agent</title>
+
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/advanced.css" />
+</head>
+
+<body>
+
+  <main class="advanced-page">
+
+    <!-- HERO -->
+    <section class="advanced-hero">
+
+      <div class="advanced-hero__left">
+        <div class="advanced-brand">
+          <img src="/static/images/logo.png" class="advanced-brand__logo-img" alt="MindMesh logo">
+
+          <div>
+            <h1 class="advanced-page-title" data-i18n="collector_agent_title">
+              AI Collector Agent
+            </h1>
+
+            <p class="advanced-page-subtitle" data-i18n="collector_agent_subtitle">
+              Controlled AI workspace for collecting and preparing ideas from external sources
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="advanced-hero__right">
+        <button id="collectorBackBtn" class="advanced-btn secondary" data-i18n="common_back">
+          Назад
+        </button>
+      </div>
+
+    </section>
+
+    <!-- SOURCE -->
+    <section class="advanced-panel">
+
+      <h2 data-i18n="collector_source_block">Source Input</h2>
+
+      <label class="advanced-label" data-i18n="collector_source_url">Source URL</label>
+      <input
+        id="collectorSourceUrl"
+        class="advanced-input"
+        type="url"
+        placeholder="https://example.com/article"
+      />
+
+      <label class="advanced-label" data-i18n="collector_source_file">
+        Source File
+      </label>
+
+      <input
+        id="collectorSourceFile"
+        class="advanced-input"
+        type="file"
+        accept=".txt,.md,.pdf,.doc,.docx,.html,.htm,.json,.csv,.rtf"
+      />
+
+      <p class="advanced-hint" data-i18n="collector_source_file_hint">
+        Upload a file for one-time AI extraction. URL can be empty if file is selected.
+      </p>
+
+      <label class="advanced-label" data-i18n="collector_source_type">Source Type</label>
+      <select id="collectorSourceType" class="advanced-input">
+        <option value="website">website</option>
+        <option value="article">article</option>
+        <option value="pdf">pdf</option>
+        <option value="patent">patent</option>
+        <option value="forum">forum</option>
+        <option value="social">social</option>
+        <option value="raw_text">raw text</option>
+        <option value="file">file</option>
+      </select>
+
+      <label class="advanced-label" data-i18n="collector_agent_instructions">Agent Instructions</label>
+      <textarea
+        id="collectorInstructions"
+        class="advanced-textarea"
+        rows="4"
+        data-i18n-placeholder="collector_agent_instructions_placeholder"
+        placeholder="Extract useful ideas, technologies, methods, problems and possible solutions."
+      ></textarea>
+
+      <div class="advanced-actions">
+        <button id="collectorRunBtn" class="advanced-btn primary" data-i18n="collector_run_agent">
+          Run Agent
+        </button>
+
+        <button id="collectorRetryBtn" class="advanced-btn secondary" data-i18n="collector_retry">
+          Retry With Instructions
+        </button>
+      </div>
+
+    </section>
+
+    <!-- RESULT -->
+    <section class="advanced-panel">
+
+      <h2 data-i18n="collector_result_block">Result Fields</h2>
+
+      <div class="advanced-grid">
+
+        <div>
+          <label class="advanced-label" data-i18n="field_title">Title</label>
+          <input id="fieldTitle" class="advanced-input" />
+        </div>
+
+        <div>
+          <label class="advanced-label">Category</label>
+          <input id="fieldCategory" class="advanced-input" />
+        </div>
+
+        <div>
+          <label class="advanced-label">Language</label>
+          <input id="fieldLanguage" class="advanced-input" />
+        </div>
+
+        <div>
+          <label class="advanced-label">Region</label>
+          <input id="fieldRegion" class="advanced-input" />
+        </div>
+
+        <div>
+          <label class="advanced-label" data-i18n="field_keywords">Keywords</label>
+          <input id="fieldKeywords" class="advanced-input" />
+        </div>
+
+        <div>
+          <label class="advanced-label">TagsAI</label>
+          <input id="fieldAITags" class="advanced-input" />
+        </div>
+
+      </div>
+
+      <label class="advanced-label">Short Description</label>
+      <textarea id="fieldShortDescription" class="advanced-textarea" rows="3"></textarea>
+
+      <label class="advanced-label" data-i18n="field_full_description">Full Description</label>
+      <textarea id="fieldFullDescription" class="advanced-textarea" rows="6"></textarea>
+
+      <label class="advanced-label">Existing Analogues</label>
+      <textarea id="fieldExistingAnalogues" class="advanced-textarea" rows="3"></textarea>
+
+      <label class="advanced-label" data-i18n="field_notes_ai">NotesAI</label>
+      <textarea id="fieldNotesAI" class="advanced-textarea" rows="4"></textarea>
+
+      <label class="advanced-label">Patentability</label>
+      <input id="fieldPatentability" class="advanced-input" />
+
+      <label class="advanced-label">Source</label>
+      <input id="fieldSource" class="advanced-input" />
+
+      <label class="advanced-label">AIReviewStatus</label>
+      <input id="fieldAIReviewStatus" class="advanced-input" value="draft" />
+
+    </section>
+
+    <!-- DUPLICATE CHECK -->
+    <section class="advanced-panel">
+
+      <h2 data-i18n="collector_duplicates_block">
+        Duplicate Analysis
+      </h2>
+
+      <div id="collectorDuplicateStatus" class="advanced-hint" data-i18n="collector_duplicate_not_checked">
+        Duplicate check was not performed. Saving to catalog is unavailable.
+      </div>
+
+      <div class="advanced-actions">
+        <button id="collectorCheckDuplicatesBtn" class="advanced-btn secondary" data-i18n="action_check_similarity">
+          Check Similarity
+        </button>
+      </div>
+
+      <div id="collectorDuplicateResult" class="advanced-log">
+        Duplicate analysis not started.
+      </div>
+
+      <div id="collectorDuplicateDecisionBlock" style="display: none; margin-top: 16px;">
+
+        <h3 data-i18n="collector_duplicate_decision_block">
+          Duplicate Decision
+        </h3>
+
+        <p id="collectorDuplicateDecisionStatus" class="advanced-hint" data-i18n="collector_decision_required">
+          Select what to do with the found match.
+        </p>
+
+        <div class="advanced-actions">
+
+          <button
+            id="collectorDecisionLinkedDuplicateBtn"
+            class="advanced-btn secondary"
+            data-i18n="collector_decision_linked_duplicate"
+          >
+            Save as Linked Duplicate
+          </button>
+
+          <button
+            id="collectorDecisionDraftNoLinkBtn"
+            class="advanced-btn secondary"
+            data-i18n="collector_decision_draft_without_link"
+          >
+            Save Draft Without Link
+          </button>
+
+          <button
+            id="collectorDecisionSendReviewBtn"
+            class="advanced-btn secondary"
+            data-i18n="action_send_to_review"
+          >
+            Send to Review
+          </button>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SAVE ACTIONS -->
+    <section class="advanced-panel">
+
+      <h2 data-i18n="panel_results_review">
+        Result and Actions
+      </h2>
+
+      <p id="collectorSaveStatus" class="advanced-hint" data-i18n="collector_duplicate_not_checked">
+        Duplicate check was not performed. Saving to catalog is unavailable.
+      </p>
+
+      <div class="advanced-actions">
+        <button id="collectorSaveDraftBtn" class="advanced-btn secondary" data-i18n="action_save_draft">
+          Save Draft
+        </button>
+
+        <button id="collectorSaveReadyBtn" class="advanced-btn primary" data-i18n="action_save_idea" disabled>
+          Save Idea
+        </button>
+      </div>
+
+    </section>
+
+    <!-- LOG -->
+    <section class="advanced-panel">
+
+      <h2 data-i18n="collector_log_block">Agent Log</h2>
+
+      <pre id="collectorLog" class="advanced-log">
+[collector] waiting...
+      </pre>
+
+    </section>
+
+  </main>
+
+  <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/collector_agent.js"></script>
+
+</body>
+</html>

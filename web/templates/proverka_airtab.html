@@ -1,0 +1,164 @@
+<!--
+============================================================
+Project: MindMesh
+File: proverka_airtab.html
+Version: 1.0
+Date: 22.04.2026
+Purpose:
+- Temporary PostgreSQL test page
+- Read / Write / Connectivity check
+- Debug page for transition Airtable -> PostgreSQL
+============================================================
+-->
+
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width:1100px; margin:20px auto;">
+  <h2>Proverka PostgreSQL (проверка PostgreSQL)</h2>
+  <p style="opacity:0.85;">
+    Temporary service page (временная сервисная страница) for MindMesh.
+    Checks external API → backend → PostgreSQL chain.
+  </p>
+
+  <div class="buttons" style="margin:16px 0; display:flex; gap:10px; flex-wrap:wrap;">
+    <button class="btn" onclick="checkHealth()">Check DB Health (проверить БД)</button>
+    <button class="btn secondary" onclick="readUsers()">Read Users (читать Users)</button>
+    <button class="btn secondary" onclick="readIdeas()">Read IdeaHub (читать IdeaHub)</button>
+    <button class="btn secondary" onclick="clearLog()">Clear Log (очистить лог)</button>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start;">
+    <div>
+      <h3>Test Write Users (тестовая запись Users)</h3>
+      <form id="userForm" onsubmit="submitUser(event)">
+        <label>Name (имя)</label>
+        <input name="Name" value="Test User Postgre" required>
+
+        <label>Email</label>
+        <input name="Email" type="email" value="test_postgre_user@example.com" required>
+
+        <label>Role (роль)</label>
+        <input name="Role" value="user">
+
+        <label>AccountStatus (статус)</label>
+        <input name="AccountStatus" value="active">
+
+        <label>Country (страна)</label>
+        <input name="Country" value="Israel">
+
+        <label>Language (язык)</label>
+        <input name="Language" value="Russian">
+
+        <button class="btn" type="submit" style="margin-top:12px;">Write Users (записать)</button>
+      </form>
+    </div>
+
+    <div>
+      <h3>Test Write IdeaHub (тестовая запись IdeaHub)</h3>
+      <form id="ideaForm" onsubmit="submitIdea(event)">
+        <label>Title</label>
+        <input name="Title" value="Test Postgre Idea" required>
+
+        <label>Short Description (кратко)</label>
+        <textarea name="Short Description" rows="3">Temporary test record from proverka_airtab.html</textarea>
+
+        <label>Full Description (полное описание)</label>
+        <textarea name="Full Description" rows="5">This is a temporary test for PostgreSQL write/read mapping from web page.</textarea>
+
+        <label>Your Name (имя)</label>
+        <input name="Your Name" value="Test Author">
+
+        <label>Your Email</label>
+        <input name="Your Email" type="email" value="test_author@example.com">
+
+        <label>Status</label>
+        <input name="Status" value="New">
+
+        <button class="btn" type="submit" style="margin-top:12px;">Write IdeaHub (записать)</button>
+      </form>
+    </div>
+  </div>
+
+  <hr style="margin:20px 0; opacity:0.3;">
+
+  <h3>Response Log (лог ответов)</h3>
+  <pre id="logBox" style="background:#111; color:#ddd; padding:14px; border-radius:10px; min-height:280px; overflow:auto; white-space:pre-wrap;"></pre>
+</div>
+
+<script>
+function log(message, data=null) {
+  const box = document.getElementById('logBox');
+  const time = new Date().toLocaleString();
+  let line = `[${time}] ${message}`;
+  if (data !== null) {
+    try {
+      line += "\n" + JSON.stringify(data, null, 2);
+    } catch (e) {
+      line += "\n" + String(data);
+    }
+  }
+  box.textContent = line + "\n\n" + box.textContent;
+}
+
+function clearLog() {
+  document.getElementById('logBox').textContent = '';
+}
+
+async function getJSON(url) {
+  const r = await fetch(url, { credentials: 'same-origin' });
+  const text = await r.text();
+  let data = text;
+  try { data = JSON.parse(text); } catch (e) {}
+  return { ok:r.ok, status:r.status, data };
+}
+
+async function postJSON(url, payload) {
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify(payload)
+  });
+  const text = await r.text();
+  let data = text;
+  try { data = JSON.parse(text); } catch (e) {}
+  return { ok:r.ok, status:r.status, data };
+}
+
+async function checkHealth() {
+  log('Check DB Health started');
+  const result = await getJSON('/api/proverka-airtab/health');
+  log(`Health response: HTTP ${result.status}`, result.data);
+}
+
+async function readUsers() {
+  log('Read Users started');
+  const result = await getJSON('/api/proverka-airtab/read-users');
+  log(`Read Users response: HTTP ${result.status}`, result.data);
+}
+
+async function readIdeas() {
+  log('Read IdeaHub started');
+  const result = await getJSON('/api/proverka-airtab/read-ideas');
+  log(`Read IdeaHub response: HTTP ${result.status}`, result.data);
+}
+
+async function submitUser(e) {
+  e.preventDefault();
+  const fd = new FormData(document.getElementById('userForm'));
+  const payload = Object.fromEntries(fd.entries());
+  log('Write Users started', payload);
+  const result = await postJSON('/api/proverka-airtab/write-user', payload);
+  log(`Write Users response: HTTP ${result.status}`, result.data);
+}
+
+async function submitIdea(e) {
+  e.preventDefault();
+  const fd = new FormData(document.getElementById('ideaForm'));
+  const payload = Object.fromEntries(fd.entries());
+  log('Write IdeaHub started', payload);
+  const result = await postJSON('/api/proverka-airtab/write-idea', payload);
+  log(`Write IdeaHub response: HTTP ${result.status}`, result.data);
+}
+</script>
+{% endblock %}

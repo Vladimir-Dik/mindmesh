@@ -826,6 +826,174 @@ def save_simple_buffer_record(data: dict):
     }
 
 # ============================================================
+# Name: Collector Buffer Save (резервное сохранение collector)
+# ============================================================
+
+import json
+import os
+import datetime
+import uuid
+
+# ============================================================
+# BUFFER PATH
+# ============================================================
+
+COLLECTOR_BUFFER_DIR = os.path.join(
+    os.path.dirname(__file__),
+    "buffer_collector"
+)
+
+os.makedirs(COLLECTOR_BUFFER_DIR, exist_ok=True)
+
+# ============================================================
+# SAVE COLLECTOR BUFFER
+# ============================================================
+
+def save_collector_buffer(data: dict):
+
+    try:
+        timestamp = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        random_id = str(uuid.uuid4())[:8]
+
+        json_filename = f"collector_{timestamp}_{random_id}.json"
+        html_filename = f"collector_{timestamp}_{random_id}.html"
+
+        json_path = os.path.join(COLLECTOR_BUFFER_DIR, json_filename)
+        html_path = os.path.join(COLLECTOR_BUFFER_DIR, html_filename)
+
+        payload = {
+            "saved_at": datetime.datetime.utcnow().isoformat(),
+            "buffer_type": "collector_agent",
+            "data": data
+        }
+
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+
+        idea = data.get("idea") or {}
+        duplicate = data.get("duplicate_data") or {}
+
+        html = f"""<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>MindMesh Collector Draft</title>
+  <style>
+    body {{
+      font-family: Arial, sans-serif;
+      margin: 24px;
+      line-height: 1.5;
+      background: #f7f7f7;
+      color: #222;
+    }}
+    .card {{
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }}
+    h1, h2 {{
+      margin-top: 0;
+    }}
+    .label {{
+      font-weight: bold;
+      margin-top: 12px;
+    }}
+    pre {{
+      white-space: pre-wrap;
+      background: #f0f0f0;
+      padding: 12px;
+      border-radius: 8px;
+    }}
+    .warning {{
+      color: #9a5a00;
+      font-weight: bold;
+    }}
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>MindMesh — Collector Draft</h1>
+    <p><strong>Project:</strong> MindMesh</p>
+    <p><strong>File:</strong> {html_filename}</p>
+    <p><strong>Version:</strong> buffer_collector v0.2</p>
+    <p><strong>Date:</strong> {datetime.datetime.utcnow().isoformat()}</p>
+  </div>
+
+  <div class="card">
+    <h2>Idea</h2>
+
+    <div class="label">Title</div>
+    <div>{idea.get("title", "")}</div>
+
+    <div class="label">Short Description</div>
+    <div>{idea.get("short_description", "")}</div>
+
+    <div class="label">Full Description</div>
+    <pre>{idea.get("full_description", "")}</pre>
+
+    <div class="label">Keywords</div>
+    <div>{idea.get("keywords", "")}</div>
+
+    <div class="label">Category</div>
+    <div>{idea.get("category", "")}</div>
+
+    <div class="label">Language</div>
+    <div>{idea.get("language", "")}</div>
+
+    <div class="label">Region</div>
+    <div>{idea.get("region", "")}</div>
+
+    <div class="label">Patentability</div>
+    <div>{idea.get("patentability", "")}</div>
+
+    <div class="label">Source</div>
+    <div>{idea.get("source", "")}</div>
+  </div>
+
+  <div class="card">
+    <h2>Duplicate Check</h2>
+    <div><strong>Duplicate found:</strong> {duplicate.get("duplicate_found")}</div>
+    <div><strong>Similarity:</strong> {duplicate.get("similarity_score", "")}%</div>
+    <div><strong>Duplicate level:</strong> {duplicate.get("duplicate_level", "")}</div>
+    <div><strong>Matched title:</strong> {(duplicate.get("idea") or {}).get("title", "")}</div>
+    <div><strong>Matched IdeaID:</strong> {(duplicate.get("idea") or {}).get("idea_id", "")}</div>
+  </div>
+
+  <div class="card">
+    <h2>AI Notes</h2>
+    <pre>{idea.get("notes_ai", "")}</pre>
+  </div>
+
+  <div class="card">
+    <h2>Raw JSON</h2>
+    <pre>{json.dumps(payload, ensure_ascii=False, indent=2)}</pre>
+  </div>
+
+</body>
+</html>
+"""
+
+        with open(html_path, "w", encoding="utf-8") as f:
+            f.write(html)
+
+        return {
+            "ok": True,
+            "filename": html_filename,
+            "json_filename": json_filename,
+            "filepath": html_path,
+            "json_path": json_path
+        }
+
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": str(e)
+        }
+
+# ============================================================
 # FEEDBACK BUFFER STORAGE
 # ============================================================
 
