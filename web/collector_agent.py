@@ -1,9 +1,9 @@
 # ============================================================
 # Project: MindMesh
 # File: collector_agent.py
-# Version: v0.5
-# Date: 2026-06-22
-# Name: AI Collector Agent backend with canonical layer (бэкенд ИИ-агента сборщика с каноническим слоем)
+# Version: v0.7
+# Date: 2026-07-03
+# Name: AI Collector Agent backend with canonical layer (extractor module)
 # ============================================================
 
 import re
@@ -13,6 +13,11 @@ import io
 import urllib.request
 from html.parser import HTMLParser
 from datetime import datetime
+try:
+    from source_engine.extractors.pdf_extractor import extract_pdf_text
+except Exception:
+    from web.source_engine.extractors.pdf_extractor import extract_pdf_text
+
 
 try:
     from intake_engine import analyze_intake
@@ -110,42 +115,184 @@ def extract_json_text(text: str) -> str:
         return json.dumps(data, ensure_ascii=False, indent=2)
     except Exception:
         return text
+        
+# ============================================================
+#обработка пдф переехала в модули   mindmesh\web\source_engine\extractors
+# ============================================================   
 
 
-def extract_file_text(filename: str, raw: bytes, content_type: str = "") -> dict:
-    decoded, encoding = decode_bytes(raw)
+# ============================================================
+# Universal Source Processing Engine (универсальный движок обработки источников)
+# Version: v0.1
+# Date: 2026-06-22
+# ============================================================
 
+def detect_source_type(filename: str, content_type: str = "") -> str:
     lower_name = (filename or "").lower()
+    content_type = (content_type or "").lower()
+
+    if lower_name.endswith((".txt", ".md")):
+        return "text"
+
+    if lower_name.endswith(".rtf"):
+        return "rtf"
 
     if lower_name.endswith((".html", ".htm")):
-        text = html_to_text(decoded)
-        file_type = "html"
+        return "html"
 
-    elif lower_name.endswith(".json"):
-        text = extract_json_text(decoded)
-        file_type = "json"
+    if lower_name.endswith(".json"):
+        return "json"
 
-    elif lower_name.endswith(".csv"):
-        text = extract_csv_text(decoded)
-        file_type = "csv"
+    if lower_name.endswith(".csv"):
+        return "csv"
 
-    elif lower_name.endswith((".txt", ".md", ".rtf")):
-        text = clean_text(decoded)
-        file_type = "text"
+    if lower_name.endswith(".pdf") or "pdf" in content_type:
+        return "pdf"
 
-    else:
-        text = clean_text(decoded)
-        file_type = "unknown_text_attempt"
+    return "unknown"
 
+
+def build_source_object(
+    *,
+    source_kind: str,
+    source_type: str,
+    filename: str = "",
+    content_type: str = "",
+    encoding: str = "",
+    text: str = "",
+    raw_length: int = 0,
+    warnings: list | None = None,
+    metadata: dict | None = None,
+    processing_state: str = "ready"
+) -> dict:
     return {
-        "source_kind": "file",
+        "source_kind": source_kind,
+        "source_type": source_type,
         "filename": filename,
         "content_type": content_type,
         "encoding": encoding,
-        "file_type": file_type,
-        "text": text,
-        "raw_length": len(text)
+        "file_type": source_type,
+        "text": text or "",
+        "raw_length": raw_length,
+        "warnings": warnings or [],
+        "metadata": metadata or {},
+        "images": [],
+        "tables": [],
+        "attachments": [],
+        "processing_state": processing_state,
+        "processing_log": []
     }
+
+
+def extract_source_from_file(filename: str, raw: bytes, content_type: str = "") -> dict:
+    source_type = detect_source_type(filename, content_type)
+
+    if source_type in ("html", "json", "csv", "text", "rtf", "unknown"):
+        decoded, encoding = decode_bytes(raw)
+
+        if source_type == "html":
+            text = html_to_text(decoded)
+
+        elif source_type == "json":
+            text = extract_json_text(decoded)
+
+        elif source_type == "csv":
+            text = extract_csv_text(decoded)
+
+        else:
+            text = clean_text(decoded)
+
+        return build_source_object(
+            source_kind="file",
+            source_type=source_type,
+            filename=filename,
+            content_type=content_type,
+            encoding=encoding,
+            text=text,
+            raw_length=len(text)
+        )
+
+    if source_type == "pdf":
+        pdf_result = extract_pdf_text(raw)
+
+        warnings = []
+        if pdf_result.get("warning"):
+            warnings.append(pdf_result.get("warning"))
+
+        pdf_text = pdf_result.get("text", "")
+
+        return build_source_object(
+            source_kind="file",
+            source_type="pdf",
+            filename=filename,
+            content_type=content_type,
+            encoding="pdf",
+            text=pdf_text,
+            raw_length=len(pdf_text),
+            warnings=warnings,
+            metadata={
+                "pdf_status": "extracted" if pdf_result.get("ok") else "needs_ocr",
+                "page_count": pdf_result.get("page_count", 0)
+            },
+            processing_state=pdf_result.get("processing_state", "unknown")
+        )
+
+    return build_source_object(
+        source_kind="file",
+        source_type="unknown",
+        filename=filename,
+        content_type=content_type,
+        encoding="unknown",
+        text="",
+        raw_length=0,
+        warnings=[
+            "Unsupported source type."
+        ]
+    )
+
+#
+# обработка PDF 
+#
+
+def estimate_text_quality(text: str) -> dict:
+    cleaned = clean_text(text)
+    if not cleaned:
+        return {"ok": False, "score": 0, "reason": "empty"}
+
+    letters = re.findall(r"[A-Za-zА-Яа-яЁёא-ת]", cleaned)
+    words = re.findall(r"[A-Za-zА-Яа-яЁёא-ת]{3,}", cleaned)
+    weird = re.findall(r"[#{}<>\\|_^~]{1,}", cleaned)
+
+    letter_ratio = len(letters) / max(len(cleaned), 1)
+    word_ratio = len(words) / max(len(cleaned.split()), 1)
+    weird_ratio = len(weird) / max(len(cleaned), 1)
+
+    score = 0
+    if letter_ratio > 0.45:
+        score += 40
+    if word_ratio > 0.45:
+        score += 40
+    if weird_ratio < 0.02:
+        score += 20
+
+    return {
+        "ok": score >= 55,
+        "score": score,
+        "letter_ratio": round(letter_ratio, 3),
+        "word_ratio": round(word_ratio, 3),
+        "weird_ratio": round(weird_ratio, 3),
+        "reason": "ok" if score >= 55 else "low_quality_text"
+    }
+
+
+def extract_source(payload: dict, filename: str, raw: bytes, content_type: str = "") -> dict:
+    return extract_source_from_file(filename, raw, content_type)
+
+
+def extract_file_text(filename: str, raw: bytes, content_type: str = "") -> dict:
+    # Compatibility wrapper (обёртка совместимости)
+    return extract_source_from_file(filename, raw, content_type)
+
 
 
 def remove_technical_header(text: str) -> str:
@@ -267,12 +414,22 @@ def split_keywords(value) -> list[str]:
 
     raw = str(value)
 
+    bad_labels = {
+        "ТИП ИСТОЧНИКА:",
+        "ТИП ИСТОЧНИКА",
+        "SOURCE TYPE:",
+        "SOURCE TYPE",
+        "SOURCE:",
+        "SOURCE"
+    }
+
     parts = re.split(r"[,\n;]+", raw)
 
     return [
         p.strip(" -•\t")
         for p in parts
         if p.strip(" -•\t")
+         and p.strip(" -•\t").upper() not in bad_labels
     ]
 
 
@@ -548,6 +705,265 @@ def build_analysis_text(cleaned_text: str, sections: dict) -> str:
 
     return cleaned_text
 
+# ============================================================
+# Name: Idea Candidate Extraction (извлечение кандидатов идей)
+# Version: v0.1
+# Date: 2026-07-01
+# ============================================================
+
+def extract_idea_candidates_from_document(text: str, meta: dict | None = None) -> list[dict]:
+    cleaned = clean_text(text)
+    meta = meta or {}
+
+    if not cleaned:
+        return []
+
+    # Делим PDF по маркерам страниц, которые добавляет extract_pdf_text()
+    chunks = re.split(r"--- PDF PAGE \d+ ---", cleaned)
+
+    candidates = []
+
+    markers = [
+        "устройство",
+        "схема",
+        "конструкция",
+        "изобретение",
+        "станция",
+        "машина",
+        "приемник",
+        "приёмник",
+        "передатчик",
+        "модель",
+        "чертеж",
+        "чертёж",
+        "двигатель",
+        "энергия",
+        "электро",
+        "автомат",
+        "радио",
+        "технология",
+        "производство",
+        "завод",
+        "генератор",
+        "лаборатория",
+        "опыт",
+        "эксперимент"
+    ]
+
+    for index, chunk in enumerate(chunks, start=1):
+        chunk_clean = clean_text(chunk)
+
+        if len(chunk_clean) < 300:
+            continue
+
+        low = chunk_clean.lower()
+
+        score = 0
+        found_markers = []
+
+        for marker in markers:
+            if marker in low:
+                score += 1
+                found_markers.append(marker)
+
+        if score < 2:
+            continue
+
+        # Берём условный заголовок: первая нормальная строка
+        lines = [
+            line.strip()
+            for line in chunk_clean.splitlines()
+            if len(line.strip()) >= 8
+        ]
+
+        title = lines[0][:140] if lines else f"Document candidate {index}"
+
+        candidates.append({
+            "candidate_id": f"doc_candidate_{index}",
+            "page_index": index,
+            "title": title,
+            "score": score,
+            "markers": sorted(list(set(found_markers))),
+            "text": chunk_clean[:2500]
+        })
+
+    candidates.sort(
+        key=lambda item: item.get("score", 0),
+        reverse=True
+    )
+
+    return candidates[:10]
+
+
+
+def build_empty_result(
+    source_label: str,
+    source_type: str,
+    instructions: str,
+    session_id: str,
+    meta: dict
+) -> dict:
+
+    file_type = meta.get("file_type") or meta.get("source_type") or source_type
+    warnings = meta.get("warnings") or []
+
+    reason = "No extracted text available."
+
+    if file_type == "pdf":
+       reason = "PDF contains no usable embedded text. OCR is required."
+
+    if file_type == "pdf_scanned":
+        reason = "PDF appears to be scanned. OCR is required."
+
+    notes_ai = (
+        "Collector Agent v0.6 (ИИ агент-сборщик v0.6): "
+        "source detected, but no usable text was extracted. "
+        f"File type: {file_type}. "
+        f"Reason: {reason}. "
+        f"Warnings: {', '.join(warnings)}. "
+        f"Instructions: {instructions}"
+    )
+
+    return {
+        "status": "empty_source",
+        "agent_session_id": session_id,
+        "created_at": datetime.utcnow().isoformat(),
+        "log": [
+            f"Source kind: {meta.get('source_kind', 'unknown')}",
+            f"Source type: {file_type}",
+            f"Processing state: {meta.get('processing_state', 'unknown')}",
+            f"Encoding: {meta.get('encoding', 'unknown')}",
+            f"Extracted text length: {meta.get('raw_length', 0)}",
+            "No usable text extracted",
+            reason
+        ],
+        "idea": {
+            "title": source_label or "Unprocessed source",
+            "category": "source_processing",
+            "language": "unknown",
+            "region": "unknown",
+            "keywords": [],
+            "ai_tags": [
+                "collector_agent",
+                "empty_source",
+                file_type
+            ],
+            "short_description": reason,
+            "full_description": "",
+            "existing_analogues": "",
+            "notes_ai": notes_ai,
+            "patentability": "unknown",
+            "source": source_label,
+            "ai_review_status": "draft",
+            "canonical_title_en": source_label or "Unprocessed source",
+            "canonical_summary_en": reason,
+            "canonical_keywords_en": [],
+            "vector_embedding": "[]",
+            "embedding_model": "none"
+        },
+        "raw": {
+            "original_text": "",
+            "cleaned_text": "",
+            "analysis_text": "",
+            "sections": {},
+            "analysis": {},
+            "canonical_layer": {},
+            "source_meta": meta
+        }
+    }
+
+# ============================================================
+# Name: Document Candidates Result (результат поиска идей в документе)
+# Version: v0.1
+# Date: 2026-07-02
+# ============================================================
+
+def build_document_candidates_result(
+    source_label: str,
+    source_type: str,
+    instructions: str,
+    session_id: str,
+    meta: dict,
+    candidates: list
+) -> dict:
+
+    preview = []
+
+    for item in candidates:
+        preview.append({
+            "candidate_id": item["candidate_id"],
+            "page": item["page_index"],
+            "title": item["title"],
+            "score": item["score"],
+            "markers": item["markers"]
+        })
+
+    return {
+        "status": "idea_candidates",
+
+        "agent_session_id": session_id,
+
+        "created_at": datetime.utcnow().isoformat(),
+
+        "log": [
+            f"Source kind: {meta.get('source_kind','unknown')}",
+            f"Source type: {source_type}",
+            f"Candidates found: {len(candidates)}",
+            "Document contains multiple possible ideas."
+        ],
+
+        "idea": {
+            "title": source_label,
+            "category": "multi_document",
+            "language": "unknown",
+            "region": "unknown",
+
+            "keywords": [],
+
+            "ai_tags": [
+                "collector_agent",
+                "multi_document",
+                "idea_candidates"
+            ],
+
+            "short_description":
+                f"Найдено {len(candidates)} возможных идей.",
+
+            "full_description":
+                "Документ содержит несколько независимых материалов.",
+
+            "existing_analogues": "",
+
+            "notes_ai":
+                "Collector Agent обнаружил несколько возможных идей. "
+                "Необходимо выбрать материал для анализа.",
+
+            "patentability": "unknown",
+
+            "source": source_label,
+
+            "ai_review_status": "candidate_selection",
+
+            "canonical_title_en":
+                "Multiple idea candidates",
+
+            "canonical_summary_en":
+                f"{len(candidates)} possible ideas detected.",
+
+            "canonical_keywords_en": [],
+
+            "vector_embedding": "[]",
+
+            "embedding_model": "none"
+        },
+
+        "raw": {
+            "idea_candidates": candidates,
+            "preview": preview,
+            "source_meta": meta
+        }
+    }
+
 
 def build_result_from_text(
     text: str,
@@ -619,7 +1035,7 @@ def build_result_from_text(
             ai_tags.append(tag)
 
     notes_ai = (
-        "Collector Agent v0.5 (ИИ агент-сборщик v0.5): "
+        "Collector Agent v0.6 (ИИ агент-сборщик v0.6): "
         "source extracted, cleaned, passed through Simple Intake Engine, "
         "canonical cross-language layer prepared. "
         f"Canonical summary EN: {canonical_layer.get('canonical_summary_en', '')}. "
@@ -684,6 +1100,25 @@ def build_collector_result(payload: dict) -> dict:
 
     fetched = fetch_url_text(source_url)
 
+    if extracted.get("file_type") == "pdf":
+        candidates = extract_idea_candidates_from_document(
+            extracted_text,
+            extracted.get("metadata", {})
+        )
+
+        if candidates:
+            extracted["metadata"]["idea_candidates"] = candidates
+            extracted["processing_state"] = "idea_candidates_found"
+
+            return build_document_candidates_result(
+                source_label=filename,
+                source_type=real_source_type,
+                instructions=instructions,
+                session_id=session_id,
+                meta=extracted,
+                candidates=candidates
+            )
+
     return build_result_from_text(
         text=fetched["text"],
         source_label=source_url,
@@ -705,12 +1140,65 @@ def build_collector_result_from_file(
     instructions = payload.get("instructions", "")
     session_id = payload.get("agent_session_id", "")
 
-    extracted = extract_file_text(filename, raw, content_type)
+    extracted = extract_source(payload, filename, raw, content_type)
+
+    real_source_type = (
+        extracted.get("file_type")
+        or extracted.get("source_type")
+        or source_type
+    )
+
+    extracted_text = clean_text(extracted.get("text", ""))
+
+    if not extracted_text:
+        return build_empty_result(
+            source_label=filename,
+            source_type=real_source_type,
+            instructions=instructions,
+            session_id=session_id,
+            meta=extracted
+        )
+
+    quality = estimate_text_quality(extracted_text)
+
+    if extracted.get("file_type") == "pdf" and not quality.get("ok"):
+        extracted["warnings"].append(
+            "PDF text was extracted, but quality is too low for reliable idea analysis."
+        )
+        extracted["metadata"]["text_quality"] = quality
+        extracted["processing_state"] = "low_quality_text"
+
+        return build_empty_result(
+            source_label=filename,
+            source_type=real_source_type,
+            instructions=instructions,
+            session_id=session_id,
+            meta=extracted
+        )
+
+    if extracted.get("file_type") == "pdf":
+        candidates = extract_idea_candidates_from_document(
+            extracted_text,
+            extracted.get("metadata", {})
+        )
+
+        if candidates:
+            extracted["metadata"]["idea_candidates"] = candidates
+            extracted["processing_state"] = "idea_candidates_found"
+
+            return build_document_candidates_result(
+                source_label=filename,
+                source_type=real_source_type,
+                instructions=instructions,
+                session_id=session_id,
+                meta=extracted,
+                candidates=candidates
+            )
 
     return build_result_from_text(
         text=extracted["text"],
         source_label=filename,
-        source_type=source_type,
+        source_type=real_source_type,
         instructions=instructions,
         session_id=session_id,
         meta=extracted

@@ -701,6 +701,7 @@
 "collector_saved_reviewer": "בודק",
 "collector_saved_need_review": "נדרשת החלטת מנהל.",
 "collector_saved_success": "הרעיון נשמר בהצלחה.",
+"collector_duplicate_not_started": "בדיקת כפילויות עדיין לא הופעלה.",
 
 "collector_working": "מתבצע עיבוד... נא להמתין.",
 "collector_session_expired": "תוקף הסשן פג. יש להתחבר שוב לפני השליחה. לאחר הכניסה יהיה צורך לבחור את הקובץ מחדש."

@@ -102,7 +102,7 @@ Name: AI Collector Agent Logic (логика ИИ-агента сборщика)
 
     if (resultBox) {
       resultBox.textContent = tr(
-        "collector_no_duplicate_check",
+        "collector_duplicate_not_started",
         "Duplicate analysis not started."
       );
     }

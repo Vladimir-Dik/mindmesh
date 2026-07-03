@@ -710,7 +710,6 @@
 "collector_saved_to_buffer": "Сохранено в резерв сборщика.",
 "collector_save_ready_blocked": "Сначала выполните проверку совпадений.",
 "collector_duplicates_block": "Проверка совпадений",
-"collector_no_duplicate_check": "Проверка совпадений не запускалась.",
 "collector_duplicate_required": "Перед сохранением нужно проверить совпадения.",
 "collector_duplicate_not_checked": "Проверка совпадений не выполнена. Сохранение в каталог недоступно.",
 "collector_duplicate_checked": "Проверка совпадений выполнена.",
@@ -739,6 +738,8 @@
 "collector_saved_need_review": "Требуется решение модератора.",
 "collector_review_required": "Требуется проверка модератора.",
 "collector_saved_success": "Идея успешно сохранена.",
+"collector_duplicate_not_started": "Проверка совпадений не запускалась.",
+"collector_no_duplicate_check": "Проверка совпадений не запускалась.",
 
 "collector_working": "Идёт обработка... подождите.",
 "collector_session_expired": "Сессия истекла. Перед отправкой войдите снова. Выбранный файл после входа нужно будет выбрать повторно."

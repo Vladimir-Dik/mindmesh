@@ -715,6 +715,7 @@
 "collector_saved_reviewer": "Reviewer",
 "collector_saved_need_review": "Moderator decision is required.",
 "collector_saved_success": "Idea saved successfully.",
+"collector_duplicate_not_started": "Duplicate analysis not started.",
 
 "collector_working": "Processing... please wait.",
 "collector_session_expired": "Session expired. Please login again before sending. The selected file must be selected again after login."
